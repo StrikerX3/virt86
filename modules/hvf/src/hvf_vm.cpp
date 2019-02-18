@@ -1,0 +1,110 @@
+/*
+Implementation of the Hypervisor.Framework VirtualMachine class.
+-------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2019 Ivan Roberto de Oliveira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+#include "hvf_vm.hpp"
+#include "hvf_vp.hpp"
+
+namespace virt86::hvf {
+
+HvFVirtualMachine::HvFVirtualMachine(HvFPlatform& platform, const VMInitParams& params)
+    : VirtualMachine(platform, params)
+    , m_platform(platform)
+{
+}
+
+HvFVirtualMachine::~HvFVirtualMachine() {
+    DestroyVPs();
+    // TODO: Close/release/free VM
+}
+
+bool HvFVirtualMachine::Initialize() {
+    // TODO: Create the VM
+    // TODO: Initialize virtual machine based on VMInitParams (m_params).
+    // Unsupported parameters should be ignored.
+
+    // TODO: Initialize any additional features available to the platform
+
+    // Create virtual processors
+    for (uint32_t id = 0; id < params.numProcessors; id++) {
+        auto vp = new HvFVirtualProcessor(*this, id);
+        if (!vp->Initialize()) {
+            delete vp;
+            return false;
+        }
+        RegisterVP(vp);
+    }
+
+    return true;
+}
+
+MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
+    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
+    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
+    // large version.
+    return MapGuestMemoryLargeImpl(baseAddress, size, flags, memory);
+}
+
+MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+    // TODO: Map the specified GPA range to the guest.
+    // If Hypervisor.Framework does not support mapping memory ranges larger
+    // than 4 GiB, remove this method from this subclass as the default
+    // implementation returns MemooryMappingStatus::Unsupported.
+
+    return MemoryMappingStatus::OK;
+}
+
+MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) {
+    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
+    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
+    // large version.
+    return UnmapGuestMemoryLargeImpl(baseAddress, size);
+}
+
+MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) {
+    // TODO: Unmap the specified GPA range from the guest.
+    // If Hypervisor.Framework does not support mapping memory ranges larger
+    // than 4 GiB, remove this method from this subclass as the default
+    // implementation returns MemooryMappingStatus::Unsupported.
+
+    return MemoryMappingStatus::OK;
+}
+
+MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
+    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
+    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
+    // large version.
+    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
+}
+
+MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+    // TODO: Configure the flags of the specified GPA range.
+    // If Hypervisor.Framework does not support mapping memory ranges larger
+    // than 4 GiB, remove this method from this subclass as the default
+    // implementation returns MemooryMappingStatus::Unsupported.
+
+    return MemoryMappingStatus::OK;
+}
+
+}
