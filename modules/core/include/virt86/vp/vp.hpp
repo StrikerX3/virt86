@@ -433,19 +433,19 @@ private:
     // ----- Helper functions -------------------------------------------------
 
     /**
-     * Converts the given linead address into a physical address under 32-bit
+     * Converts the given linear address into a physical address under 32-bit
      * paging mode.
      */
     bool LinearToPhysical32(const uint32_t laddr, uint64_t *paddr);
 
     /**
-     * Converts the given linead address into a physical address under PAE
+     * Converts the given linear address into a physical address under PAE
      * paging mode.
      */
     bool LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr);
 
     /**
-     * Converts the given linead address into a physical address under 4-level
+     * Converts the given linear address into a physical address under 4-level
      * paging mode.
      */
     bool LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr);

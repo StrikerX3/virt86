@@ -373,9 +373,9 @@ private:
      */
     std::vector<MemoryRegion> m_memoryRegions;
 
-    /*
+    /**
      * The I/O handlers registered with this virtual machine.
-    */
+     */
     IOHandlers m_io;
 
     // Allow VirtualProcessor to access the I/O handlers
