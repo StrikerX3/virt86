@@ -49,8 +49,7 @@ enum class VMExitReason {
     Normal,              // Time slice expiration
 
     Cancelled,           // Execution was cancelled (possibly due to interrupt injection)
-    Interrupt,           // An interrupt was received
-    InterruptWindow,     // An interrupt window was opened
+    Interrupt,           // An interrupt window has opened
 
     PIO,                 // IN or OUT instruction
     MMIO,                // MMIO instruction
@@ -72,9 +71,6 @@ enum class VMExitReason {
 struct VMExitInfo {
     // The reason for the VM exit
     VMExitReason reason;
-
-    // The interrupt vector, when reason == VMExitReason::Interrupt
-    uint8_t interruptVector;
 
     // The exception code, when reason == VMExitReason::Exception
     uint32_t exceptionCode;
