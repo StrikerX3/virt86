@@ -41,11 +41,8 @@ public:
 protected:
     virtual ~KvmVirtualMachine() override;
 
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) override;
-    MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
 private:
     KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM);

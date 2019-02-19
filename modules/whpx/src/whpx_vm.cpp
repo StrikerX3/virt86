@@ -166,11 +166,7 @@ static inline WHV_MAP_GPA_RANGE_FLAGS ToWHVFlags(const MemoryFlags flags) {
     return whvFlags;
 }
 
-MemoryMappingStatus WhpxVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
-    return MapGuestMemoryLargeImpl(baseAddress, size, flags, memory);
-}
-
-MemoryMappingStatus WhpxVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus WhpxVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     WHV_MAP_GPA_RANGE_FLAGS whvFlags = ToWHVFlags(flags);
     if (whvFlags == WHvMapGpaRangeFlagNone) {
         return MemoryMappingStatus::InvalidFlags;
@@ -184,11 +180,7 @@ MemoryMappingStatus WhpxVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t b
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus WhpxVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) {
-    return UnmapGuestMemoryLargeImpl(baseAddress, size);
-}
-
-MemoryMappingStatus WhpxVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) {
+MemoryMappingStatus WhpxVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
     HRESULT hr = g_dispatch.WHvUnmapGpaRange(m_handle, baseAddress, size);
     if (S_OK != hr) {
         return MemoryMappingStatus::Failed;
@@ -197,11 +189,10 @@ MemoryMappingStatus WhpxVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus WhpxVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
-}
+MemoryMappingStatus WhpxVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+    // TODO: what this currently does is unmap and remap the specified guest
+    // physical memory range, but this is probably wrong
 
-MemoryMappingStatus WhpxVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     WHV_MAP_GPA_RANGE_FLAGS whvFlags = ToWHVFlags(flags);
     if (whvFlags == WHvMapGpaRangeFlagNone) {
         return MemoryMappingStatus::InvalidFlags;
@@ -213,12 +204,12 @@ MemoryMappingStatus WhpxVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint6
     }
     void *hostMemory = reinterpret_cast<uint8_t*>(region->hostMemory) + (baseAddress - region->baseAddress);
 
-    auto status = UnmapGuestMemoryLargeImpl(baseAddress, size);
+    auto status = UnmapGuestMemoryImpl(baseAddress, size);
     if (status != MemoryMappingStatus::OK) {
         return status;
     }
 
-    return MapGuestMemoryLargeImpl(baseAddress, size, flags, hostMemory);
+    return MapGuestMemoryImpl(baseAddress, size, flags, hostMemory);
 }
 
 DirtyPageTrackingStatus WhpxVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {

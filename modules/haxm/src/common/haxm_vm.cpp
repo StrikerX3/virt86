@@ -69,11 +69,12 @@ bool HaxmVirtualMachine::Initialize() {
     return true;
 }
 
-MemoryMappingStatus HaxmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
-    return m_sys->MapGuestMemory(baseAddress, size, flags, memory);
-}
+MemoryMappingStatus HaxmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+    // Use the regular version for memory ranges up to 4 GiB
+    if (size <= 0xFFFFFFFFull) {
+        return m_sys->MapGuestMemory(baseAddress, size, flags, memory);
+    }
 
-MemoryMappingStatus HaxmVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     // HAXM module must support 64-bit memory operations
     if ((m_platformImpl.m_haxCaps.winfo & (HAX_CAP_64BIT_SETRAM | HAX_CAP_64BIT_RAMBLOCK)) == 0) {
         return MemoryMappingStatus::Unsupported;
@@ -82,23 +83,17 @@ MemoryMappingStatus HaxmVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t b
     return m_sys->MapGuestMemoryLarge(baseAddress, size, flags, memory);
 }
 
-MemoryMappingStatus HaxmVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) {
+MemoryMappingStatus HaxmVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
     // HAXM API version must be 4 or greater to support this operation
     if (m_platformImpl.m_haxVer.cur_version < 4) {
         return MemoryMappingStatus::Unsupported;
     }
 
-    if (!m_sys->UnmapGuestMemory(baseAddress, size)) {
-        return MemoryMappingStatus::Failed;
-    }
-
-    return MemoryMappingStatus::OK;
-}
-
-MemoryMappingStatus HaxmVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) {
-    // HAXM API version must be 4 or greater to support this operation
-    if (m_platformImpl.m_haxVer.cur_version < 4) {
-        return MemoryMappingStatus::Unsupported;
+    // Use the regular version for memory ranges up to 4 GiB
+    if (size <= 0xFFFFFFFFull) {
+        if (!m_sys->UnmapGuestMemory(baseAddress, size)) {
+            return MemoryMappingStatus::Failed;
+        }
     }
 
     // HAXM module must support 64-bit memory operations
@@ -113,11 +108,7 @@ MemoryMappingStatus HaxmVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus HaxmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
-}
-
-MemoryMappingStatus HaxmVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus HaxmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     // HAXM module must support guest memory protection operation
     if ((m_platformImpl.m_haxCaps.winfo & HAX_CAP_RAM_PROTECTION) == 0) {
         return MemoryMappingStatus::Unsupported;

@@ -41,14 +41,9 @@ public:
 protected:
     virtual ~WhpxVirtualMachine() override;
 
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-
-    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) override;
-    MemoryMappingStatus UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) override;
-
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) override;
-    MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
+    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
     DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) override;
     DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) override;

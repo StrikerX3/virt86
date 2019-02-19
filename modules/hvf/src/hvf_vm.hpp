@@ -35,21 +35,18 @@ class HvFVirtualMachine : public VirtualMachine {
 protected:
     virtual ~HvFVirtualMachine() override;
 
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-
-    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) override;
-    MemoryMappingStatus UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) override;
-
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) override;
-    MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    // TODO: UnmapGuestMemoryImpl and SetGuestMemoryFlagsImpl are optional
+    // operations and may be removed if Hypervisor.Framework doesn't support them
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
+    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
 private:
     HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications);  // TODO: modify the constructor to pass down handles or file descriptors as needed
     bool Initialize();
 
     HvFPlatform& m_platform;
-    
+
     // Allow HvFPlatform to access the constructor and Initialize()
     friend class HvFPlatform;
 };
