@@ -26,29 +26,27 @@ The project has been successfully compiled with the following toolchains:
 
 ### Building on Windows with Visual Studio 2017
 
-To make a Visual Studio 2017 project you'll need to specify the CMake generator. Use either `"Visual Studio 15 2017"` for a 32-bit build or `"Visual Studio 15 2017 Win64"` for a 64-bit build.
+To make a Visual Studio 2017 project you'll need to specify the `"Visual Studio 15 2017"` CMake generator (`-G` command line parameter) and a target architecture (`-A`). Use either `Win32` for a 32-bit build or `x64` for a 64-bit build.
 
-By default, CMake projects will install to `C:\Program Files\` on Windows, so you'll either need to run Visual Studio with administrative rights or provide the `CMAKE_INSTALL_PREFIX` parameter to the `cmake` command line to point to a directory where you have write permissions.
-
-The following commands create and open a Visual Studio 2017 64-bit project that installs the library to `D:\Work\Libraries`:
+The following commands create and open a Visual Studio 2017 64-bit project:
 
 ```cmd
 git clone https://github.com/StrikerX3/virt86.git
 cd virt86
 md build && cd build
-cmake -G "Visual Studio 15 2017 Win64" .. -DCMAKE_INSTALL_PREFIX=D:\Work\Libraries
+cmake -G "Visual Studio 15 2017" -A x64 ..
 start virt86.sln
 ```
-
-To install the library, build the INSTALL project from the solution. The Debug configuration exports `virt86-debug.lib` and `virt86.pdb`. All Release configurations export `virt86.lib`.
-
-You may also build the project directly from the command line with CMake:
+The project can be built directly from the command line with CMake, without opening Visual Studio:
 
 ```cmd
-cmake --build . --target INSTALL --config Release -- /nologo /verbosity:minimal /maxcpucount
+cd virt86/build
+cmake --build . --target ALL_BUILD --config Release -- /nologo /verbosity:minimal /maxcpucount
 ```
 
-If your installation of Visual Studio 2017 provides a Windows 10 SDK older than 10.0.17134.0, Windows Hypervisor Platform will not be available and the `virt86-whpx` project will neither be included in the solution nor in the library. You will still be able to use virt86 with HAXM.
+If your installation of Visual Studio 2017 provides a Windows 10 SDK older than 10.0.17134.0, Windows Hypervisor Platform will not be available and the `virt86-whpx` project will neither be included in the solution nor in the library. You'll still be able to use virt86 with HAXM.
+
+To install the library, build the `INSTALL` project from the solution or specify the `INSTALL` target to the `cmake --build` command. The Debug configuration exports `virt86-debug.lib` and `virt86.pdb`. All Release configurations export `virt86.lib`. Note that, by default, CMake projects will install to `C:\Program Files\` on Windows which needs administrative rights to write files to. To work around that, provide the `CMAKE_INSTALL_PREFIX` parameter to the `cmake` command line to point to a directory where you have write permissions: `-DCMAKE_INSTALL_PREFIX=<path>`. Alternatively, you can run Visual Studio with administrative privileges or `cmake` from an elevated command prompt.
 
 ### Building on Linux with GCC 7+
 
