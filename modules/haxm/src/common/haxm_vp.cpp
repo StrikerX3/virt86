@@ -133,7 +133,7 @@ VPExecutionStatus HaxmVirtualProcessor::HandleExecResult() {
     // Handle exit status using tunnel
     switch (m_tunnel->_exit_status) {
     case HAX_EXIT_HLT:         m_exitInfo.reason = VMExitReason::HLT;       break;  // HLT instruction
-    case HAX_EXIT_INTERRUPT:   m_exitInfo.reason = VMExitReason::Normal;    break;  // Let HAXM handle this
+    case HAX_EXIT_INTERRUPT:   m_exitInfo.reason = VMExitReason::Interrupt; break;  // Interrupt window
     case HAX_EXIT_PAUSED:      m_exitInfo.reason = VMExitReason::Normal;    break;  // Let HAXM handle this
     case HAX_EXIT_MMIO:        m_exitInfo.reason = VMExitReason::Error;     break;  // Regular MMIO (cannot be implemented)
     case HAX_EXIT_REALMODE:    m_exitInfo.reason = VMExitReason::Error;     break;  // Real mode is not supported

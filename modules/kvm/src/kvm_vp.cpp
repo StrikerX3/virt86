@@ -191,15 +191,15 @@ VPExecutionStatus KvmVirtualProcessor::HandleExecResult() {
 
     // Handle exit status using tunnel
     switch (m_kvmRun->exit_reason) {
-        case KVM_EXIT_HLT:             m_exitInfo.reason = VMExitReason::HLT;             break;  // HLT instruction
-        case KVM_EXIT_INTR:            m_exitInfo.reason = VMExitReason::Normal;          break;  // Let KVM handle this
-        case KVM_EXIT_IRQ_WINDOW_OPEN: m_exitInfo.reason = VMExitReason::InterruptWindow; break;  // Interrupt window opened
-        case KVM_EXIT_EXCEPTION:       HandleException();                                 break;  // CPU exception raised
-        case KVM_EXIT_SHUTDOWN:        m_exitInfo.reason = VMExitReason::Shutdown;        break;  // The VM is shutting down
-        case KVM_EXIT_UNKNOWN:         m_exitInfo.reason = VMExitReason::Error;           break;  // VM exited for an unknown reason
-        case KVM_EXIT_IO:              HandleIO();                                        break;  // I/O (in / out instructions)
-        case KVM_EXIT_MMIO:            HandleMMIO();                                      break;  // MMIO
-        case KVM_EXIT_DEBUG:                                                                      // A breakpoint was hit
+        case KVM_EXIT_HLT:             m_exitInfo.reason = VMExitReason::HLT;       break;  // HLT instruction
+        case KVM_EXIT_INTR:            m_exitInfo.reason = VMExitReason::Normal;    break;  // Let KVM handle this
+        case KVM_EXIT_IRQ_WINDOW_OPEN: m_exitInfo.reason = VMExitReason::Interrupt; break;  // Interrupt window
+        case KVM_EXIT_EXCEPTION:       HandleException();                           break;  // CPU exception raised
+        case KVM_EXIT_SHUTDOWN:        m_exitInfo.reason = VMExitReason::Shutdown;  break;  // The VM is shutting down
+        case KVM_EXIT_UNKNOWN:         m_exitInfo.reason = VMExitReason::Error;     break;  // VM exited for an unknown reason
+        case KVM_EXIT_IO:              HandleIO();                                  break;  // I/O (in / out instructions)
+        case KVM_EXIT_MMIO:            HandleMMIO();                                break;  // MMIO
+        case KVM_EXIT_DEBUG:                                                                // A breakpoint was hit
         {
             // Determine if it was a software or hardware breakpoint
             if (m_kvmRun->debug.arch.dr6 & 0xf) {
