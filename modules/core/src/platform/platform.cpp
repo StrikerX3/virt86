@@ -35,21 +35,20 @@ Platform::Platform(const char *name)
 Platform::~Platform() {
 }
 
-const bool Platform::CreateVM(VirtualMachine **vm, const VMSpecifications& specifications) {
-    *vm = CreateVMImpl(specifications);
-    if (*vm != nullptr) {
-        m_vms.emplace_back(*vm);
-        return true;
+const std::optional<std::reference_wrapper<VirtualMachine>> Platform::CreateVM(const VMSpecifications& specifications) {
+    VirtualMachine *vm = CreateVMImpl(specifications);
+    if (vm != nullptr) {
+        m_vms.emplace_back(vm);
+        return *vm;
     }
 
-    return false;
+    return std::nullopt;
 }
 
-const bool Platform::FreeVM(VirtualMachine **vm) {
+const bool Platform::FreeVM(VirtualMachine& vm) {
     for (auto it = m_vms.begin(); it != m_vms.end(); it++) {
-        if (it->get() == *vm) {
-            m_vms.erase(it);  // will also destruct the VirtualMachine object
-            *vm = nullptr;
+        if (it->get() == &vm) {
+            m_vms.erase(it);
             return true;
         }
     }

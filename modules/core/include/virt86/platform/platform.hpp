@@ -102,16 +102,17 @@ public:
     /**
      * Creates a new virtual machine with the specified parameters.
      *
-     * Returns true if the virtual machine was successfully created.
+     * The optional contains a reference to the newly created virtual machine
+     * if it is successfully created.
      */
-    const bool CreateVM(VirtualMachine **vm, const VMSpecifications& specifications);
+    const std::optional<std::reference_wrapper<VirtualMachine>> CreateVM(const VMSpecifications& specifications);
 
     /**
      * Destroys the virtual machine if it was created with this platform.
      *
      * Returns true if the virtual machine was successfully destroyed.
      */
-    const bool FreeVM(VirtualMachine **vm);
+    const bool FreeVM(VirtualMachine& vm);
 
 protected:
     Platform(const char *name);
