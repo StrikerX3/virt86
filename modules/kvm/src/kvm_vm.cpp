@@ -105,11 +105,7 @@ bool KvmVirtualMachine::Initialize() {
     return true;
 }
 
-MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
-    return MapGuestMemoryLargeImpl(baseAddress, size, flags, memory);
-}
-
-MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     kvm_userspace_memory_region& memoryRegion = m_memoryRegions.emplace_back();
     memoryRegion.guest_phys_addr = baseAddress;
     memoryRegion.memory_size = size;
@@ -130,11 +126,7 @@ MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t ba
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
-}
-
-MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     // Define function that checks if the memory region exactly matches the
     // specified memory address range
     auto equals = std::bind([](kvm_userspace_memory_region& rgn, const uint64_t baseAddress, const uint64_t size) -> bool {

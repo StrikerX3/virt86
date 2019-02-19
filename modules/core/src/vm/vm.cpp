@@ -56,7 +56,7 @@ std::optional<std::reference_wrapper<VirtualProcessor>> VirtualMachine::GetVirtu
     return std::nullopt;
 }
 
-MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     // Host memory block must be page-aligned
     if (((uint64_t) memory) & 0xFFF) {
         return MemoryMappingStatus::MisalignedHostMemory;
@@ -75,6 +75,12 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
     // Size must be page-aligned
     if (size & 0xFFF) {
         return MemoryMappingStatus::MisalignedSize;
+    }
+
+    // Platform must support large memory allocation in order to unmap more
+    // than 4 GiB of guest memory
+    if ((size > 0xFFFFFFFFull) && !m_platform.GetFeatures().largeMemoryAllocation) {
+        return MemoryMappingStatus::Unsupported;
     }
 
     auto status = MapGuestMemoryImpl(baseAddress, size, flags, memory);
@@ -84,7 +90,7 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
     return status;
 }
 
-MemoryMappingStatus VirtualMachine::UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) {
+MemoryMappingStatus VirtualMachine::UnmapGuestMemory(const uint64_t baseAddress, const uint64_t size) {
     // Base address must be page-aligned
     if (baseAddress & 0xFFF) {
         return MemoryMappingStatus::MisalignedAddress;
@@ -100,6 +106,12 @@ MemoryMappingStatus VirtualMachine::UnmapGuestMemory(const uint64_t baseAddress,
         return MemoryMappingStatus::MisalignedSize;
     }
     
+    // Platform must support large memory allocation in order to unmap more
+    // than 4 GiB of guest memory
+    if ((size > 0xFFFFFFFFull) && !m_platform.GetFeatures().largeMemoryAllocation) {
+        return MemoryMappingStatus::Unsupported;
+    }
+
     auto status = UnmapGuestMemoryImpl(baseAddress, size);
     if (status == MemoryMappingStatus::OK) {
         SubtractMemoryRange(baseAddress, size);
@@ -107,12 +119,7 @@ MemoryMappingStatus VirtualMachine::UnmapGuestMemory(const uint64_t baseAddress,
     return status;
 }
 
-MemoryMappingStatus VirtualMachine::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
-    // Host memory block must be page-aligned
-    if (((uint64_t) memory) & 0xFFF) {
-        return MemoryMappingStatus::MisalignedHostMemory;
-    }
-
+MemoryMappingStatus VirtualMachine::SetGuestMemoryFlags(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     // Base address must be page-aligned
     if (baseAddress & 0xFFF) {
         return MemoryMappingStatus::MisalignedAddress;
@@ -128,72 +135,13 @@ MemoryMappingStatus VirtualMachine::MapGuestMemoryLarge(const uint64_t baseAddre
         return MemoryMappingStatus::MisalignedSize;
     }
 
-    auto status = MapGuestMemoryLargeImpl(baseAddress, size, flags, memory);
-    if (status == MemoryMappingStatus::OK) {
-        m_memoryRegions.push_back(MemoryRegion{ baseAddress, size, memory });
-    }
-    return status;
-}
-
-MemoryMappingStatus VirtualMachine::UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) {
-    // Base address must be page-aligned
-    if (baseAddress & 0xFFF) {
-        return MemoryMappingStatus::MisalignedAddress;
-    }
-
-    // Size must be greater than zero
-    if (size == 0) {
-        return MemoryMappingStatus::EmptyRange;
-    }
-
-    // Size must be page-aligned
-    if (size & 0xFFF) {
-        return MemoryMappingStatus::MisalignedSize;
-    }
-    
-    auto status = UnmapGuestMemoryLargeImpl(baseAddress, size);
-    if (status == MemoryMappingStatus::OK) {
-        SubtractMemoryRange(baseAddress, size);
-    }
-    return status;
-}
-
-MemoryMappingStatus VirtualMachine::SetGuestMemoryFlags(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    // Base address must be page-aligned
-    if (baseAddress & 0xFFF) {
-        return MemoryMappingStatus::MisalignedAddress;
-    }
-
-    // Size must be greater than zero
-    if (size == 0) {
-        return MemoryMappingStatus::EmptyRange;
-    }
-
-    // Size must be page-aligned
-    if (size & 0xFFF) {
-        return MemoryMappingStatus::MisalignedSize;
+    // Platform must support large memory allocation in order to unmap more
+    // than 4 GiB of guest memory
+    if ((size > 0xFFFFFFFFull) && !m_platform.GetFeatures().largeMemoryAllocation) {
+        return MemoryMappingStatus::Unsupported;
     }
 
     return SetGuestMemoryFlagsImpl(baseAddress, size, flags);
-}
-
-MemoryMappingStatus VirtualMachine::SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
-    // Base address must be page-aligned
-    if (baseAddress & 0xFFF) {
-        return MemoryMappingStatus::MisalignedAddress;
-    }
-
-    // Size must be greater than zero
-    if (size == 0) {
-        return MemoryMappingStatus::EmptyRange;
-    }
-
-    // Size must be page-aligned
-    if (size & 0xFFF) {
-        return MemoryMappingStatus::MisalignedSize;
-    }
-
-    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
 }
 
 DirtyPageTrackingStatus VirtualMachine::QueryDirtyPages(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
@@ -377,19 +325,11 @@ void VirtualMachine::DestroyVPs() {
 
 // ----- Optional features ----------------------------------------------------
 
-MemoryMappingStatus VirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) {
+MemoryMappingStatus VirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
     return MemoryMappingStatus::Unsupported;
 }
 
-MemoryMappingStatus VirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    return MemoryMappingStatus::Unsupported;
-}
-
-MemoryMappingStatus VirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) {
-    return MemoryMappingStatus::Unsupported;
-}
-
-MemoryMappingStatus VirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus VirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     return MemoryMappingStatus::Unsupported;
 }
 

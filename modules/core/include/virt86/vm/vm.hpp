@@ -108,8 +108,11 @@ public:
      *
      * Attempting to remap guest physical pages may succeed or fail, depending
      * on the underlying hypervisor's implementation.
+     *
+     * Some platforms do not allow mapping memory ranges larger than 4 GiB, in
+     * which case the method will return MemoryMappingStatus::Unsupoorted.
      */
-    MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory);
+    MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory);
 
     /**
      * Unmaps a physical memory region from the guest.
@@ -117,30 +120,13 @@ public:
      * The base address and size must be aligned to the page size (4 KiB).
      *
      * Not all platforms support umapping GPA ranges.
+     *
      * Some platforms may allow unmapping portions of GPA ranges.
+     *
+     * Some platforms do not allow mapping memory ranges larger than 4 GiB, in
+     * which case the method will return MemoryMappingStatus::Unsupoorted.
      */
-    MemoryMappingStatus UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size);
-
-    /**
-     * Maps a large block of host physical memory to the guest.
-     *
-     * The host memory block's base address and the size must be aligned to the
-     * page size (4 KiB).
-     *
-     * Attempting to remap guest physical pages may succeed or fail, depending
-     * on the underlying hypervisor's implementation.
-     */
-    MemoryMappingStatus MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory);
-
-    /**
-     * Unmaps a large physical memory region from the guest.
-     *
-     * The base address and size must be aligned to the page size (4 KiB).
-     *
-     * Not all platforms support umapping GPA ranges.
-     * Some platforms may allow unmapping portions of GPA ranges.
-     */
-    MemoryMappingStatus UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size);
+    MemoryMappingStatus UnmapGuestMemory(const uint64_t baseAddress, const uint64_t size);
 
     /**
      * Changes flags for a region of guest memory.
@@ -150,17 +136,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest memory protection feature.
      */
-    MemoryMappingStatus SetGuestMemoryFlags(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags);
-
-    /**
-     * Changes flags for a region of guest memory.
-     *
-     * The base address and size must be aligned to the page size (4 KiB).
-     *
-     * This is an optional operation, supported by platforms that provide the
-     * guest memory protection feature.
-     */
-    MemoryMappingStatus SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
+    MemoryMappingStatus SetGuestMemoryFlags(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
 
     /**
      * Queries the specified range of memory for dirty pages.
@@ -241,46 +217,19 @@ protected:
      * If the dirty tracking flag is set but the platform doesn't support
      * dirty page tracking, it will be ignored.
      */
-    virtual MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) = 0;
+    virtual MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) = 0;
 
     /**
      * Does the actual unmapping of the host physical memory block from the
-     * guest on the underlying hypervisor platform, using 32-bit memory region
-     * size.
+     * guest on the underlying hypervisor platform.
      *
      * The following preconditions are true when this method is invoked:
      * - Base address is page-aligned
      * - Size is non-zero and page-aligned
+     * - Size is not larger than 4 GiB if the platform doesn't support large
+     *   memory allocations.
      */
-    virtual MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size);
-
-    /**
-     * Does the actual mapping of the host physical memory block to the guest
-     * on the underlying hypervisor platform, using 64-bit memory region size.
-     *
-     * The following preconditions are true when this method is invoked:
-     * - Base address is page-aligned
-     * - Size is non-zero and page-aligned
-     * - Host memory block is page-aligned
-     *
-     * If the platform does not support GPA remapping when attempting to map
-     * a region that was previously mapped, the function must fail.
-     *
-     * If the dirty tracking flag is set but the platform doesn't support
-     * dirty page tracking, it will be ignored.
-     */
-    virtual MemoryMappingStatus MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) = 0;
-
-    /**
-     * Does the actual unmapping of the host physical memory block from the
-     * guest on the underlying hypervisor platform, using 64-bit memory region
-     * size.
-     *
-     * The following preconditions are true when this method is invoked:
-     * - Base address is page-aligned
-     * - Size is non-zero and page-aligned
-     */
-    virtual MemoryMappingStatus UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size);
+    virtual MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size);
 
     /**
      * Tells the hypervisor to update the flags for the given memory range.
@@ -288,23 +237,13 @@ protected:
      * The following preconditions are true when this method is invoked:
      * - Base address is page-aligned
      * - Size is non-zero and page-aligned
+     * - Size is not larger than 4 GiB if the platform doesn't support large
+     *   memory allocations.
      *
      * If the dirty tracking flag is set but the platform doesn't support
      * dirty page tracking, it will be ignored.
      */
-    virtual MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags);
-
-    /**
-     * Tells the hypervisor to update the flags for the given memory range.
-     *
-     * The following preconditions are true when this method is invoked:
-     * - Base address is page-aligned
-     * - Size is non-zero and page-aligned
-     *
-     * If the dirty tracking flag is set but the platform doesn't support
-     * dirty page tracking, it will be ignored.
-     */
-    virtual MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
+    virtual MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
 
     /**
      * Asks the hypervisor to fill in the dirty page bitmap for the given

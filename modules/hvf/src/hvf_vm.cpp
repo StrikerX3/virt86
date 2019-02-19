@@ -47,7 +47,7 @@ bool HvFVirtualMachine::Initialize() {
     // TODO: Initialize any additional features available to the platform
 
     // Create virtual processors
-    for (uint32_t id = 0; id < params.numProcessors; id++) {
+    for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
         auto vp = new HvFVirtualProcessor(*this, id);
         if (!vp->Initialize()) {
             delete vp;
@@ -59,14 +59,7 @@ bool HvFVirtualMachine::Initialize() {
     return true;
 }
 
-MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
-    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
-    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
-    // large version.
-    return MapGuestMemoryLargeImpl(baseAddress, size, flags, memory);
-}
-
-MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     // TODO: Map the specified GPA range to the guest.
     // If Hypervisor.Framework does not support mapping memory ranges larger
     // than 4 GiB, remove this method from this subclass as the default
@@ -75,14 +68,7 @@ MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryLargeImpl(const uint64_t ba
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint32_t size) {
-    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
-    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
-    // large version.
-    return UnmapGuestMemoryLargeImpl(baseAddress, size);
-}
-
-MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t baseAddress, const uint64_t size) {
+MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
     // TODO: Unmap the specified GPA range from the guest.
     // If Hypervisor.Framework does not support mapping memory ranges larger
     // than 4 GiB, remove this method from this subclass as the default
@@ -91,14 +77,7 @@ MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryLargeImpl(const uint64_t 
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags) {
-    // TODO: If Hypervisor.Framework provides a separate API for mapping memory
-    // ranges up to 4 GiB in size, use it here, otherwise just delegate to the
-    // large version.
-    return SetGuestMemoryFlagsLargeImpl(baseAddress, size, flags);
-}
-
-MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     // TODO: Configure the flags of the specified GPA range.
     // If Hypervisor.Framework does not support mapping memory ranges larger
     // than 4 GiB, remove this method from this subclass as the default
