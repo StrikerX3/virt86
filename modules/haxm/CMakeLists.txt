@@ -97,6 +97,9 @@ else()
     add_precompiled_header(virt86-haxm src/common/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
 endif()
 
+# Tell dependents that HAXM is available via compiler definition
+target_compile_definitions(virt86-haxm PUBLIC VIRT86_HAXM_AVAILABLE=1)
+
 ##############################
 # Installation
 #

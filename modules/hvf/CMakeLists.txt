@@ -68,6 +68,9 @@ target_include_directories(virt86-hvf
 
 add_precompiled_header(virt86-hvf src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 
+# Tell dependents that HvF is available via compiler definition
+target_compile_definitions(virt86-hvf PUBLIC VIRT86_HVF_AVAILABLE=1)
+
 ##############################
 # Installation
 #
