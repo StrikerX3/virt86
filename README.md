@@ -4,7 +4,9 @@ virt86 interfaces with the major x86 hardware-assisted virtualization engines
 [Intel HAXM](https://github.com/intel/haxm),
 [Microsoft Windows Hypervisor Platform](https://docs.microsoft.com/en-us/virtualization/api/),
 [KVM](https://www.linux-kvm.org/page/Main_Page) and
-[Hypervisor.Framework](https://developer.apple.com/documentation/hypervisor), exposing a simple and universal C++ API to consumers while abstracting away the specifics of each platform. It does not provide a hypervisor by itself; instead, it interacts with existing virtualization platforms.
+[Hypervisor.Framework](https://developer.apple.com/documentation/hypervisor)<sup>1</sup>, exposing a simple and universal C++ API to consumers while abstracting away the specifics of each platform. It does not provide a hypervisor by itself; instead, it interacts with existing virtualization platforms.
+
+<sup>1</sup> *Mac OS X is currently unsupported. See issues [#1](https://github.com/StrikerX3/virt86/issues/1) and [#4](https://github.com/StrikerX3/virt86/issues/4).*
 
 ## Downloads
 
