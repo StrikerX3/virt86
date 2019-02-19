@@ -62,7 +62,7 @@ cmake ..
 make
 ```
 
-To install the library, run `make install` from the `build` directory.
+To install the library, run `sudo make install` from the `build` directory.
 
 ## Using virt86
 
