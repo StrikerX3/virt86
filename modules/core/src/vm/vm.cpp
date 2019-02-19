@@ -39,8 +39,8 @@ void __nullMMIOWrite(uint64_t, size_t, uint64_t) { }
 
 // ----------------------------------------------------------------------------
 
-VirtualMachine::VirtualMachine(Platform& platform, const VMInitParams& params)
-    : m_initParams(params)
+VirtualMachine::VirtualMachine(Platform& platform, const VMSpecifications& specifications)
+    : m_specifications(specifications)
     , m_platform(platform)
     , m_io({ __nullIORead, __nullIOWrite, __nullMMIORead, __nullMMIOWrite })
 {

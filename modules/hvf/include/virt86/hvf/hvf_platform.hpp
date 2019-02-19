@@ -42,7 +42,7 @@ protected:
     HvFPlatform();
     virtual ~HvFPlatform() override;
 
-    VirtualMachine *CreateVMImpl(const VMInitParams& params) override;
+    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
 
 };
 

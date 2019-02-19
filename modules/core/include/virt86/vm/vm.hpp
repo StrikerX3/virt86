@@ -2,7 +2,7 @@
 Defines the VirtualMachine interface to be implemented by hypervisor adapters.
 
 VirtualMachine instances are created through a Platform object. The parameters
-used to create the virtual machine can be retrieved with GetInitParams().
+used to create the virtual machine can be retrieved with GetSpecifications().
 
 In order to use a virtual machine, you must retrieve virtual processors created
 as part of its initialization using GetVirtualProcessor(index). You may also
@@ -57,7 +57,7 @@ SOFTWARE.
 #include "io.hpp"
 #include "mem.hpp"
 #include "status.hpp"
-#include "init.hpp"
+#include "specs.hpp"
 
 #include <vector>
 #include <optional>
@@ -85,10 +85,9 @@ public:
     virtual ~VirtualMachine() noexcept;
 
     /**
-     * Retrieves the set of initialization parameters used to create this
-     * virtual machine.
+     * Retrieves the set of specifications used to create this virtual machine.
      */
-    const VMInitParams& GetInitParams() const { return m_initParams; }
+    const VMSpecifications& GetSpecifications() const { return m_specifications; }
 
     /**
      * Retrieves the virtual processor with the specified index, if it exists.
@@ -225,7 +224,7 @@ public:
     const Platform& GetPlatform() const { return m_platform; }
 
 protected:
-    VirtualMachine(Platform& platform, const VMInitParams& params);
+    VirtualMachine(Platform& platform, const VMSpecifications& specifications);
 
     /**
      * Does the actual mapping of the host physical memory block to the guest
@@ -356,10 +355,9 @@ protected:
     Platform& m_platform;
 
     /**
-     * The set of initialization parameters used to create this virtual
-     * machine.
+     * The set of specifications used to create this virtual machine.
      */
-    const VMInitParams& m_initParams;
+    const VMSpecifications& m_specifications;
 
 private:
     void SubtractMemoryRange(uint64_t baseAddress, uint64_t size);

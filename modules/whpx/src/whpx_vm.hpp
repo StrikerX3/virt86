@@ -58,7 +58,7 @@ private:
 
     WHV_PARTITION_HANDLE m_handle;
 
-    WhpxVirtualMachine(WhpxPlatform& platform, const VMInitParams& params);
+    WhpxVirtualMachine(WhpxPlatform& platform, const VMSpecifications& specifications);
     bool Initialize();
 
     // Allow WhpxPlatform to access the constructor and Initialize()

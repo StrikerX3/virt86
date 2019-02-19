@@ -28,8 +28,8 @@ SOFTWARE.
 
 namespace virt86::hvf {
 
-HvFVirtualMachine::HvFVirtualMachine(HvFPlatform& platform, const VMInitParams& params)
-    : VirtualMachine(platform, params)
+HvFVirtualMachine::HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications)
+    : VirtualMachine(platform, specifications)
     , m_platform(platform)
 {
 }
@@ -41,7 +41,7 @@ HvFVirtualMachine::~HvFVirtualMachine() {
 
 bool HvFVirtualMachine::Initialize() {
     // TODO: Create the VM
-    // TODO: Initialize virtual machine based on VMInitParams (m_params).
+    // TODO: Initialize virtual machine based on VMSpecifications (m_specifications).
     // Unsupported parameters should be ignored.
 
     // TODO: Initialize any additional features available to the platform

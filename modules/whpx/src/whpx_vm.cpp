@@ -30,8 +30,8 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-WhpxVirtualMachine::WhpxVirtualMachine(WhpxPlatform& platform, const VMInitParams& params)
-    : VirtualMachine(platform, params)
+WhpxVirtualMachine::WhpxVirtualMachine(WhpxPlatform& platform, const VMSpecifications& specifications)
+    : VirtualMachine(platform, specifications)
     , m_platform(platform)
     , m_handle(INVALID_HANDLE_VALUE)
 {
@@ -54,7 +54,7 @@ bool WhpxVirtualMachine::Initialize() {
 
     // Configure partition to have the specified number of virtual processors
     WHV_PARTITION_PROPERTY procCount = { 0 };
-    procCount.ProcessorCount = m_initParams.numProcessors;
+    procCount.ProcessorCount = m_specifications.numProcessors;
     if (S_OK != g_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeProcessorCount, &procCount, sizeof(WHV_PARTITION_PROPERTY))) {
         CloseHandle(m_handle);
         m_handle = INVALID_HANDLE_VALUE;
@@ -62,7 +62,7 @@ bool WhpxVirtualMachine::Initialize() {
     }
 
     // Configure extended VM exits
-    auto enabledVMExits = BitmaskEnum(m_initParams.extendedVMExits & m_platform.GetFeatures().extendedVMExits);
+    auto enabledVMExits = BitmaskEnum(m_specifications.extendedVMExits & m_platform.GetFeatures().extendedVMExits);
     if (enabledVMExits) {
         WHV_PARTITION_PROPERTY vmExits = { 0 };
         if (enabledVMExits.AnyOf(ExtendedVMExit::CPUID)) {
@@ -86,11 +86,11 @@ bool WhpxVirtualMachine::Initialize() {
     // Configure CPUID functions to trigger a VM exit if exit on CPUID
     // instruction is enabled
     if (enabledVMExits.AnyOf(ExtendedVMExit::CPUID)) {
-        auto count = m_initParams.vmExitCPUIDFunctions.size();
+        auto count = m_specifications.vmExitCPUIDFunctions.size();
         if (count > 0) {
             UINT32 *functions = new UINT32[count];
             for (size_t i = 0; i < count; i++) {
-                functions[i++] = m_initParams.vmExitCPUIDFunctions[i];
+                functions[i++] = m_specifications.vmExitCPUIDFunctions[i];
             }
             if (S_OK != g_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeCpuidExitList, functions, count * sizeof(UINT32))) {
                 delete[] functions;
@@ -104,7 +104,7 @@ bool WhpxVirtualMachine::Initialize() {
     // exception is enabled
     if (enabledVMExits.AnyOf(ExtendedVMExit::Exception)) {
         WHV_PARTITION_PROPERTY property = { 0 };
-        property.ExceptionExitBitmap = static_cast<UINT64>(m_initParams.vmExitExceptions);
+        property.ExceptionExitBitmap = static_cast<UINT64>(m_specifications.vmExitExceptions);
 
         if (S_OK != g_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeExceptionExitBitmap, &property, sizeof(WHV_PARTITION_PROPERTY))) {
             CloseHandle(m_handle);
@@ -114,17 +114,17 @@ bool WhpxVirtualMachine::Initialize() {
     }
 
     // Define custom CPUID results
-    if (m_initParams.CPUIDResults.size() > 0) {
-        auto count = m_initParams.CPUIDResults.size();
+    if (m_specifications.CPUIDResults.size() > 0) {
+        auto count = m_specifications.CPUIDResults.size();
         WHV_X64_CPUID_RESULT *cpuidResultList = new WHV_X64_CPUID_RESULT[count];
         ZeroMemory(cpuidResultList, count * sizeof(WHV_X64_CPUID_RESULT));
 
         for (size_t i = 0; i < count; i++) {
-            cpuidResultList[i].Function = m_initParams.CPUIDResults[i].function;
-            cpuidResultList[i].Eax = m_initParams.CPUIDResults[i].eax;
-            cpuidResultList[i].Ebx = m_initParams.CPUIDResults[i].ebx;
-            cpuidResultList[i].Ecx = m_initParams.CPUIDResults[i].ecx;
-            cpuidResultList[i].Edx = m_initParams.CPUIDResults[i].edx;
+            cpuidResultList[i].Function = m_specifications.CPUIDResults[i].function;
+            cpuidResultList[i].Eax = m_specifications.CPUIDResults[i].eax;
+            cpuidResultList[i].Ebx = m_specifications.CPUIDResults[i].ebx;
+            cpuidResultList[i].Ecx = m_specifications.CPUIDResults[i].ecx;
+            cpuidResultList[i].Edx = m_specifications.CPUIDResults[i].edx;
         }
 
         if (S_OK != g_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeCpuidResultList, cpuidResultList, count * sizeof(WHV_X64_CPUID_RESULT))) {
@@ -142,7 +142,7 @@ bool WhpxVirtualMachine::Initialize() {
     }
 
     // Create virtual processors
-    for (uint32_t id = 0; id < m_initParams.numProcessors; id++) {
+    for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
         auto vp = new WhpxVirtualProcessor(*this, id);
         if (!vp->Initialize()) {
             delete vp;

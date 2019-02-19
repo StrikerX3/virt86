@@ -28,8 +28,8 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmVirtualMachine::HaxmVirtualMachine(HaxmPlatform& platform, const VMInitParams& params, HaxmPlatformImpl& platformImpl)
-    : VirtualMachine(platform, params)
+HaxmVirtualMachine::HaxmVirtualMachine(HaxmPlatform& platform, const VMSpecifications& specifications, HaxmPlatformImpl& platformImpl)
+    : VirtualMachine(platform, specifications)
     , m_platform(platform)
     , m_platformImpl(platformImpl)
     , m_sys(std::make_unique<HaxmVirtualMachineSysImpl>(platformImpl))
@@ -43,7 +43,7 @@ HaxmVirtualMachine::~HaxmVirtualMachine() {
 }
 
 bool HaxmVirtualMachine::Initialize() {
-    if (!m_sys->Initialize(m_initParams.numProcessors, &m_vmID)) {
+    if (!m_sys->Initialize(m_specifications.numProcessors, &m_vmID)) {
         return false;
     }
 
@@ -56,7 +56,7 @@ bool HaxmVirtualMachine::Initialize() {
     }
 
     // Create virtual processors
-    for (uint32_t id = 0; id < m_initParams.numProcessors; id++) {
+    for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
         auto vp = new HaxmVirtualProcessor(*this, *m_sys, id);
         if (!vp->Initialize()) {
             delete vp;

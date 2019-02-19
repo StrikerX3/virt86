@@ -34,8 +34,8 @@ SOFTWARE.
 
 namespace virt86::kvm {
 
-KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMInitParams& params, int fdKVM)
-    : VirtualMachine(platform, params)
+KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM)
+    : VirtualMachine(platform, specifications)
     , m_platform(platform)
     , m_fdKVM(fdKVM)
     , m_fd(-1)
@@ -59,7 +59,7 @@ bool KvmVirtualMachine::Initialize() {
     }
 
     // Move the identity map to the specified address.
-    uint64_t identityMapAddr = m_initParams.kvm.identityMapPageAddress;
+    uint64_t identityMapAddr = m_specifications.kvm.identityMapPageAddress;
     if (ioctl(m_fd, KVM_SET_IDENTITY_MAP_ADDR, &identityMapAddr) < 0) {
         close(m_fd);
         m_fd = -1;
@@ -68,12 +68,12 @@ bool KvmVirtualMachine::Initialize() {
 
 
     // Configure the custom CPUIDs if supported
-    if (m_platform.GetFeatures().customCPUIDs && m_initParams.CPUIDResults.size() > 0) {
-        size_t count = m_initParams.CPUIDResults.size();
+    if (m_platform.GetFeatures().customCPUIDs && m_specifications.CPUIDResults.size() > 0) {
+        size_t count = m_specifications.CPUIDResults.size();
         kvm_cpuid2 *cpuid = (kvm_cpuid2 *)malloc(sizeof(kvm_cpuid2) + count * sizeof(kvm_cpuid_entry2));
         cpuid->nent = static_cast<__u32>(count);
         for (size_t i = 0; i < count; i++) {
-            auto& entry = m_initParams.CPUIDResults[i];
+            auto& entry = m_specifications.CPUIDResults[i];
             cpuid->entries[i].function = entry.function;
             cpuid->entries[i].index = static_cast<__u32>(i);
             cpuid->entries[i].flags = 0;
@@ -93,7 +93,7 @@ bool KvmVirtualMachine::Initialize() {
     }
 
     // Create virtual processors
-    for (uint32_t id = 0; id < m_initParams.numProcessors; id++) {
+    for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
         auto vp = new KvmVirtualProcessor(*this, id);
         if (!vp->Initialize()) {
             delete vp;

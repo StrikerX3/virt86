@@ -113,8 +113,8 @@ KvmPlatform::~KvmPlatform() {
     }
 }
 
-VirtualMachine *KvmPlatform::CreateVMImpl(const VMInitParams& params) {
-    auto vm = new KvmVirtualMachine(*this, params, m_fd);
+VirtualMachine *KvmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = new KvmVirtualMachine(*this, specifications, m_fd);
     if (!vm->Initialize()) {
         delete vm;
         return nullptr;

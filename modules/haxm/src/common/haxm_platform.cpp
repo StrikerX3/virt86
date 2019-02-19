@@ -76,8 +76,8 @@ bool HaxmPlatform::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) {
     return m_delegate->impl.SetGlobalMemoryLimit(enabled, limitMB);
 }
 
-VirtualMachine *HaxmPlatform::CreateVMImpl(const VMInitParams& params) {
-    auto vm = new HaxmVirtualMachine(*this, params, m_delegate->impl);
+VirtualMachine *HaxmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = new HaxmVirtualMachine(*this, specifications, m_delegate->impl);
     if (!vm->Initialize()) {
         delete vm;
         return nullptr;

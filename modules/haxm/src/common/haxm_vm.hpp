@@ -52,7 +52,7 @@ protected:
     MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
 private:
-    HaxmVirtualMachine(HaxmPlatform& platform, const VMInitParams& params, HaxmPlatformImpl& platformImpl);
+    HaxmVirtualMachine(HaxmPlatform& platform, const VMSpecifications& specifications, HaxmPlatformImpl& platformImpl);
     bool Initialize();
 
     HaxmPlatform& m_platform;

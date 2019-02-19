@@ -53,7 +53,7 @@ HvFPlatform::HvFPlatform()
     m_features.partialMMIOInstructions = false;
     m_features.floatingPointExtensions = FloatingPointExtension::SSE2;   // Hypervisor provides access to additional XMM/YMM/ZMM registers; see the enum class for more details
     m_features.extendedControlRegisters = ExtendedControlRegister::None;  // Hypervisor provides access to extended control registers
-    m_features.extendedVMExits = ExtendedVMExit::None;   // Additional VM exits supported by the hypervisor; must be provided to the VMInitParams to enable them (if supported)
+    m_features.extendedVMExits = ExtendedVMExit::None;   // Additional VM exits supported by the hypervisor; must be provided to the VMSpecifications to enable them (if supported)
     m_features.exceptionExits = ExceptionCode::None;  // Exception codes supported by the hypervisor that will cause VM exits if ExtendedVMExit::Exception is supported and enabled
     m_features.customCPUIDs = false;  // Hypervisor allows configuring custom CPUID results
 }
@@ -63,9 +63,9 @@ HvFPlatform::~HvFPlatform() {
     // TODO: Close/release/free platform
 }
 
-VirtualMachine *HvFPlatform::CreateVMImpl(const VMInitParams& params) {
-    auto vm = new HvFVirtualMachine(*this, params);
-    if (!vm->Initialize(params)) {
+VirtualMachine *HvFPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = new HvFVirtualMachine(*this, specifications);
+    if (!vm->Initialize()) {
         delete vm;
         return nullptr;
     }

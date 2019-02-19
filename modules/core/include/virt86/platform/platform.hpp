@@ -11,12 +11,12 @@ Before using a platform, you must check the initialization status by calling
 the GetInitStatus() method. If the return value is not PlatformInitStatus::OK,
 the platform has not been initialized successfully.
 
-The main use of a Platform is to create virtual machines. Create a VMInitParams
-struct to specify parameters such as the number of virtual processors,
-additional VM exit conditions or custom CPUIDs. Call the CreateVM() method with
-it and a pointer to a VirtualMachine pointer variable. If the virtual machine
-is created, the function returns true and pointer will refer to the newly
-created VM.
+The main use of a Platform is to create virtual machines. Create a
+VMSpecifications struct to specify parameters such as the number of virtual
+processors, additional VM exit conditions or custom CPUIDs. Call the CreateVM()
+method with it and a pointer to a VirtualMachine pointer variable. If the
+virtual machine is created, the function returns true and pointer will refer to
+the newly created VM.
 
 Please note that Platform instances are not meant to be used concurrently
 by multiple threads. You will need to provide your own concurrency control
@@ -104,7 +104,7 @@ public:
      *
      * Returns true if the virtual machine was successfully created.
      */
-    const bool CreateVM(VirtualMachine **vm, const VMInitParams& params);
+    const bool CreateVM(VirtualMachine **vm, const VMSpecifications& specifications);
 
     /**
      * Destroys the virtual machine if it was created with this platform.
@@ -125,10 +125,10 @@ protected:
     void DestroyVMs();
 
     /**
-     * Instantiates and initializes a virtual machine with the specified number
-     * of virtual processors.
+     * Instantiates and initializes a virtual machine from the given
+     * specifications.
      */
-    virtual VirtualMachine *CreateVMImpl(const VMInitParams& params) = 0;
+    virtual VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) = 0;
 
     /**
      * The platform's name.

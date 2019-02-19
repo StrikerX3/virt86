@@ -35,8 +35,8 @@ Platform::Platform(const char *name)
 Platform::~Platform() {
 }
 
-const bool Platform::CreateVM(VirtualMachine **vm, const VMInitParams& initParams) {
-    *vm = CreateVMImpl(initParams);
+const bool Platform::CreateVM(VirtualMachine **vm, const VMSpecifications& specifications) {
+    *vm = CreateVMImpl(specifications);
     if (*vm != nullptr) {
         m_vms.emplace_back(*vm);
         return true;

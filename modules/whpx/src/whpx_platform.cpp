@@ -107,8 +107,8 @@ WhpxPlatform::~WhpxPlatform() {
     }
 }
 
-VirtualMachine *WhpxPlatform::CreateVMImpl(const VMInitParams& params) {
-    auto vm = new WhpxVirtualMachine(*this, params);
+VirtualMachine *WhpxPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = new WhpxVirtualMachine(*this, specifications);
     if (!vm->Initialize()) {
         delete vm;
         return nullptr;

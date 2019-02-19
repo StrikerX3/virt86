@@ -1,6 +1,8 @@
 /*
-Specifies the VM initialization parameters to be passed when creating a virtual
+Defines virtual machine specifications to be used when creating a virtual
 machine through a Platform instance.
+
+Features not supported by a platform are ignored.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -27,17 +29,16 @@ SOFTWARE.
 #pragma once
 
 #include "virt86/platform/features.hpp"
+#include "virt86/vp/cpuid.hpp"
 
 #include <vector>
 
 namespace virt86 {
 
 /**
- * Virtual machine initialization parameters.
- *
- * Unsupported features are ignored.
+ * Virtual machine specifications.
  */
-struct VMInitParams {
+struct VMSpecifications {
     /**
      * The number of virtual processors to create in the virtual machine.
      * Must be a positive number.

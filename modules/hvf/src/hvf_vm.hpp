@@ -45,8 +45,8 @@ protected:
     MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
 private:
-    HvFVirtualMachine(HvFPlatform& platform, const VMInitParams& params);  // TODO: modify the constructor to pass down handles or file descriptors as needed
-    bool Initialize(const VMInitParams& params);
+    HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications);  // TODO: modify the constructor to pass down handles or file descriptors as needed
+    bool Initialize();
 
     HvFPlatform& m_platform;
     

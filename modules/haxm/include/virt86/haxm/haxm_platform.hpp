@@ -46,7 +46,7 @@ protected:
     HaxmPlatform();
     virtual ~HaxmPlatform() override;
 
-    VirtualMachine *CreateVMImpl(const VMInitParams& params) override;
+    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
 
 private:
     struct Delegate;

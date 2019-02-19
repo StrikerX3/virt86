@@ -48,7 +48,7 @@ protected:
     MemoryMappingStatus SetGuestMemoryFlagsLargeImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
 private:
-    KvmVirtualMachine(KvmPlatform& platform, const VMInitParams& m_initParams, int fdKVM);
+    KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM);
     bool Initialize();
 
     KvmPlatform& m_platform;
