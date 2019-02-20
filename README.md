@@ -84,3 +84,7 @@ Extract the file to your preferred location for libraries. Add `<virt86-path>/in
 `#include "virt86/virt86.hpp"` in your application. The header includes all platforms available on your system and defines a fixed-sized array of platform factories named `virt86::PlatformFactories` for convenience.
 
 Read the [wiki](https://github.com/StrikerX3/virt86/wiki) and check out the [demo projects](https://github.com/StrikerX3/virt86-demos) for more details on how to use virt86.
+
+## Support
+
+If you find this useful and want to support [the author](https://github.com/StrikerX3), consider becoming a [patron](https://www.patreon.com/StrikerX3).
