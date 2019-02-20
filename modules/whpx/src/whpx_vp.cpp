@@ -115,13 +115,13 @@ VPExecutionStatus WhpxVirtualProcessor::RunImpl() {
     }
     switch (m_exitContext.ExitReason) {
     case WHvRunVpExitReasonX64Halt:                  m_exitInfo.reason = VMExitReason::HLT;       break;  // HLT instruction
+    case WHvRunVpExitReasonX64MsrAccess:             HandleMSRAccess();                           break;  // MSR access
+    case WHvRunVpExitReasonX64Cpuid:                 HandleCPUIDAccess();                         break;  // CPUID instruction
     case WHvRunVpExitReasonX64IoPortAccess:          return HandleIO();                                   // I/O (IN / OUT instructions)
     case WHvRunVpExitReasonMemoryAccess:             return HandleMMIO();                                 // MMIO
     case WHvRunVpExitReasonX64InterruptWindow:       m_exitInfo.reason = VMExitReason::Interrupt; break;  // Interrupt window
     case WHvRunVpExitReasonCanceled:                 m_exitInfo.reason = VMExitReason::Cancelled; break;  // Execution cancelled
     case WHvRunVpExitReasonNone:                     m_exitInfo.reason = VMExitReason::Normal;    break;  // VM exited for no reason
-    case WHvRunVpExitReasonX64MsrAccess:             m_exitInfo.reason = VMExitReason::MSRAccess; break;  // MSR access
-    case WHvRunVpExitReasonX64Cpuid:                 m_exitInfo.reason = VMExitReason::CPUID;     break;  // CPUID instruction
     case WHvRunVpExitReasonException:                m_exitInfo.reason = VMExitReason::Exception; break;  // CPU raised an exception
     case WHvRunVpExitReasonUnsupportedFeature:       m_exitInfo.reason = VMExitReason::Error;     break;  // Host CPU does not support a feature needed by the hypervisor
     case WHvRunVpExitReasonInvalidVpRegisterValue:   m_exitInfo.reason = VMExitReason::Error;     break;  // VCPU has an invalid register
@@ -162,6 +162,26 @@ VPExecutionStatus WhpxVirtualProcessor::HandleMMIO() {
     m_exitInfo.reason = VMExitReason::MMIO;
 
     return VPExecutionStatus::OK;
+}
+
+void WhpxVirtualProcessor::HandleMSRAccess() {
+    m_exitInfo.reason = VMExitReason::MSRAccess;
+    m_exitInfo.msr.isWrite = m_exitContext.MsrAccess.AccessInfo.IsWrite == TRUE;
+    m_exitInfo.msr.msrNumber = m_exitContext.MsrAccess.MsrNumber;
+    m_exitInfo.msr.rax = m_exitContext.MsrAccess.Rax;
+    m_exitInfo.msr.rdx = m_exitContext.MsrAccess.Rdx;
+}
+
+void WhpxVirtualProcessor::HandleCPUIDAccess() {
+    m_exitInfo.reason = VMExitReason::CPUID;
+    m_exitInfo.cpuid.rax = m_exitContext.CpuidAccess.Rax;
+    m_exitInfo.cpuid.rcx = m_exitContext.CpuidAccess.Rcx;
+    m_exitInfo.cpuid.rdx = m_exitContext.CpuidAccess.Rdx;
+    m_exitInfo.cpuid.rbx = m_exitContext.CpuidAccess.Rbx;
+    m_exitInfo.cpuid.defaultRax = m_exitContext.CpuidAccess.DefaultResultRax;
+    m_exitInfo.cpuid.defaultRcx = m_exitContext.CpuidAccess.DefaultResultRcx;
+    m_exitInfo.cpuid.defaultRdx = m_exitContext.CpuidAccess.DefaultResultRdx;
+    m_exitInfo.cpuid.defaultRbx = m_exitContext.CpuidAccess.DefaultResultRbx;
 }
 
 bool WhpxVirtualProcessor::PrepareInterrupt(uint8_t vector) {

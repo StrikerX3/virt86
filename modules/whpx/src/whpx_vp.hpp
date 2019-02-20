@@ -93,6 +93,8 @@ private:
 
     VPExecutionStatus HandleIO();
     VPExecutionStatus HandleMMIO();
+    void HandleMSRAccess();
+    void HandleCPUIDAccess();
 };
 
 }

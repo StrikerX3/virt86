@@ -72,8 +72,34 @@ struct VMExitInfo {
     // The reason for the VM exit
     VMExitReason reason;
 
-    // The exception code, when reason == VMExitReason::Exception
-    uint32_t exceptionCode;
+    // Details about specific VM exits
+    union {
+        // The exception code, when reason == VMExitReason::Exception
+        uint32_t exceptionCode;
+
+        // MSR access information, whem VMExitReason::MSRAccess
+        struct {
+            bool isWrite;
+            uint32_t msrNumber;
+            uint64_t rax;
+            uint64_t rdx;
+        } msr;
+
+        // CPUID access information, whem VMExitReason::CPUID.
+        // The register fields contain the values when CPUID was executed and
+        // the default* fields indicate the values the hypervisor would return
+        // based on its properties and the host's capabilities.
+        struct {
+            uint64_t rax;
+            uint64_t rcx;
+            uint64_t rdx;
+            uint64_t rbx;
+            uint64_t defaultRax;
+            uint64_t defaultRcx;
+            uint64_t defaultRdx;
+            uint64_t defaultRbx;
+        } cpuid;
+    };
 };
 
 }
