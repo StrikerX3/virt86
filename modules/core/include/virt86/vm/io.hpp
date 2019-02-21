@@ -30,18 +30,26 @@ SOFTWARE.
 
 namespace virt86 {
 
-using IOReadFunc = uint32_t(*)(uint16_t port, size_t size);
-using IOWriteFunc = void(*)(uint16_t port, size_t size, uint32_t value);
+using IOReadFunc = uint32_t(*)(void *context, uint16_t port, size_t size);
+using IOWriteFunc = void(*)(void *context, uint16_t port, size_t size, uint32_t value);
 
-using MMIOReadFunc = uint64_t(*)(uint64_t address, size_t size);
-using MMIOWriteFunc = void(*)(uint64_t address, size_t size, uint64_t value);
+using MMIOReadFunc = uint64_t(*)(void *context, uint64_t address, size_t size);
+using MMIOWriteFunc = void(*)(void *context, uint64_t address, size_t size, uint64_t value);
 
 struct IOHandlers {
-    IOReadFunc IORead;
-    IOWriteFunc IOWrite;
+    IOReadFunc IOReadFunc;
+    IOWriteFunc IOWriteFunc;
 
-    MMIOReadFunc MMIORead;
-    MMIOWriteFunc MMIOWrite;
+    MMIOReadFunc MMIOReadFunc;
+    MMIOWriteFunc MMIOWriteFunc;
+
+    uint32_t IORead(uint16_t port, size_t size) const { return IOReadFunc(context, port, size); }
+    void IOWrite(uint16_t port, size_t size, uint32_t value) const { return IOWriteFunc(context, port, size, value); }
+
+    uint64_t MMIORead(uint64_t address, size_t size) const { return MMIOReadFunc(context, address, size); }
+    void MMIOWrite(uint64_t address, size_t size, uint64_t value) const { return MMIOWriteFunc(context, address, size, value); }
+
+    void *context;
 };
 
 }

@@ -195,6 +195,12 @@ public:
     void RegisterMMIOWriteCallback(const MMIOWriteFunc func);
 
     /**
+     * Registers a pointer to arbitrary data to be passed down to the I/O
+     * callback functions.
+     */
+    void RegisterIOContext(void *context);
+
+    /**
      * Retrieves the platform that created this virtual machine.
      */
     const Platform& GetPlatform() const { return m_platform; }

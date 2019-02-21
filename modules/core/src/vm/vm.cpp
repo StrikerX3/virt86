@@ -31,18 +31,18 @@ namespace virt86 {
 // No-op I/O handlers to use as default when nullptr is specified.
 // They always return 0 on reads and discard writes.
 
-uint32_t __nullIORead(uint16_t, size_t) { return 0; }
-void __nullIOWrite(uint16_t, size_t, uint32_t) { }
+uint32_t __nullIORead(void*, uint16_t, size_t) { return 0; }
+void __nullIOWrite(void*, uint16_t, size_t, uint32_t) { }
 
-uint64_t __nullMMIORead(uint64_t, size_t) { return 0; }
-void __nullMMIOWrite(uint64_t, size_t, uint64_t) { }
+uint64_t __nullMMIORead(void*, uint64_t, size_t) { return 0; }
+void __nullMMIOWrite(void*, uint64_t, size_t, uint64_t) { }
 
 // ----------------------------------------------------------------------------
 
 VirtualMachine::VirtualMachine(Platform& platform, const VMSpecifications& specifications)
     : m_specifications(specifications)
     , m_platform(platform)
-    , m_io({ __nullIORead, __nullIOWrite, __nullMMIORead, __nullMMIOWrite })
+    , m_io({ __nullIORead, __nullIOWrite, __nullMMIORead, __nullMMIOWrite, nullptr })
 {
 }
 
@@ -240,19 +240,23 @@ bool VirtualMachine::MemWrite(const uint64_t paddr, uint64_t size, const void *v
 }
 
 void VirtualMachine::RegisterIOReadCallback(IOReadFunc func) {
-    m_io.IORead = (func == nullptr) ? __nullIORead : func;
+    m_io.IOReadFunc = (func == nullptr) ? __nullIORead : func;
 }
 
 void VirtualMachine::RegisterIOWriteCallback(IOWriteFunc func) {
-    m_io.IOWrite = (func == nullptr) ? __nullIOWrite : func;
+    m_io.IOWriteFunc = (func == nullptr) ? __nullIOWrite : func;
 }
 
 void VirtualMachine::RegisterMMIOReadCallback(MMIOReadFunc func) {
-    m_io.MMIORead = (func == nullptr) ? __nullMMIORead : func;
+    m_io.MMIOReadFunc = (func == nullptr) ? __nullMMIORead : func;
 }
 
 void VirtualMachine::RegisterMMIOWriteCallback(MMIOWriteFunc func) {
-    m_io.MMIOWrite = (func == nullptr) ? __nullMMIOWrite : func;
+    m_io.MMIOWriteFunc = (func == nullptr) ? __nullMMIOWrite : func;
+}
+
+void VirtualMachine::RegisterIOContext(void *context) {
+    m_io.context = context;
 }
 
 MemoryRegion *VirtualMachine::GetMemoryRegion(uint64_t address) {
