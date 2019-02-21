@@ -174,25 +174,25 @@ public:
      * Registers a callback function for the I/O read operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterIOReadCallback(const IOReadFunc func);
+    void RegisterIOReadCallback(const IOReadFunc_t func);
 
     /**
      * Registers a callback function for the I/O write operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterIOWriteCallback(const IOWriteFunc func);
+    void RegisterIOWriteCallback(const IOWriteFunc_t func);
 
     /**
      * Registers a callback function for the MMIO read operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterMMIOReadCallback(const MMIOReadFunc func);
+    void RegisterMMIOReadCallback(const MMIOReadFunc_t func);
 
     /**
      * Registers a callback function for the MMIO write operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterMMIOWriteCallback(const MMIOWriteFunc func);
+    void RegisterMMIOWriteCallback(const MMIOWriteFunc_t func);
 
     /**
      * Registers a pointer to arbitrary data to be passed down to the I/O

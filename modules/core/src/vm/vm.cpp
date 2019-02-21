@@ -239,19 +239,19 @@ bool VirtualMachine::MemWrite(const uint64_t paddr, uint64_t size, const void *v
     return false;
 }
 
-void VirtualMachine::RegisterIOReadCallback(IOReadFunc func) {
+void VirtualMachine::RegisterIOReadCallback(IOReadFunc_t func) {
     m_io.IOReadFunc = (func == nullptr) ? __nullIORead : func;
 }
 
-void VirtualMachine::RegisterIOWriteCallback(IOWriteFunc func) {
+void VirtualMachine::RegisterIOWriteCallback(IOWriteFunc_t func) {
     m_io.IOWriteFunc = (func == nullptr) ? __nullIOWrite : func;
 }
 
-void VirtualMachine::RegisterMMIOReadCallback(MMIOReadFunc func) {
+void VirtualMachine::RegisterMMIOReadCallback(MMIOReadFunc_t func) {
     m_io.MMIOReadFunc = (func == nullptr) ? __nullMMIORead : func;
 }
 
-void VirtualMachine::RegisterMMIOWriteCallback(MMIOWriteFunc func) {
+void VirtualMachine::RegisterMMIOWriteCallback(MMIOWriteFunc_t func) {
     m_io.MMIOWriteFunc = (func == nullptr) ? __nullMMIOWrite : func;
 }
 

@@ -30,18 +30,18 @@ SOFTWARE.
 
 namespace virt86 {
 
-using IOReadFunc = uint32_t(*)(void *context, uint16_t port, size_t size);
-using IOWriteFunc = void(*)(void *context, uint16_t port, size_t size, uint32_t value);
+using IOReadFunc_t = uint32_t(*)(void *context, uint16_t port, size_t size);
+using IOWriteFunc_t = void(*)(void *context, uint16_t port, size_t size, uint32_t value);
 
-using MMIOReadFunc = uint64_t(*)(void *context, uint64_t address, size_t size);
-using MMIOWriteFunc = void(*)(void *context, uint64_t address, size_t size, uint64_t value);
+using MMIOReadFunc_t = uint64_t(*)(void *context, uint64_t address, size_t size);
+using MMIOWriteFunc_t = void(*)(void *context, uint64_t address, size_t size, uint64_t value);
 
 struct IOHandlers {
-    IOReadFunc IOReadFunc;
-    IOWriteFunc IOWriteFunc;
+    IOReadFunc_t IOReadFunc;
+    IOWriteFunc_t IOWriteFunc;
 
-    MMIOReadFunc MMIOReadFunc;
-    MMIOWriteFunc MMIOWriteFunc;
+    MMIOReadFunc_t MMIOReadFunc;
+    MMIOWriteFunc_t MMIOWriteFunc;
 
     uint32_t IORead(uint16_t port, size_t size) const { return IOReadFunc(context, port, size); }
     void IOWrite(uint16_t port, size_t size, uint32_t value) const { return IOWriteFunc(context, port, size, value); }
