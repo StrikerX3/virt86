@@ -75,7 +75,7 @@ bool KvmVirtualMachine::Initialize() {
 
 
     // Configure the custom CPUIDs if supported
-    if (m_platform.GetFeatures().customCPUIDs && m_specifications.CPUIDResults.empty()) {
+    if (m_platform.GetFeatures().customCPUIDs && !m_specifications.CPUIDResults.empty()) {
         size_t count = m_specifications.CPUIDResults.size();
         auto cpuid = (kvm_cpuid2 *)malloc(sizeof(kvm_cpuid2) + count * sizeof(kvm_cpuid_entry2));
         cpuid->nent = static_cast<__u32>(count);
