@@ -323,8 +323,14 @@ private:
      */
     IOHandlers m_io;
 
+    // Only let friends take the address
+    VirtualMachine *operator&() { return this; }
+
     // Allow VirtualProcessor to access the I/O handlers
     friend class VirtualProcessor;
+
+    // Allow Platform to take the address
+    friend class Platform;
 };
 
 }

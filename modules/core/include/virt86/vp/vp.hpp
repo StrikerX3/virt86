@@ -97,6 +97,17 @@ class VirtualMachine;
  */
 class VirtualProcessor {
 public:
+    // Prevent copy construction and copy assignment
+    VirtualProcessor(const VirtualProcessor&) = delete;
+    VirtualProcessor& operator=(const VirtualProcessor&) = delete;
+
+    // Prevent move construction and move assignment
+    VirtualProcessor(VirtualProcessor&&) = delete;
+    VirtualProcessor&& operator=(VirtualProcessor&&) = delete;
+
+    // Disallow taking the address
+    VirtualProcessor *operator&() = delete;
+    
     virtual ~VirtualProcessor();
     
     // ----- Basic virtual processor operations -------------------------------

@@ -82,6 +82,9 @@ public:
     Platform(Platform&&) = delete;
     Platform&& operator=(Platform&&) = delete;
 
+    // Disallow taking the address
+    Platform *operator&() = delete;
+
     virtual ~Platform() noexcept;
 
     /**
