@@ -52,7 +52,7 @@ int main() {
     printf("Copyright (c) 2019 Ivan Roberto de Oliveira\n");
     printf("\n");
     
-    if (array_size(PlatformFactories) == 0) {
+    if constexpr (array_size(PlatformFactories) == 0) {
         printf("No virtualization platforms are available on this system\n");
         return -1;
     }
@@ -86,6 +86,7 @@ int main() {
         printf("    Guest debugging: %s\n", (features.guestDebugging) ? "available" : "unavailable");
         printf("    Memory protection: %s\n", (features.guestMemoryProtection) ? "available" : "unavailable");
         printf("    Dirty page tracking: %s\n", (features.dirtyPageTracking) ? "available" : "unavailable");
+        printf("    Partial dirty bitmap: %s\n", (features.partialDirtyBitmap) ? "supported" : "unsupported");
         printf("    Large memory allocation: %s\n", (features.largeMemoryAllocation) ? "supported" : "unsuported");
         printf("    Memory unmapping: %s\n", (features.memoryUnmapping) ? "supported" : "unsuported");
         printf("    Partial unmapping: %s\n", (features.partialUnmapping) ? "supported" : "unsuported");

@@ -52,6 +52,7 @@ enum class DirtyPageTrackingStatus {
     EmptyRange,                // Cannot query an empty memory range (size = 0)
     BitmapTooSmall,            // The provided bitmap buffer is too small
     NotEnabled,                // Dirty page tracking is not enabled for the specified guest memory range
+    InvalidRange,              // An invalid memory range was specified
     Failed,                    // Failed to query dirty pages
 };
 

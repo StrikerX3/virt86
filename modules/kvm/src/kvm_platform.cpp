@@ -94,6 +94,7 @@ KvmPlatform::KvmPlatform()
     m_features.extendedPageTables = true;
     m_features.guestDebugging = ioctl(m_fd, KVM_CAP_DEBUGREGS) != 0 && ioctl(m_fd, KVM_CAP_SET_GUEST_DEBUG) != 0;
     m_features.dirtyPageTracking = true;
+    m_features.partialDirtyBitmap = false;
     m_features.largeMemoryAllocation = true;
     m_features.partialUnmapping = false;
     m_features.memoryUnmapping = false;

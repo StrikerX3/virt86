@@ -26,6 +26,8 @@ SOFTWARE.
 #include "kvm_vm.hpp"
 #include "kvm_vp.hpp"
 
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <linux/kvm.h>
 #include <algorithm>
@@ -33,6 +35,11 @@ SOFTWARE.
 #include <memory>
 
 namespace virt86::kvm {
+
+// Checks if the memory region exactly matches the given memory address range
+static bool regionEquals(kvm_userspace_memory_region& rgn, const uint64_t baseAddress, const uint64_t size) {
+    return rgn.guest_phys_addr == baseAddress && rgn.memory_size == size;
+}
 
 KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM)
     : VirtualMachine(platform, specifications)
@@ -68,9 +75,9 @@ bool KvmVirtualMachine::Initialize() {
 
 
     // Configure the custom CPUIDs if supported
-    if (m_platform.GetFeatures().customCPUIDs && m_specifications.CPUIDResults.size() > 0) {
+    if (m_platform.GetFeatures().customCPUIDs && m_specifications.CPUIDResults.empty()) {
         size_t count = m_specifications.CPUIDResults.size();
-        kvm_cpuid2 *cpuid = (kvm_cpuid2 *)malloc(sizeof(kvm_cpuid2) + count * sizeof(kvm_cpuid_entry2));
+        auto cpuid = (kvm_cpuid2 *)malloc(sizeof(kvm_cpuid2) + count * sizeof(kvm_cpuid_entry2));
         cpuid->nent = static_cast<__u32>(count);
         for (size_t i = 0; i < count; i++) {
             auto& entry = m_specifications.CPUIDResults[i];
@@ -117,9 +124,12 @@ MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAdd
     if (flagsBM.AnyOf(MemoryFlags::DirtyPageTracking)) memoryRegion.flags |= KVM_MEM_LOG_DIRTY_PAGES;
 
     if (ioctl(m_fd, KVM_SET_USER_MEMORY_REGION, &memoryRegion) < 0) {
-        m_memoryRegions.erase(std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(), std::bind([](kvm_userspace_memory_region& rgn1, kvm_userspace_memory_region& rgn2) -> bool {
-            return rgn1.slot == rgn2.slot;
-        }, memoryRegion, std::placeholders::_1)));
+        for (auto it = m_memoryRegions.begin(); it != m_memoryRegions.end(); it++) {
+            if (it->slot == memoryRegion.slot) {
+                m_memoryRegions.erase(it);
+                break;
+            }
+        }
         return MemoryMappingStatus::Failed;
     }
 
@@ -127,14 +137,9 @@ MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAdd
 }
 
 MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
-    // Define function that checks if the memory region exactly matches the
-    // specified memory address range
-    auto equals = std::bind([](kvm_userspace_memory_region& rgn, const uint64_t baseAddress, const uint64_t size) -> bool {
-        return rgn.guest_phys_addr == baseAddress && rgn.memory_size == size;
-    }, std::placeholders::_1, baseAddress, size);
-
     // Find memory range that corresponds to the specified address range
-    auto memoryRegion = std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(), equals);
+    auto memoryRegion = std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(),
+        [=](kvm_userspace_memory_region& memRgn) { return regionEquals(memRgn, baseAddress, size); });
     if (memoryRegion == m_memoryRegions.end()) {
         return MemoryMappingStatus::InvalidRange;
     }
@@ -149,6 +154,35 @@ MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t ba
     }
 
     return MemoryMappingStatus::OK;
+}
+
+DirtyPageTrackingStatus KvmVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
+    // Find memory range that corresponds to the specified address range
+    auto memoryRegion = std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(),
+        [=](kvm_userspace_memory_region& memRgn) { return regionEquals(memRgn, baseAddress, size); });
+    if (memoryRegion == m_memoryRegions.end()) {
+        return DirtyPageTrackingStatus::InvalidRange;
+    }
+
+    // Get dirty bitmap for the entire slot
+    kvm_dirty_log dirtyLog = { 0 };
+    dirtyLog.slot = memoryRegion->slot;
+    dirtyLog.dirty_bitmap = bitmap;
+    if (ioctl(m_fd, KVM_GET_DIRTY_LOG, &dirtyLog) < 0) {
+        return DirtyPageTrackingStatus::Failed;
+    }
+
+    return DirtyPageTrackingStatus::OK;
+}
+
+DirtyPageTrackingStatus KvmVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) {
+    // Delegate to QueryDirtyPagesImpl as it will clear the dirty bitmap for
+    // the memory slot
+    const size_t bitmapSize = (size / PAGE_SIZE + sizeof(uint64_t) - 1) / sizeof(uint64_t);
+    auto bitmap = new uint64_t[bitmapSize];
+    auto status = QueryDirtyPagesImpl(baseAddress, size, bitmap, bitmapSize);
+    delete[] bitmap;
+    return status;
 }
 
 }

@@ -75,6 +75,7 @@ WhpxPlatform::WhpxPlatform()
     m_features.largeMemoryAllocation = true;
     m_features.customCPUIDs = true;
     m_features.dirtyPageTracking = features.DirtyPageTracking;
+    m_features.partialDirtyBitmap = true;
     m_features.partialUnmapping = features.PartialUnmap;
     m_features.memoryUnmapping = true;
     m_initStatus = PlatformInitStatus::OK;

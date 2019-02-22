@@ -150,6 +150,13 @@ struct PlatformFeatures {
     bool dirtyPageTracking = false;
 
     /**
+     * Hypervisor allows users to read the dirty bitmap of a subregion of
+     * mapeed memory. When false, only full memory regions may be queried, if
+     * the platform supports dirty page tracking.
+     */
+    bool partialDirtyBitmap = false;
+
+    /**
      * Allows mapping memory regions larger than 4 GiB.
      */
     bool largeMemoryAllocation = false;

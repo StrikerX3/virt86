@@ -47,10 +47,11 @@ HvFPlatform::HvFPlatform()
     m_features.extendedPageTables = false;
     m_features.guestDebugging = false;  // Required for single stepping, software and hardware breakpoints
     m_features.dirtyPageTracking = false;  // Allows mapping GPA ranges with the DirtyPageTracking feature
+    m_features.partialDirtyBitmap = false;  // Allows QueryDirtyBitmap to query portions of an address range
     m_features.largeMemoryAllocation = false;  // Enables memory operations with 64-bit sizes
     m_features.partialUnmapping = false;  // Enables UnmapGuestMemory with subranges of mapped ranges
     m_features.memoryUnmapping = false;  // Enables UnmapGuestMemory operations
-    m_features.partialMMIOInstructions = false;
+    m_features.partialMMIOInstructions = false;  // Complex MMIO instructions need multiple executions of the virtual processor to complete
     m_features.floatingPointExtensions = FloatingPointExtension::SSE2;   // Hypervisor provides access to additional XMM/YMM/ZMM registers; see the enum class for more details
     m_features.extendedControlRegisters = ExtendedControlRegister::None;  // Hypervisor provides access to extended control registers
     m_features.extendedVMExits = ExtendedVMExit::None;   // Additional VM exits supported by the hypervisor; must be provided to the VMSpecifications to enable them (if supported)
