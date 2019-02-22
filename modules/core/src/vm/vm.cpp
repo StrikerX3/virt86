@@ -166,7 +166,7 @@ DirtyPageTrackingStatus VirtualMachine::QueryDirtyPages(const uint64_t baseAddre
     }
 
     // Bitmap buffer must be large enough to contain bits for all pages
-    uint64_t requiredSize = (size / PAGE_SIZE / sizeof(uint64_t));
+    uint64_t requiredSize = ((size / PAGE_SIZE + sizeof(uint64_t) - 1) / sizeof(uint64_t));
     if (bitmapSize < requiredSize) {
         return DirtyPageTrackingStatus::BitmapTooSmall;
     }
