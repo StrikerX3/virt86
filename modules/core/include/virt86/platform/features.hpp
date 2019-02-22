@@ -151,7 +151,7 @@ struct PlatformFeatures {
 
     /**
      * Hypervisor allows users to read the dirty bitmap of a subregion of
-     * mapeed memory. When false, only full memory regions may be queried, if
+     * mapped memory. When false, only full memory regions may be queried, if
      * the platform supports dirty page tracking.
      */
     bool partialDirtyBitmap = false;
