@@ -39,15 +39,19 @@ SOFTWARE.
 */
 #pragma once
 
-#include "virt86/haxm/haxm_platform.hpp"
+#if defined(VIRT86_HAXM_AVAILABLE)
+#  include "virt86/haxm/haxm_platform.hpp"
+#endif
 
-#if defined(_WIN32)
-#  if defined(VIRT86_WHPX_AVAILABLE)
-#    include "virt86/whpx/whpx_platform.hpp"
-#  endif
-#elif defined(__linux__)
+#if defined(VIRT86_WHPX_AVAILABLE)
+#  include "virt86/whpx/whpx_platform.hpp"
+#endif
+
+#if defined(VIRT86_KVM_AVAILABLE)
 #  include "virt86/kvm/kvm_platform.hpp"
-#elif defined(__APPLE__)
+#endif
+
+#if defined(VIRT86_HVF_AVAILABLE)
 #  include "virt86/hvf/hvf_platform.hpp"
 #endif
 
@@ -56,14 +60,19 @@ namespace virt86 {
 using PlatformFactory = Platform& (*)();
 
 inline PlatformFactory PlatformFactories[] = {
+#if defined(VIRT86_HAXM_AVAILABLE)
     []() -> Platform& { return haxm::HaxmPlatform::Instance(); },
-#if defined(_WIN32)
-#  if defined(VIRT86_WHPX_AVAILABLE)
+#endif
+
+#if defined(VIRT86_WHPX_AVAILABLE)
     []() -> Platform& { return whpx::WhpxPlatform::Instance(); },
-#  endif
-#elif defined(__linux__)
+#endif
+
+#if defined(VIRT86_KVM_AVAILABLE)
     []() -> Platform& { return kvm::KvmPlatform::Instance(); },
-#elif defined(__APPLE__)
+#endif
+
+#if defined(VIRT86_HVF_AVAILABLE)
     []() -> Platform& { return hvf::HvFPlatform::Instance(); },
 #endif
 };
