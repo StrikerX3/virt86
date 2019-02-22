@@ -3,14 +3,17 @@ Includes all available platforms based on the current build system
 configuration and availability according to operating system and SDK
 requirements:
 
-         Windows   Linux   macOS
-   HAXM    yes      yes     yes
-   WHPX    yes[1]    -       -
-   KVM      -       yes      -
-   HvF      -        -      yes[2]
+         Windows   Linux   macOS   NetBSD
+   HAXM    yes      yes     yes     yes[3] 
+   WHPX    yes[1]    -       -       -
+   KVM      -       yes      -       -
+   HvF      -        -      yes[2]   -
+   NVMM     -        -       -      yes[4]
   
 [1] WHPX requires Windows 10 SDK version 10.0.17134.0 or later
 [2] Hypervisor.Framework support is currently unimplemented
+[3] HAXM support for NetBSD is currently unimplemented
+[4] NVMM support for NetBSD is currently unimplemented
 
 The header also exposes a fixed-size array of available platform factories on
 virt86::PlatformFactories.
@@ -55,6 +58,10 @@ SOFTWARE.
 #  include "virt86/hvf/hvf_platform.hpp"
 #endif
 
+#if defined(VIRT86_NVMM_AVAILABLE)
+#  include "virt86/nvmm/nvmm_platform.hpp"
+#endif
+
 namespace virt86 {
 
 using PlatformFactory = Platform& (*)();
@@ -74,6 +81,10 @@ inline PlatformFactory PlatformFactories[] = {
 
 #if defined(VIRT86_HVF_AVAILABLE)
     []() noexcept -> Platform& { return hvf::HvFPlatform::Instance(); },
+#endif
+
+#if defined(VIRT86_NVMM_AVAILABLE)
+    []() -> Platform& { return nvmm::NVMMPlatform::Instance(); },
 #endif
 };
 

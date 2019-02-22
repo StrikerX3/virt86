@@ -35,6 +35,10 @@ elseif(APPLE)
     add_subdirectory(haxm)
     # TODO: Add support for Hypervisor.Framework
     #add_subdirectory(hvf)
+elseif(NETBSD)
+    # TODO: add support for HAXM
+    #add_subdirectory(haxm)
+    add_subdirectory(nvmm)
 endif()
 
 add_subdirectory(virt86)

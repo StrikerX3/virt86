@@ -1,4 +1,4 @@
-# Top-level CMake project definitions.
+# Template for CMake Config module.
 # -------------------------------------------------------------------------------
 # MIT License
 # 
@@ -21,42 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+@PACKAGE_INIT@
 
-# CMake 3.12 is required for target_link_libraries with OBJECT libraries
-cmake_minimum_required(VERSION 3.12)
-
-project(virt86 VERSION 1.0.1)
-
-# Differentiate between Linux and macOS
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-endif()
-
-# Identify NetBSD
-if(CMAKE_SYSTEM_NAME MATCHES "NetBSD")
-    set(NETBSD TRUE)
-endif()
-
-# Define properties and include helpers for Visual Studio
-if(MSVC)
-    include(cmake/VSHelpers.cmake)
-
-    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-    # Configure startup project
-    set_property(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" PROPERTY VS_STARTUP_PROJECT virt86-platform-check)
-endif()
-
-include(cmake/PrecompiledHeader.cmake)
-include(GNUInstallDirs)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
-# Require C++17 features
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
-
-# Add modules and apps
-add_subdirectory(modules)
-add_subdirectory(apps)
+include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
+check_required_components("@PROJECT_NAME@")

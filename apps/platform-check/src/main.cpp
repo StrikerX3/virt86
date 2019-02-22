@@ -36,6 +36,8 @@ SOFTWARE.
 #  include <stdlib.h>
 #elif defined(__APPLE__)
 #  include <stdlib.h>
+#elif defined(__unix__)
+#  include <stdlib.h>
 #endif
 
 #include <cstdio>
