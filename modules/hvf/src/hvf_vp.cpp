@@ -155,8 +155,8 @@ VPOperationStatus HvFVirtualProcessor::RegWrite(const Reg regs[], const RegValue
     // TODO: Write the specified registers to the VCPU state.
     // If Hypervisor.Framework provides a more efficient way of writing
     // registers in bulk, use that here. Otherwise, this method can be removed
-    // from this subclass, as the default implementation will read registers
-    // using a for loop and RegRead with individual registers and values
+    // from this subclass, as the default implementation will write registers
+    // using a for loop and RegWrite with individual registers and values
 
     // Additionally, if you're caching registers, set the dirty flags now.
     return VPOperationStatus::OK;
