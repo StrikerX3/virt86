@@ -61,29 +61,32 @@ bool HvFVirtualMachine::Initialize() {
 
 MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
     // TODO: Map the specified GPA range to the guest.
-    // If Hypervisor.Framework does not support mapping memory ranges larger
-    // than 4 GiB, remove this method from this subclass as the default
-    // implementation returns MemooryMappingStatus::Unsupported.
 
     return MemoryMappingStatus::OK;
 }
 
 MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
     // TODO: Unmap the specified GPA range from the guest.
-    // If Hypervisor.Framework does not support mapping memory ranges larger
-    // than 4 GiB, remove this method from this subclass as the default
-    // implementation returns MemooryMappingStatus::Unsupported.
 
     return MemoryMappingStatus::OK;
 }
 
 MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
     // TODO: Configure the flags of the specified GPA range.
-    // If Hypervisor.Framework does not support mapping memory ranges larger
-    // than 4 GiB, remove this method from this subclass as the default
-    // implementation returns MemooryMappingStatus::Unsupported.
 
     return MemoryMappingStatus::OK;
+}
+
+DrtyPageTrackingStatus HvFVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
+    // TODO: Query the dirty page bitmap for the specified GPA range.
+
+    return DirtyPageTrackingStatus::OK;
+}
+
+DirtyPageTrackingStatus HvFVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) {
+    // TODO: Clear the dirty page bitmap for the specified GPA range.
+
+    return DirtyPageTrackingStatus::OK;
 }
 
 }
