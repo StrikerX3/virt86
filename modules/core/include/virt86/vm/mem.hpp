@@ -42,9 +42,17 @@ enum class MemoryFlags : uint32_t {
 ENABLE_BITMASK_OPERATORS(MemoryFlags)
 
 struct MemoryRegion {
-    uint64_t baseAddress;
-    uint64_t size;
-    void *hostMemory;
+    uint64_t baseAddress = 0;
+    uint64_t size = 0;
+    void *hostMemory = nullptr;
+
+    MemoryRegion() = default;
+
+    MemoryRegion(uint64_t baseAddress, uint64_t size, void *hostMemory)
+        : baseAddress(baseAddress)
+        , size(size)
+        , hostMemory(hostMemory)
+    {}
 };
 
 }

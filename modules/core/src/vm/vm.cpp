@@ -85,7 +85,7 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
 
     auto status = MapGuestMemoryImpl(baseAddress, size, flags, memory);
     if (status == MemoryMappingStatus::OK) {
-        m_memoryRegions.push_back(MemoryRegion{ baseAddress, size, memory });
+        m_memoryRegions.emplace_back(baseAddress, size, memory);
     }
     return status;
 }
@@ -166,7 +166,7 @@ DirtyPageTrackingStatus VirtualMachine::QueryDirtyPages(const uint64_t baseAddre
     }
 
     // Bitmap buffer must be large enough to contain bits for all pages
-    uint64_t requiredSize = (size / PAGE_SIZE / 8U);
+    uint64_t requiredSize = (size / PAGE_SIZE / sizeof(uint64_t));
     if (bitmapSize < requiredSize) {
         return DirtyPageTrackingStatus::BitmapTooSmall;
     }

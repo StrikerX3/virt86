@@ -53,11 +53,11 @@ HaxmPlatform::HaxmPlatform()
         m_features.maxProcessorsPerVM = 64;
         m_features.maxProcessorsGlobal = 128;
         m_features.floatingPointExtensions = FloatingPointExtension::SSE2;
-        m_features.unrestrictedGuest = (caps.winfo & HAX_CAP_UG);
-        m_features.extendedPageTables = (caps.winfo & HAX_CAP_EPT);
-        m_features.guestDebugging = (caps.winfo & HAX_CAP_DEBUG);
-        m_features.guestMemoryProtection = (caps.winfo & HAX_CAP_RAM_PROTECTION);
-        m_features.largeMemoryAllocation = (caps.winfo & HAX_CAP_64BIT_SETRAM);
+        m_features.unrestrictedGuest = (caps.winfo & HAX_CAP_UG) != 0;
+        m_features.extendedPageTables = (caps.winfo & HAX_CAP_EPT) != 0;
+        m_features.guestDebugging = (caps.winfo & HAX_CAP_DEBUG) != 0;
+        m_features.guestMemoryProtection = (caps.winfo & HAX_CAP_RAM_PROTECTION) != 0;
+        m_features.largeMemoryAllocation = (caps.winfo & HAX_CAP_64BIT_SETRAM) != 0;
         m_features.memoryUnmapping = true;
         m_features.partialUnmapping = true;  // TODO: since when?
         m_features.partialMMIOInstructions = true;
