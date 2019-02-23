@@ -1,0 +1,58 @@
+version: '{build}'
+branches:
+  only:
+  - master
+clone_folder: c:\projects\virt86
+image:
+- Visual Studio 2017
+configuration:
+- Release
+- Debug
+platform:
+- x86
+- x64
+environment:
+  matrix:
+  - arch: Win64
+  # - arch: #does not work, Release|x64 not a valid target
+matrix:
+  fast_finish: true
+
+# skip unsupported combinations
+init:
+- set arch=
+- if "%arch%"=="Win64" ( set arch= Win64)
+- echo %arch%
+- echo %APPVEYOR_BUILD_WORKER_IMAGE%
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" )
+- echo CMake generator = %generator%
+- set VIRT86_ARTIFACT_PATH=C:\projects\virt86\build\_artifact\virt86-MSVC-$(platform)-$(configuration)
+- echo virt86 artifact path = %VIRT86_ARTIFACT_PATH%
+
+before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    mkdir _artifact\virt86-MSVC-%arch%-$(configuration)
+    cmake --version
+    cmake .. -G %generator% -_artifact_PREFIX=%VIRT86_ARTIFACT_PATH%
+    copy c:\projects\virt86\README.md %VIRT86_ARTIFACT_PATH%
+    copy c:\projects\virt86\LICENSE %VIRT86_ARTIFACT_PATH%
+
+build:
+  project: c:\projects\virt86\build\INSTALL.vcxproj
+  verbosity: minimal
+  parallel: true
+
+only_commits:
+  files:
+    - CMakeLists.txt
+    - appveyor.yml
+    - modules/
+    - apps/
+    - cmake/
+
+artifacts:
+  - path: C:\projects\virt86\build\_artifact\virt86-MSVC-$(platform)-$(configuration)
