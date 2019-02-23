@@ -1,0 +1,23 @@
+language: cpp
+dist: xenial
+os: linux
+compiler: gcc
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+branches:
+  only:
+  - master
+  - travis-ci
+script:
+- mkdir build
+- cd build
+- cmake .. -DCMAKE_INSTALL_PREFIX=${VIRT86_ARTIFACT_PATH} && make
