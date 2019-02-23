@@ -87,7 +87,8 @@ bool HaxmVirtualProcessorSysImpl::Run() {
 }
 
 bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) {
-    return ioctl(m_fd, HAX_VCPU_IOCTL_INTERRUPT, (uint32_t)vector) >= 0;
+    uint32_t vector32 = static_cast<uint32_t>(vector);
+    return ioctl(m_fd, HAX_VCPU_IOCTL_INTERRUPT, &vector32) >= 0;
 }
 
 bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) {
