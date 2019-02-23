@@ -28,29 +28,25 @@ SOFTWARE.
 
 namespace virt86::hvf {
 
-HvFVirtualProcessor::HvFVirtualProcessor(HvFVirtualMachine& vm, uint32_t vcpuID)
+HvFVirtualProcessor::HvFVirtualProcessor(HvFVirtualMachine& vm)
     : VirtualProcessor(vm)
     , m_vm(vm)
-    , m_vcpuID(vcpuID)
+    , m_vcpuID(0)
 {
 }
 
 HvFVirtualProcessor::~HvFVirtualProcessor() {
-    // TODO: Close/release/free VCPU
+    hv_vcpu_destroy(m_vcpuID);
 }
 
 bool HvFVirtualProcessor::Initialize() {
-    // TODO: Create the VCPU
-    // TODO: Initialize any additional features available to the platform
-
-    return true;
-
+    return (HV_SUCCESS == hv_vcpu_create(&m_vcpuID, HV_VCPU_DEFAULT));
 }
 
 VPExecutionStatus HvFVirtualProcessor::RunImpl() {
-    // TODO: Request VCPU to run
-    // If registers are cached in this class, update the VCPU state before running
-    // (see HAXM or KVM for examples of this)
+    if (HV_SUCCESS != hv_vcpu_run(m_vcpuID)) {
+        return VPExecutionStatus::Failed;
+    }
 
     return HandleExecResult();
 }

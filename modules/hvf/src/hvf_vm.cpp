@@ -26,6 +26,8 @@ SOFTWARE.
 #include "hvf_vm.hpp"
 #include "hvf_vp.hpp"
 
+#include <Hypervisor/hv.h>
+
 namespace virt86::hvf {
 
 HvFVirtualMachine::HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications)
@@ -36,19 +38,18 @@ HvFVirtualMachine::HvFVirtualMachine(HvFPlatform& platform, const VMSpecificatio
 
 HvFVirtualMachine::~HvFVirtualMachine() {
     DestroyVPs();
-    // TODO: Close/release/free VM
+    hv_vm_destroy();
 }
 
 bool HvFVirtualMachine::Initialize() {
-    // TODO: Create the VM
-    // TODO: Initialize virtual machine based on VMSpecifications (m_specifications).
-    // Unsupported parameters should be ignored.
-
-    // TODO: Initialize any additional features available to the platform
-
+    // Create the virtual machine
+    if (HV_SUCCESS != hv_vm_create(HV_VM_DEFAULT)) {
+        return false;
+    }
+    
     // Create virtual processors
     for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
-        auto vp = new HvFVirtualProcessor(*this, id);
+        auto vp = new HvFVirtualProcessor(*this);
         if (!vp->Initialize()) {
             delete vp;
             return false;
@@ -60,33 +61,46 @@ bool HvFVirtualMachine::Initialize() {
 }
 
 MemoryMappingStatus HvFVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
-    // TODO: Map the specified GPA range to the guest.
+    hv_uvaddr_t uva = (hv_uvaddr_t)memory;
+    hv_gpaddr_t gpa = (hv_gpaddr_t)baseAddress;
+    size_t sz = (size_t)size;
+    hv_memory_flags_t memFlags = 0;
 
+    auto flagsBM = BitmaskEnum(flags);
+    if (flagsBM.AnyOf(MemoryFlags::Read)) memFlags |= HV_MEMORY_READ;
+    if (flagsBM.AnyOf(MemoryFlags::Write)) memFlags |= HV_MEMORY_WRITE;
+    if (flagsBM.AnyOf(MemoryFlags::Execute)) memFlags |= HV_MEMORY_EXEC;
+
+    if (HV_SUCCESS != hv_vm_map(uva, gpa, sz, memFlags)) {
+        return MemoryMappingStatus::Failed;
+    }
     return MemoryMappingStatus::OK;
 }
 
 MemoryMappingStatus HvFVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
-    // TODO: Unmap the specified GPA range from the guest.
+    hv_gpaddr_t gpa = (hv_gpaddr_t)baseAddress;
+    size_t sz = (size_t)size;
 
+    if (HV_SUCCESS != hv_vm_unmap(gpa, sz)) {
+        return MemoryMappingStatus::Failed;
+    }
     return MemoryMappingStatus::OK;
 }
 
 MemoryMappingStatus HvFVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
-    // TODO: Configure the flags of the specified GPA range.
+    hv_gpaddr_t gpa = (hv_gpaddr_t)baseAddress;
+    size_t sz = (size_t)size;
+    hv_memory_flags_t memFlags = 0;
 
+    auto flagsBM = BitmaskEnum(flags);
+    if (flagsBM.AnyOf(MemoryFlags::Read)) memFlags |= HV_MEMORY_READ;
+    if (flagsBM.AnyOf(MemoryFlags::Write)) memFlags |= HV_MEMORY_WRITE;
+    if (flagsBM.AnyOf(MemoryFlags::Execute)) memFlags |= HV_MEMORY_EXEC;
+
+    if (HV_SUCCESS != hv_vm_protect(gpa, sz, memFlags)) {
+        return MemoryMappingStatus::Failed;
+    }
     return MemoryMappingStatus::OK;
-}
-
-DrtyPageTrackingStatus HvFVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
-    // TODO: Query the dirty page bitmap for the specified GPA range.
-
-    return DirtyPageTrackingStatus::OK;
-}
-
-DirtyPageTrackingStatus HvFVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) {
-    // TODO: Clear the dirty page bitmap for the specified GPA range.
-
-    return DirtyPageTrackingStatus::OK;
 }
 
 }

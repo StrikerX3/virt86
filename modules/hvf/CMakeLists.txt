@@ -48,6 +48,8 @@ file(GLOB_RECURSE public_headers
 #
 add_library(virt86-hvf OBJECT ${sources} ${private_headers} ${public_headers})
 
+target_link_libraries(virt86-hvf PUBLIC "-framework Hypervisor")
+
 if(TARGET virt86-core)
     add_library(virt86::virt86-core ALIAS virt86-core)
 else()

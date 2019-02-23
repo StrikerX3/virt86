@@ -26,3 +26,5 @@ SOFTWARE.
 #include "virt86/platform/platform.hpp"
 #include "hvf_vm.hpp"
 #include "hvf_vp.hpp"
+
+#include <Hypervisor/hv.h>

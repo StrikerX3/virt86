@@ -136,6 +136,11 @@ protected:
     virtual std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) = 0;
 
     /**
+     * Retrieves the number of virtual machines created with this platform.
+     */
+    const size_t VMCount() const { return m_vms.size(); }
+
+    /**
      * The platform's name.
      */
     const char *m_name;

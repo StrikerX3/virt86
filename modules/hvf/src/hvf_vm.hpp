@@ -35,18 +35,12 @@ class HvFVirtualMachine : public VirtualMachine {
 protected:
     virtual ~HvFVirtualMachine() override;
 
-    // TODO: UnmapGuestMemoryImpl, SetGuestMemoryFlagsImpl and the dirty page
-    // tracking operations are optional and may be removed if
-    // Hypervisor.Framework doesn't support them
     MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
     MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
     MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
 
-    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) override;
-    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) override;
-
 private:
-    HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications);  // TODO: modify the constructor to pass down handles or file descriptors as needed
+    HvFVirtualMachine(HvFPlatform& platform, const VMSpecifications& specifications);
     bool Initialize();
 
     HvFPlatform& m_platform;

@@ -28,6 +28,8 @@ SOFTWARE.
 
 #include "virt86/vp/vp.hpp"
 
+#include <Hypervisor/hv.h>
+
 namespace virt86::hvf {
 
 class HvFVirtualMachine;
@@ -67,13 +69,13 @@ public:
     VPOperationStatus GetBreakpointAddress(uint64_t *address) const override;
 
 protected:
-    HvFVirtualProcessor(HvFVirtualMachine& vm, uint32_t vcpuID);
+    HvFVirtualProcessor(HvFVirtualMachine& vm);
     ~HvFVirtualProcessor() override;
 
 private:
     HvFVirtualMachine& m_vm;
 
-    uint32_t m_vcpuID;
+    hv_vcpuid_t m_vcpuID;
 
     bool Initialize();
 

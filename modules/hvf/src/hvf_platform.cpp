@@ -26,6 +26,8 @@ SOFTWARE.
 #include "virt86/hvf/hvf_platform.hpp"
 #include "hvf_vm.hpp"
 
+#include <Hypervisor/hv.h>
+
 namespace virt86::hvf {
 
 HvFPlatform& HvFPlatform::Instance() {
@@ -36,15 +38,14 @@ HvFPlatform& HvFPlatform::Instance() {
 HvFPlatform::HvFPlatform()
     : Platform("Hypervisor.Framework")
 {
-    // TODO: Initialize Hypervisor.Framework.
-    // Update m_initStatus with the result.
+    // Hypervisor.Framework is always initialized.
     m_initStatus = PlatformInitStatus::OK;
 
-    // TODO: Check and publish capabilities/features
+    // Check and publish capabilities/features
     m_features.maxProcessorsPerVM = 1;
     m_features.maxProcessorsGlobal = 1;
-    m_features.unrestrictedGuest = false;
-    m_features.extendedPageTables = false;
+    m_features.unrestrictedGuest = true;
+    m_features.extendedPageTables = true;
     m_features.guestDebugging = false;  // Required for single stepping, software and hardware breakpoints
     m_features.dirtyPageTracking = false;  // Allows mapping GPA ranges with the DirtyPageTracking feature
     m_features.partialDirtyBitmap = false;  // Allows QueryDirtyBitmap to query portions of an address range
@@ -61,10 +62,14 @@ HvFPlatform::HvFPlatform()
 
 HvFPlatform::~HvFPlatform() {
     DestroyVMs();
-    // TODO: Close/release/free platform
 }
 
 VirtualMachine *HvFPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    // Only one virtual machine may be created per process
+    if (VMCount() > 0) {
+        return nullptr;
+    }
+    
     auto vm = new HvFVirtualMachine(*this, specifications);
     if (!vm->Initialize()) {
         delete vm;
