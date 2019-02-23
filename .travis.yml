@@ -17,7 +17,6 @@ matrix:
 branches:
   only:
   - master
-  - travis-ci
 
 before_install:
 - eval "${MATRIX_EVAL}"
