@@ -17,7 +17,7 @@ matrix:
 
 init:
 - set ARCH=
-- if "%PLATFORM%"=="x64" (set ARCH=Win64)
+- if "%PLATFORM%"=="x64" (set ARCH= Win64)
 - echo %ARCH%
 - echo %APPVEYOR_BUILD_WORKER_IMAGE%
 - set generator="Visual Studio 15 2017%ARCH%"
