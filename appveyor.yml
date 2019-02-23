@@ -40,6 +40,20 @@ build:
   verbosity: minimal
   parallel: true
 
+after_build:
+- ps: |-
+    function ZipFiles($zipfilename, $sourcedir)
+    {
+       [Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem")
+       $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
+       [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir, $zipfilename, $compressionLevel, $false)
+    }
+    $binPath = "$($env:VIRT86_ARTIFACT_PATH)"
+    $zipName = "virt86-$($env:APPVEYOR_BUILD_VERSION)-MSVC-$($env:PLATFORM)-$($env:CONFIGURATION).zip"
+    $zipFullPath = "$($binPath)$($zipName)"
+    ZipFiles "$($zipFullPath)" "$($binPath)" | Out-Null
+    Push-AppveyorArtifact "$($zipFullPath)" -FileName $zipName
+
 only_commits:
   files:
     - CMakeLists.txt
@@ -48,7 +62,7 @@ only_commits:
     - apps/
     - cmake/
 
-artifacts:
-  - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
-    name: virt86-$(version)-MSVC-$(platform)-$(configuration)
-    type: zip
+# artifacts:
+#   - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
+#     name: virt86-$(version)-MSVC-$(platform)-$(configuration)
+#     type: zip
