@@ -50,3 +50,5 @@ only_commits:
 
 artifacts:
   - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
+    name: virt86-$(build)-MSVC-$(platform)-$(configuration)
+    type: zip
