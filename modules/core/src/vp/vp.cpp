@@ -571,7 +571,7 @@ void VirtualProcessor::HandleInterruptQueue() {
 }
 
 void VirtualProcessor::InjectPendingInterrupt() {
-    // If there no pending interrupts, leave
+    // If there are no pending interrupts, leave
     if (m_pendingInterrupts.size() == 0) {
         return;
     }
