@@ -1,19 +1,33 @@
 version: '1.0.0-b{build}'
+
 branches:
   only:
   - master
   - appveyor
-clone_folder: c:\projects\virt86
+
+only_commits:
+  files:
+    - CMakeLists.txt
+    - appveyor.yml
+    - modules/
+    - apps/
+    - cmake/
+
 image:
 - Visual Studio 2017
+
 configuration:
 - Release
 - Debug
+
 platform:
 - x86
 - x64
+
 matrix:
   fast_finish: true
+
+clone_folder: c:\projects\virt86
 
 init:
 - set ARCH=
@@ -41,7 +55,7 @@ build:
   parallel: true
 
 # Manually push artifacts in order to add the version to the filename
-after_build:
+after_test:
 - ps: |-
     function ZipFiles($zipfilename, $sourcedir)
     {
@@ -54,11 +68,3 @@ after_build:
     $zipFullPath = "$($binPath)$($zipName)"
     ZipFiles "$($zipFullPath)" "$($binPath)" | Out-Null
     Push-AppveyorArtifact "$($zipFullPath)" -FileName $zipName
-
-only_commits:
-  files:
-    - CMakeLists.txt
-    - appveyor.yml
-    - modules/
-    - apps/
-    - cmake/
