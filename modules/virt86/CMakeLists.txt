@@ -132,7 +132,8 @@ elseif(APPLE)
     else()
         find_package(virt86-hvf CONFIG REQUIRED)
     endif()
-    target_link_libraries(virt86 PUBLIC virt86::virt86-hvf)
+    # TODO: Add support for Hypervisor.Framework
+    #target_link_libraries(virt86 PUBLIC virt86::virt86-hvf)
 endif()
 
 if(MSVC)
