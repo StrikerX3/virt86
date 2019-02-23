@@ -1,7 +1,9 @@
 language: cpp
 dist: xenial
 os: linux
-compiler: gcc
+compiler:
+- gcc
+- clang
 matrix:
   include:
     - os: linux
