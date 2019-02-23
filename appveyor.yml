@@ -1,0 +1,70 @@
+version: '1.0.0-b{build}'
+
+branches:
+  only:
+  - master
+  - appveyor
+
+only_commits:
+  files:
+    - CMakeLists.txt
+    - appveyor.yml
+    - modules/
+    - apps/
+    - cmake/
+
+image:
+- Visual Studio 2017
+
+configuration:
+- Release
+- Debug
+
+platform:
+- x86
+- x64
+
+matrix:
+  fast_finish: true
+
+clone_folder: c:\projects\virt86
+
+init:
+- set ARCH=
+- if "%PLATFORM%"=="x64" (set ARCH= Win64)
+- echo %ARCH%
+- echo %APPVEYOR_BUILD_WORKER_IMAGE%
+- set generator="Visual Studio 15 2017%ARCH%"
+- echo CMake generator = %GENERATOR%
+- set VIRT86_ARTIFACT_PATH=C:\projects\virt86\build\_artifact\virt86-MSVC-%PLATFORM%-%CONFIGURATION%
+- echo virt86 artifact path = %VIRT86_ARTIFACT_PATH%
+
+before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    mkdir %VIRT86_ARTIFACT_PATH%
+    cmake --version
+    cmake .. -G %GENERATOR% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH% -DCMAKE_SYSTEM_VERSION=10.0.17763.0
+    copy c:\projects\virt86\README.md %VIRT86_ARTIFACT_PATH%
+    copy c:\projects\virt86\LICENSE %VIRT86_ARTIFACT_PATH%
+
+build:
+  project: c:\projects\virt86\build\INSTALL.vcxproj
+  verbosity: minimal
+  parallel: true
+
+# Manually push artifacts in order to add the version to the filename
+after_test:
+- ps: |-
+    function ZipFiles($zipfilename, $sourcedir)
+    {
+       [Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem")
+       $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
+       [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir, $zipfilename, $compressionLevel, $false)
+    }
+    $binPath = "$($env:VIRT86_ARTIFACT_PATH)"
+    $zipName = "virt86-$($env:APPVEYOR_BUILD_VERSION)-MSVC-$($env:PLATFORM)-$($env:CONFIGURATION).zip"
+    $zipFullPath = "$($binPath)$($zipName)"
+    ZipFiles "$($zipFullPath)" "$($binPath)" | Out-Null
+    Push-AppveyorArtifact "$($zipFullPath)" -FileName $zipName

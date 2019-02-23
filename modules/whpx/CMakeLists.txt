@@ -27,9 +27,8 @@
 project(virt86-whpx VERSION 1.0.0 LANGUAGES CXX)
 
 if(${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION} VERSION_LESS 10.0.17134.0)
-    message(WARNING
-        "WHPX requires Windows SDK version 10.0.17134.0 or later. virt86-whpx will not be available."
-    )
+    message(WARNING "WHPX requires Windows SDK version 10.0.17134.0 or later. virt86-whpx will not be available.")
+    message(STATUS "CMake reports Windows target platform version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}.")
     return()
 endif()
 
