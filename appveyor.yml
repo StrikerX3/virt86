@@ -40,6 +40,7 @@ build:
   verbosity: minimal
   parallel: true
 
+# Manually push artifacts in order to add the version to the filename
 after_build:
 - ps: |-
     function ZipFiles($zipfilename, $sourcedir)
@@ -61,8 +62,3 @@ only_commits:
     - modules/
     - apps/
     - cmake/
-
-# artifacts:
-#   - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
-#     name: virt86-$(version)-MSVC-$(platform)-$(configuration)
-#     type: zip
