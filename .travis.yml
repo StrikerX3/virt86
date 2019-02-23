@@ -18,6 +18,9 @@ branches:
   - master
   - travis-ci
 
+before_install:
+- eval "${MATRIX_EVAL}"
+
 script:
 - mkdir build
 - cd build
