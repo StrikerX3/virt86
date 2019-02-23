@@ -40,3 +40,6 @@ cmake-build-debug/
 
 # CLion project metadata
 .idea/
+
+# Mac OS X
+.DS_Store
