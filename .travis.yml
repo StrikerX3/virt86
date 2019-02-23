@@ -1,11 +1,12 @@
 language: cpp
-dist: xenial
-os: linux
-compiler:
-- gcc
+# os: linux
+# dist: xenial
+# compiler: gcc
 matrix:
   include:
     - os: linux
+      dist: xenial
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -14,9 +15,12 @@ matrix:
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - os: osx
+      osx_image: xcode10.1
 branches:
   only:
   - master
+  - travis-mac
 
 before_install:
 - eval "${MATRIX_EVAL}"
