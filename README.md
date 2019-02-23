@@ -10,7 +10,7 @@ virt86 interfaces with the major x86 hardware-assisted virtualization engines
 
 See more details about supported platforms and features [here](https://github.com/StrikerX3/virt86/wiki/Supported-Platforms-and-Features).
 
-<sup>1</sup> *Mac OS X is currently unsupported. See issues [#1](https://github.com/StrikerX3/virt86/issues/1) and [#4](https://github.com/StrikerX3/virt86/issues/4).*
+<sup>1</sup> *Hypervisor.Framework support is being studied. See issue [#1](https://github.com/StrikerX3/virt86/issues/1) and the [`hvf`](https://github.com/StrikerX3/virt86/tree/hvf) branch.*
 
 ## Downloads
 
@@ -25,6 +25,7 @@ The project has been successfully compiled with the following toolchains:
 * Microsoft Visual C++ 19.16.27027.1 (Visual Studio 2017 v15.9.7) on Windows 10, 32- and 64-bit, using Windows 10 SDKs 10.0.17134.0 and 10.0.17763.0
 * GCC 7.3.0 on Ubuntu 18.04.0, 64-bit
 * GCC 8.2.0 on Ubuntu 18.04.0 (`gcc-8` package), 64-bit
+* Apple LLVM 10.0.0 on Mac OS X Mojave 10.14.3, 64-bit
 
 ### Building on Windows with Visual Studio 2017
 
@@ -64,6 +65,18 @@ make
 
 To install the library, run `sudo make install` from the `build` directory.
 
+### Building on Mac OS X
+
+Install [brew](https://brew.sh/) if you haven't already. The default installation is sufficient.
+
+```bash
+git clone https://github.com/StrikerX3/virt86.git
+cd virt86
+mkdir build; cd build
+cmake ..
+make
+```
+
 ## Using virt86
 
 ### Linking with CMake
@@ -79,7 +92,7 @@ If you installed the library to a non-standard location by specifying `CMAKE_INS
 
 ### Linking against a downloaded release
 
-Extract the file to your preferred location for libraries. Add `<virt86-path>/include` to your project's includes and `<virt86-path>/lib` to your project's library directories. Link against `virt86.lib` or `virt86-debug.lib` on Windows or `libvirt86.a` on Linux and Mac OS X.
+Extract the file to your preferred location for libraries. Add `<virt86-path>/include` to your project's includes and `<virt86-path>/lib` to your project's library directories. Link against `virt86.lib` on Windows or `libvirt86.a` on Linux and Mac OS X. For debug libraries, use `virt86-debug.lib` or `libvirt86-debug.a`.
 
 ### Using the library
 
