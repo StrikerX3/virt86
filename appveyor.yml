@@ -56,4 +56,4 @@ only_commits:
     - cmake/
 
 artifacts:
-  - path: C:\projects\virt86\build\_artifact\virt86-MSVC-$(platform)-$(configuration)
+  - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
