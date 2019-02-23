@@ -36,7 +36,7 @@ before_build:
 - cmd: |-
     mkdir build
     cd build
-    mkdir _artifact\virt86-MSVC-%arch%-%configuration%
+    mkdir %VIRT86_ARTIFACT_PATH%
     cmake --version
     cmake .. -G %generator% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH%
     copy c:\projects\virt86\README.md %VIRT86_ARTIFACT_PATH%
