@@ -14,7 +14,7 @@ See more details about supported platforms and features [here](https://github.co
 
 ## Downloads
 
-You can find the latest release of virt86 [here](https://github.com/StrikerX3/virt86/releases/latest). Older releases are available in the [Releases](https://github.com/StrikerX3/virt86/releases) page. You can also find the development builds in [AppVeyor](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master).
+You can find the latest release of virt86 [here](https://github.com/StrikerX3/virt86/releases/latest). Older releases are available in the [Releases](https://github.com/StrikerX3/virt86/releases) page. You can also find development builds in [AppVeyor](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master).
 
 ## Building virt86
 
