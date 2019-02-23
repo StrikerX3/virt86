@@ -34,7 +34,7 @@ before_build:
     cd build
     mkdir %VIRT86_ARTIFACT_PATH%
     cmake --version
-    cmake .. -G %generator% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH%
+    cmake .. -G %generator% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH% -DCMAKE_SYSTEM_VERSION=10.0.17763.0
     copy c:\projects\virt86\README.md %VIRT86_ARTIFACT_PATH%
     copy c:\projects\virt86\LICENSE %VIRT86_ARTIFACT_PATH%
 
