@@ -1,4 +1,4 @@
-version: '{build}'
+version: '1.0.0-b{build}'
 branches:
   only:
   - master
@@ -50,5 +50,5 @@ only_commits:
 
 artifacts:
   - path: build\_artifact\virt86-MSVC-$(platform)-$(configuration)
-    name: virt86-$(build)-MSVC-$(platform)-$(configuration)
+    name: virt86-$(version)-MSVC-$(platform)-$(configuration)
     type: zip
