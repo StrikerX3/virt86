@@ -67,7 +67,7 @@ To install the library, run `sudo make install` from the `build` directory.
 
 ### Building on Mac OS X
 
-Install [brew](https://brew.sh/) if you haven't already. The default installation is sufficient.
+Install [brew](https://brew.sh/) if you haven't already. The default installation is sufficient. Xcode is not needed to compile the library -- virt86 can be compiled with the Xcode command line tools included with brew.
 
 ```bash
 git clone https://github.com/StrikerX3/virt86.git
