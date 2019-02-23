@@ -1,6 +1,6 @@
 # virt86
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/qbe0h2k9pl2sselw/branch/master?svg=true)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/qbe0h2k9pl2sselw/branch/master?svg=true)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) [![Travis CI build Status](https://travis-ci.com/StrikerX3/virt86.svg?branch=master)](https://travis-ci.com/StrikerX3/virt86)
 
 virt86 interfaces with the major x86 hardware-assisted virtualization engines
 [Intel HAXM](https://github.com/intel/haxm),
@@ -14,7 +14,7 @@ See more details about supported platforms and features [here](https://github.co
 
 ## Downloads
 
-You can find the latest release of virt86 [here](https://github.com/StrikerX3/virt86/releases/latest). Older releases are available in the [Releases](https://github.com/StrikerX3/virt86/releases) page. You can also find development builds in [AppVeyor](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master).
+You can find the latest release of virt86 [here](https://github.com/StrikerX3/virt86/releases/latest). Older releases are available in the [Releases](https://github.com/StrikerX3/virt86/releases) page. You can also find Windows development builds in [AppVeyor](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master).
 
 ## Building virt86
 
