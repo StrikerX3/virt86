@@ -15,17 +15,14 @@ platform:
 matrix:
   fast_finish: true
 
-# skip unsupported combinations
 init:
-- set arch=
-- if "%platform%"=="x64" ( set arch= Win64)
-- echo %arch%
+- set ARCH=
+- if "%PLATFORM%"=="x64" (set ARCH=Win64)
+- echo %ARCH%
 - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" )
-- echo CMake generator = %generator%
-- set VIRT86_ARTIFACT_PATH=C:\projects\virt86\build\_artifact\virt86-MSVC-%platform%-%configuration%
+- set generator="Visual Studio 15 2017%ARCH%"
+- echo CMake generator = %GENERATOR%
+- set VIRT86_ARTIFACT_PATH=C:\projects\virt86\build\_artifact\virt86-MSVC-%PLATFORM%-%CONFIGURATION%
 - echo virt86 artifact path = %VIRT86_ARTIFACT_PATH%
 
 before_build:
@@ -34,7 +31,7 @@ before_build:
     cd build
     mkdir %VIRT86_ARTIFACT_PATH%
     cmake --version
-    cmake .. -G %generator% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH% -DCMAKE_SYSTEM_VERSION=10.0.17763.0
+    cmake .. -G %GENERATOR% -DCMAKE_INSTALL_PREFIX=%VIRT86_ARTIFACT_PATH% -DCMAKE_SYSTEM_VERSION=10.0.17763.0
     copy c:\projects\virt86\README.md %VIRT86_ARTIFACT_PATH%
     copy c:\projects\virt86\LICENSE %VIRT86_ARTIFACT_PATH%
 
