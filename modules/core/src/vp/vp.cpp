@@ -35,7 +35,7 @@ VirtualProcessor::VirtualProcessor(VirtualMachine& vm)
 {
 }
 
-VirtualProcessor::~VirtualProcessor() {
+VirtualProcessor::~VirtualProcessor() noexcept {
 }
 
 // ----- Basic virtual processor operations -----------------------------------

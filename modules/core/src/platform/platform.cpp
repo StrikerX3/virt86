@@ -32,7 +32,7 @@ Platform::Platform(const char *name)
 {
 }
 
-Platform::~Platform() {
+Platform::~Platform() noexcept {
 }
 
 const std::optional<std::reference_wrapper<VirtualMachine>> Platform::CreateVM(const VMSpecifications& specifications) {

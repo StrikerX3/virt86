@@ -46,7 +46,7 @@ VirtualMachine::VirtualMachine(Platform& platform, const VMSpecifications& speci
 {
 }
 
-VirtualMachine::~VirtualMachine() {
+VirtualMachine::~VirtualMachine() noexcept {
 }
 
 std::optional<std::reference_wrapper<VirtualProcessor>> VirtualMachine::GetVirtualProcessor(const size_t index) {

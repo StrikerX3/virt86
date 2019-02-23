@@ -108,7 +108,7 @@ public:
     // Disallow taking the address
     VirtualProcessor *operator&() = delete;
     
-    virtual ~VirtualProcessor();
+    virtual ~VirtualProcessor() noexcept;
     
     // ----- Basic virtual processor operations -------------------------------
 
