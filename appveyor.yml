@@ -3,7 +3,6 @@ version: '1.0.0-b{build}'
 branches:
   only:
   - master
-  - appveyor
 
 only_commits:
   files:
