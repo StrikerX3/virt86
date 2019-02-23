@@ -33,7 +33,8 @@ elseif(LINUX)
     add_subdirectory(kvm)
 elseif(APPLE)
     add_subdirectory(haxm)
-    add_subdirectory(hvf)
+    # TODO: Add support for Hypervisor.Framework
+    #add_subdirectory(hvf)
 endif()
 
 add_subdirectory(virt86)
