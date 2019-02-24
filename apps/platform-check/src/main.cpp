@@ -95,7 +95,7 @@ int main() {
         printf("    Custom CPUID results: %s\n", (features.customCPUIDs) ? "supported" : "unsupported");
         if (features.customCPUIDs) {
             printf("       Function        EAX         EBX         ECX         EDX\n");
-            for (auto it = features.supportedCustomCPUIDs.begin(); it != features.supportedCustomCPUIDs.end(); it++) {
+            for (auto it = features.supportedCustomCPUIDs.cbegin(); it != features.supportedCustomCPUIDs.cend(); it++) {
                 printf("      0x%08x = 0x%08x  0x%08x  0x%08x  0x%08x\n", it->function, it->eax, it->ebx, it->ecx, it->edx);
             }
         }

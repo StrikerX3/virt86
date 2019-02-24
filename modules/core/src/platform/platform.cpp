@@ -46,7 +46,7 @@ const std::optional<std::reference_wrapper<VirtualMachine>> Platform::CreateVM(c
 }
 
 const bool Platform::FreeVM(VirtualMachine& vm) {
-    for (auto it = m_vms.begin(); it != m_vms.end(); it++) {
+    for (auto it = m_vms.cbegin(); it != m_vms.cend(); it++) {
         if (it->get() == &vm) {
             m_vms.erase(it);
             return true;

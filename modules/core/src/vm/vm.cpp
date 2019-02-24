@@ -199,7 +199,7 @@ bool VirtualMachine::MemRead(const uint64_t paddr, uint64_t size, void *value) c
     // We need to go in reverse order to ensure the most recent mappings
     // take precedence over previous, overlapping mappings.
     const uint64_t finalPAddr = paddr + size - 1;
-    for (auto it = m_memoryRegions.rbegin(); it != m_memoryRegions.rend(); it++) {
+    for (auto it = m_memoryRegions.crbegin(); it != m_memoryRegions.crend(); it++) {
         auto& memoryRegion = *it;
         const uint64_t finalAddress = memoryRegion.baseAddress + memoryRegion.size - 1;
         if (paddr >= memoryRegion.baseAddress && finalPAddr <= finalAddress) {
