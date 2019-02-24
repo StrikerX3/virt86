@@ -84,6 +84,35 @@ bool KvmVirtualProcessor::Initialize() {
         return false;
     }
 
+    // Configure the custom CPUIDs if supported
+    if (m_vm.GetPlatform().GetFeatures().customCPUIDs) {
+        auto& cpuids = m_vm.GetSpecifications().CPUIDResults;
+        if (!cpuids.empty()) {
+            size_t count = cpuids.size();
+            auto cpuid = allocVarEntry<kvm_cpuid2, kvm_cpuid_entry2>(count);
+            cpuid->nent = static_cast<__u32>(count);
+            for (size_t i = 0; i < count; i++) {
+                auto &entry = cpuids[i];
+                cpuid->entries[i].function = entry.function;
+                cpuid->entries[i].index = static_cast<__u32>(i);
+                cpuid->entries[i].flags = 0;
+                cpuid->entries[i].eax = entry.eax;
+                cpuid->entries[i].ebx = entry.ebx;
+                cpuid->entries[i].ecx = entry.ecx;
+                cpuid->entries[i].edx = entry.edx;
+            }
+
+            int result = ioctl(m_fd, KVM_SET_CPUID2, cpuid);
+            if (result < 0) {
+                close(m_fd);
+                m_fd = -1;
+                free(cpuid);
+                return false;
+            }
+            free(cpuid);
+        }
+    }
+
     return true;
 
 }

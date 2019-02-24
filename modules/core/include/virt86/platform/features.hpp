@@ -27,6 +27,9 @@ SOFTWARE.
 
 #include "virt86/util/bitmask_enum.hpp"
 #include "virt86/vp/exception.hpp"
+#include "virt86/vp/cpuid.hpp"
+
+#include <vector>
 
 namespace virt86 {
 
@@ -202,6 +205,12 @@ struct PlatformFeatures {
      * Hypervisor allows custom CPUID results to be configured.
      */
     bool customCPUIDs = false;
+
+    /**
+     * Supported CPUID codes and their default responses. Only valid if custom
+     * CPUIDs are supported.
+     */
+    std::vector<CPUIDResult> supportedCustomCPUIDs;
 };
 
 }

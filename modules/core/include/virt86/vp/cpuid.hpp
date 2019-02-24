@@ -32,6 +32,15 @@ namespace virt86 {
 struct CPUIDResult {
     uint32_t function;
     uint32_t eax, ebx, ecx, edx;
+
+    CPUIDResult() = default;
+    CPUIDResult(uint32_t function, uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx)
+        : function(function)
+        , eax(eax)
+        , ebx(ebx)
+        , ecx(ecx)
+        , edx(edx)
+    {}
 };
 
 }

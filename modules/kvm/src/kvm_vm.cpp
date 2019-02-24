@@ -25,6 +25,7 @@ SOFTWARE.
 */
 #include "kvm_vm.hpp"
 #include "kvm_vp.hpp"
+#include "kvm_helpers.hpp"
 
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -71,32 +72,6 @@ bool KvmVirtualMachine::Initialize() {
         close(m_fd);
         m_fd = -1;
         return false;
-    }
-
-
-    // Configure the custom CPUIDs if supported
-    if (m_platform.GetFeatures().customCPUIDs && !m_specifications.CPUIDResults.empty()) {
-        size_t count = m_specifications.CPUIDResults.size();
-        auto cpuid = (kvm_cpuid2 *)malloc(sizeof(kvm_cpuid2) + count * sizeof(kvm_cpuid_entry2));
-        cpuid->nent = static_cast<__u32>(count);
-        for (size_t i = 0; i < count; i++) {
-            auto& entry = m_specifications.CPUIDResults[i];
-            cpuid->entries[i].function = entry.function;
-            cpuid->entries[i].index = static_cast<__u32>(i);
-            cpuid->entries[i].flags = 0;
-            cpuid->entries[i].eax = entry.eax;
-            cpuid->entries[i].ebx = entry.ebx;
-            cpuid->entries[i].ecx = entry.ecx;
-            cpuid->entries[i].edx = entry.edx;
-        }
-
-        if (ioctl(m_fd, KVM_SET_CPUID2, cpuid) < 0) {
-            close(m_fd);
-            m_fd = -1;
-            free(cpuid);
-            return false;
-        }
-        free(cpuid);
     }
 
     // Create virtual processors

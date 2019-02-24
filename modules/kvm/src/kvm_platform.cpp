@@ -25,6 +25,7 @@ SOFTWARE.
 */
 #include "virt86/kvm/kvm_platform.hpp"
 #include "kvm_vm.hpp"
+#include "kvm_helpers.hpp"
 
 #include <fcntl.h>
 #include <linux/kvm.h>
@@ -103,7 +104,48 @@ KvmPlatform::KvmPlatform()
     m_features.extendedControlRegisters = ExtendedControlRegister::CR8 | ExtendedControlRegister::XCR0;
     m_features.extendedVMExits = ExtendedVMExit::Exception;
     m_features.exceptionExits = ExceptionCode::All;
-    m_features.customCPUIDs = false;// TODO: ioctl(m_fd, KVM_CHECK_EXTENSION, KVM_CAP_EXT_CPUID) != 0;
+    m_features.customCPUIDs = ioctl(m_fd, KVM_CHECK_EXTENSION, KVM_CAP_EXT_CPUID) != 0;
+
+    // Get list of supported CPUIDs
+    if (m_features.customCPUIDs) {
+        // Start with a reasonably large starting value.
+        // If the ioctl fails, check the error code:
+        // - E2BIG indicates that the array is too small
+        // - ENOMEM indicates that the array is too large; nent is adjusted to
+        //   the correct size
+        uint32_t count = 40;
+        do {
+            auto cpuid2 = allocVarEntry<kvm_cpuid2, kvm_cpuid_entry2>(count);
+            cpuid2->nent = count;
+            if (ioctl(m_fd, KVM_GET_SUPPORTED_CPUID, cpuid2) < 0) {
+                if (errno == E2BIG) {
+                    // Array is too small
+                    // Double its size and retry
+                    count *= 2;
+                    free(cpuid2);
+                    continue;
+                }
+                if (errno == ENOMEM) {
+                    // Array is too large
+                    count = cpuid2->nent;
+                    free(cpuid2);
+                    continue;
+                }
+                // Another error occurred, fail initialization
+                free(cpuid2);
+                m_initStatus = PlatformInitStatus::Failed;
+                return;
+            }
+
+            // If we get to this point, the ioctl succeeded
+            for (size_t i = 0; i < cpuid2->nent; i++) {
+                auto &entry = cpuid2->entries[i];
+                m_features.supportedCustomCPUIDs.emplace_back(entry.function, entry.eax, entry.ebx, entry.ecx, entry.edx);
+            }
+            free(cpuid2);
+            break;
+        } while (true);
+    }
 }
 
 KvmPlatform::~KvmPlatform() {

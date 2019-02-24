@@ -44,4 +44,16 @@ void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRe
 bool LoadXMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
 bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
 
+/**
+ * Allocates memory for an object of type T that contains a variable-length
+ * array of entries with type E.
+ */
+template<class T, class E>
+T *allocVarEntry(size_t numEntries) {
+    size_t sz = sizeof(T) + numEntries * sizeof(E);
+    auto mem = (T *)malloc(sz);
+    memset(mem, 0, sz);
+    return mem;
+}
+
 }
