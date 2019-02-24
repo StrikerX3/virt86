@@ -208,7 +208,7 @@ struct PlatformFeatures {
 
     /**
      * Supported CPUID codes and their default responses. Only valid if custom
-     * CPUIDs are supported.
+     * CPUIDs are supported. Not all platforms fill this list.
      */
     std::vector<CPUIDResult> supportedCustomCPUIDs;
 };
