@@ -63,7 +63,13 @@ after_test:
        [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir, $zipfilename, $compressionLevel, $false)
     }
     $binPath = "$($env:VIRT86_ARTIFACT_PATH)"
-    $zipName = "virt86-$($env:APPVEYOR_BUILD_VERSION)-MSVC-$($env:PLATFORM)-$($env:CONFIGURATION).zip"
+    if ($($env:APPVEYOR_REPO_TAG) -eq "true") {
+        $tagName = $env:APPVEYOR_REPO_TAG_NAME
+        $tagName = $tagName.Remove(0, 1)
+        $zipName = "virt86-$($tagName)-MSVC-$($env:PLATFORM)-$($env:CONFIGURATION).zip"
+    } else {
+        $zipName = "virt86-$($env:APPVEYOR_BUILD_VERSION)-MSVC-$($env:PLATFORM)-$($env:CONFIGURATION).zip"
+    }
     $zipFullPath = "$($binPath)$($zipName)"
     ZipFiles "$($zipFullPath)" "$($binPath)" | Out-Null
     Push-AppveyorArtifact "$($zipFullPath)" -FileName $zipName
