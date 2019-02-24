@@ -87,7 +87,6 @@ enum class FloatingPointExtension {
      */
     EVEX = (1 << 5),
 };
-ENABLE_BITMASK_OPERATORS(FloatingPointExtension)
 
 /**
  * Extended control registers exposed by the hypervisor.
@@ -99,7 +98,6 @@ enum class ExtendedControlRegister {
     CR8 = (1 << 1),
     MXCSRMask = (1 << 2),
 };
-ENABLE_BITMASK_OPERATORS(ExtendedControlRegister)
 
 /**
  * Additional VM exit reasons supported by the hypervisor.
@@ -111,7 +109,6 @@ enum class ExtendedVMExit {
     MSRAccess = (1 << 1),     // Supports VM exit on MSR access
     Exception = (1 << 2),     // Supports VM exit on CPU exception
 };
-ENABLE_BITMASK_OPERATORS(ExtendedVMExit)
 
 /**
  * Specifies the features supported by a virtualization platform.
@@ -214,3 +211,7 @@ struct PlatformFeatures {
 };
 
 }
+
+ENABLE_BITMASK_OPERATORS(virt86::FloatingPointExtension)
+ENABLE_BITMASK_OPERATORS(virt86::ExtendedControlRegister)
+ENABLE_BITMASK_OPERATORS(virt86::ExtendedVMExit)

@@ -39,7 +39,6 @@ enum class MemoryFlags : uint32_t {
     Execute = (1 << 2),
     DirtyPageTracking = (1 << 3),
 };
-ENABLE_BITMASK_OPERATORS(MemoryFlags)
 
 struct MemoryRegion {
     uint64_t baseAddress = 0;
@@ -56,3 +55,5 @@ struct MemoryRegion {
 };
 
 }
+
+ENABLE_BITMASK_OPERATORS(virt86::MemoryFlags)

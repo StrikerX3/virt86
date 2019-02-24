@@ -77,8 +77,6 @@ SOFTWARE.
 
 #include <type_traits>
 
-namespace virt86 {
-
 #define ENABLE_BITMASK_OPERATORS(x)  \
 template<>                           \
 struct is_bitmask_enum<x> {   \
@@ -227,5 +225,3 @@ struct BitmaskEnum {
         return (value & ~mask) == none;
     }
 };
-
-}

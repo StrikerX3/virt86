@@ -54,6 +54,7 @@ enum class ExceptionCode : uint64_t {
 
     All = (1 << 20) - 1,
 };
-ENABLE_BITMASK_OPERATORS(ExceptionCode)
 
 }
+
+ENABLE_BITMASK_OPERATORS(virt86::ExceptionCode)
