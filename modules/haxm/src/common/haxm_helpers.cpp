@@ -63,22 +63,22 @@ void StoreSTRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) n
 }
 
 void LoadMMRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) noexcept {
-    value.mm.i64[0] = *reinterpret_cast<const uint64_t *>(&fpuRegs.st_mm[index][0]);
+    value.mm.i64[0] = *reinterpret_cast<const int64_t *>(&fpuRegs.st_mm[index][0]);
 }
 
 void StoreMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) noexcept {
-    *reinterpret_cast<uint64_t *>(&fpuRegs.st_mm[index][0]) = value.mm.i64[0];
+    *reinterpret_cast<int64_t *>(&fpuRegs.st_mm[index][0]) = value.mm.i64[0];
 }
 
 bool LoadXMMRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) noexcept {
     if (index < 8) {
-        value.xmm.i64[0] = *reinterpret_cast<const uint64_t *>(&fpuRegs.mmx_1[index][0]);
-        value.xmm.i64[1] = *reinterpret_cast<const uint64_t *>(&fpuRegs.mmx_1[index][8]);
+        value.xmm.i64[0] = *reinterpret_cast<const int64_t *>(&fpuRegs.mmx_1[index][0]);
+        value.xmm.i64[1] = *reinterpret_cast<const int64_t *>(&fpuRegs.mmx_1[index][8]);
         return true;
     }
     if (index < 16) {
-        value.xmm.i64[0] = *reinterpret_cast<const uint64_t *>(&fpuRegs.mmx_2[index - 8][0]);
-        value.xmm.i64[1] = *reinterpret_cast<const uint64_t *>(&fpuRegs.mmx_2[index - 8][8]);
+        value.xmm.i64[0] = *reinterpret_cast<const int64_t *>(&fpuRegs.mmx_2[index - 8][0]);
+        value.xmm.i64[1] = *reinterpret_cast<const int64_t *>(&fpuRegs.mmx_2[index - 8][8]);
         return true;
     }
     return false;
@@ -86,13 +86,13 @@ bool LoadXMMRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) n
 
 bool StoreXMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) noexcept {
     if (index < 8) {
-        *reinterpret_cast<uint64_t *>(&fpuRegs.mmx_1[index][0]) = value.xmm.i64[0];
-        *reinterpret_cast<uint64_t *>(&fpuRegs.mmx_1[index][8]) = value.xmm.i64[1];
+        *reinterpret_cast<int64_t *>(&fpuRegs.mmx_1[index][0]) = value.xmm.i64[0];
+        *reinterpret_cast<int64_t *>(&fpuRegs.mmx_1[index][8]) = value.xmm.i64[1];
         return true;
     }
     if (index < 16) {
-        *reinterpret_cast<uint64_t *>(&fpuRegs.mmx_2[index - 8][0]) = value.xmm.i64[0];
-        *reinterpret_cast<uint64_t *>(&fpuRegs.mmx_2[index - 8][8]) = value.xmm.i64[1];
+        *reinterpret_cast<int64_t *>(&fpuRegs.mmx_2[index - 8][0]) = value.xmm.i64[0];
+        *reinterpret_cast<int64_t *>(&fpuRegs.mmx_2[index - 8][8]) = value.xmm.i64[1];
         return true;
     }
     return false;
