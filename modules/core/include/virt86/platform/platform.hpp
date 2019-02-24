@@ -59,10 +59,11 @@ namespace virt86 {
  * Indicates the platform initialization status.
  */
 enum class PlatformInitStatus {
-    OK,           // Platform initialized successfully
-    Unavailable,  // Platform is unavailable
-    Unsupported,  // Platform is unsupported on the host
-    Failed,       // Initialization failed for another reason
+    OK,             // Platform initialized successfully
+    Uninitialized,  // Platform is uninitialized
+    Unavailable,    // Platform is unavailable
+    Unsupported,    // Platform is unsupported on the host
+    Failed,         // Initialization failed for another reason
 };
 
 /**
@@ -95,12 +96,12 @@ public:
     /**
      * Retrieves the platform's initialization status.
      */
-    const PlatformInitStatus GetInitStatus() const { return m_initStatus; }
+    const PlatformInitStatus GetInitStatus() const noexcept { return m_initStatus; }
 
     /**
      * Retrieves the platform's features available and enabled on the host.
      */
-    const PlatformFeatures& GetFeatures() const { return m_features; }
+    const PlatformFeatures& GetFeatures() const noexcept { return m_features; }
 
     /**
      * Creates a new virtual machine with the specified parameters.
@@ -118,7 +119,7 @@ public:
     const bool FreeVM(VirtualMachine& vm);
 
 protected:
-    Platform(const char *name);
+    Platform(const char *name) noexcept;
 
     /**
      * Destroys all virtual machines created with the platform.
@@ -126,18 +127,18 @@ protected:
      * This method is meant to be used in destructors to ensure resources are
      * released in the proper order.
      */
-    void DestroyVMs();
+    void DestroyVMs() noexcept;
 
     /**
      * Instantiates and initializes a virtual machine from the given
      * specifications.
      */
-    virtual VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) = 0;
+    virtual std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) = 0;
 
     /**
      * The platform's name.
      */
-    std::string m_name;
+    const char *m_name;
 
     /**
      * The platform's initialization status.

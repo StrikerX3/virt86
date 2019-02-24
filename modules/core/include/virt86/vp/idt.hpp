@@ -51,10 +51,10 @@ struct IDTEntry {
 		uint64_t descriptor;
 	};
 
-	void Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes);
+	void Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) noexcept;
 
-	uint32_t GetOffset();
-	void SetOffset(uint32_t offset);
+	uint32_t GetOffset() noexcept;
+	void SetOffset(uint32_t offset) noexcept;
 };
 
 }

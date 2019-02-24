@@ -36,9 +36,9 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name);
-RegValue TranslateRegisterValue(const Reg reg, WHV_REGISTER_VALUE& value);
-void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_VALUE& output);
-bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg);
+VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) noexcept;
+RegValue TranslateRegisterValue(const Reg reg, const WHV_REGISTER_VALUE& value) noexcept;
+void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_VALUE& output) noexcept;
+bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) noexcept;
 
 }

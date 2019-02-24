@@ -29,20 +29,20 @@ SOFTWARE.
 
 namespace virt86::kvm {
 
-void LoadSegment(RegValue& value, struct kvm_segment *segment);
-void StoreSegment(const RegValue& value, struct kvm_segment *segment);
+void LoadSegment(RegValue& value, const struct kvm_segment *segment) noexcept;
+void StoreSegment(const RegValue& value, struct kvm_segment *segment) noexcept;
 
-void LoadTable(RegValue& value, struct kvm_dtable *table);
-void StoreTable(const RegValue& value, struct kvm_dtable *table);
+void LoadTable(RegValue& value, const struct kvm_dtable *table) noexcept;
+void StoreTable(const RegValue& value, struct kvm_dtable *table) noexcept;
     
-void LoadSTRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
-void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
+void LoadSTRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept;
+void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept;
 
-void LoadMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
-void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
+void LoadMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept;
+void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept;
 
-bool LoadXMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
-bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs);
+bool LoadXMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept;
+bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept;
 
 /**
  * Allocates memory for an object of type T that contains a variable-length

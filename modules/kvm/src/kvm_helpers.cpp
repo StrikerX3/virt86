@@ -31,7 +31,7 @@ SOFTWARE.
 
 namespace virt86::kvm {
 
-void LoadSegment(RegValue& value, struct kvm_segment *segment) {
+void LoadSegment(RegValue& value, const struct kvm_segment *segment) noexcept {
     value.segment.selector = segment->selector;
     value.segment.base = segment->base;
     value.segment.limit = segment->limit;
@@ -45,7 +45,7 @@ void LoadSegment(RegValue& value, struct kvm_segment *segment) {
     value.segment.attributes.available = segment->avl;
 }
 
-void StoreSegment(const RegValue& value, struct kvm_segment *segment) {
+void StoreSegment(const RegValue& value, struct kvm_segment *segment) noexcept {
     segment->selector = value.segment.selector;
     segment->base = value.segment.base;
     segment->limit = value.segment.limit;
@@ -59,35 +59,35 @@ void StoreSegment(const RegValue& value, struct kvm_segment *segment) {
     segment->avl = value.segment.attributes.available;
 }
 
-void LoadTable(RegValue& value, struct kvm_dtable *table) {
+void LoadTable(RegValue& value, const struct kvm_dtable *table) noexcept {
     value.table.base = table->base;
     value.table.limit = table->limit;
 }
 
-void StoreTable(const RegValue& value, struct kvm_dtable *table) {
+void StoreTable(const RegValue& value, struct kvm_dtable *table) noexcept {
     table->base = value.table.base;
     table->limit = value.table.limit;
 }
 
-void LoadSTRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+void LoadSTRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
     value.st.significand = *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]);
     value.st.exponentSign = *reinterpret_cast<uint16_t *>(&fpuRegs.fpr[index][8]);
 }
 
-void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
     *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]) = value.st.significand;
     *reinterpret_cast<uint16_t *>(&fpuRegs.fpr[index][8]) = value.st.exponentSign;
 }
 
-void LoadMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+void LoadMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
     value.mm.i64[0] = *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]);
 }
 
-void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
     *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]) = value.mm.i64[0];
 }
 
-bool LoadXMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+bool LoadXMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
     if (index < 16) {
         value.xmm.i64[0] = *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][0]);
         value.xmm.i64[1] = *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][8]);
@@ -96,7 +96,7 @@ bool LoadXMMRegister(RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
     return false;
 }
 
-bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) {
+bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
     if (index < 16) {
         *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][0]) = value.xmm.i64[0];
         *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][8]) = value.xmm.i64[1];

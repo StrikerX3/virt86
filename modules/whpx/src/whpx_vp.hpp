@@ -38,63 +38,74 @@ class WhpxVirtualMachine;
 
 class WhpxVirtualProcessor : public VirtualProcessor {
 public:
-    VPExecutionStatus RunImpl() override;
+    WhpxVirtualProcessor(WhpxVirtualMachine& vm, const WhpxDispatch& dispatch, uint32_t id);
+    ~WhpxVirtualProcessor() noexcept final;
 
-    bool PrepareInterrupt(uint8_t vector) override;
-    VPOperationStatus InjectInterrupt(uint8_t vector) override;
-    bool CanInjectInterrupt() const override;
-    void RequestInterruptWindow() override;
+    // Prevent copy construction and copy assignment
+    WhpxVirtualProcessor(const WhpxVirtualProcessor&) = delete;
+    WhpxVirtualProcessor& operator=(const WhpxVirtualProcessor&) = delete;
 
-    VPOperationStatus RegRead(const Reg reg, RegValue& value) override;
-    VPOperationStatus RegWrite(const Reg reg, const RegValue& value) override;
-    VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs) override;
-    VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) override;
+    // Prevent move construction and move assignment
+    WhpxVirtualProcessor(WhpxVirtualProcessor&&) = delete;
+    WhpxVirtualProcessor&& operator=(WhpxVirtualProcessor&&) = delete;
 
-    VPOperationStatus GetFPUControl(FPUControl& value) override;
-    VPOperationStatus SetFPUControl(const FPUControl& value) override;
+    // Disallow taking the address
+    WhpxVirtualProcessor *operator&() = delete;
 
-    VPOperationStatus GetMXCSR(MXCSR& value) override;
-    VPOperationStatus SetMXCSR(const MXCSR& value) override;
+    VPExecutionStatus RunImpl() noexcept override;
 
-    VPOperationStatus GetMXCSRMask(MXCSR& value) override;
-    VPOperationStatus SetMXCSRMask(const MXCSR& value) override;
+    bool PrepareInterrupt(uint8_t vector) noexcept override;
+    VPOperationStatus InjectInterrupt(uint8_t vector) noexcept override;
+    bool CanInjectInterrupt() const noexcept override;
+    void RequestInterruptWindow() noexcept override;
 
-    VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) override;
-    VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) override;
-    VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) override;
-    VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) override;
+    VPOperationStatus RegRead(const Reg reg, RegValue& value) noexcept override;
+    VPOperationStatus RegWrite(const Reg reg, const RegValue& value) noexcept override;
+    VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept override;
+    VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept override;
 
-protected:
-    WhpxVirtualProcessor(WhpxVirtualMachine& vm, uint32_t id);
-    ~WhpxVirtualProcessor() override;
+    VPOperationStatus GetFPUControl(FPUControl& value) noexcept override;
+    VPOperationStatus SetFPUControl(const FPUControl& value) noexcept override;
+
+    VPOperationStatus GetMXCSR(MXCSR& value) noexcept override;
+    VPOperationStatus SetMXCSR(const MXCSR& value) noexcept override;
+
+    VPOperationStatus GetMXCSRMask(MXCSR& value) noexcept override;
+    VPOperationStatus SetMXCSRMask(const MXCSR& value) noexcept override;
+
+    VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) noexcept override;
+    VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) noexcept override;
+    VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept override;
+    VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept override;
 
 private:
     WhpxVirtualMachine& m_vm;
+    const WhpxDispatch& m_dispatch;
 
     uint32_t m_id;
     WHV_EMULATOR_HANDLE m_emuHandle;
     WHV_RUN_VP_EXIT_CONTEXT m_exitContext;
 
-    static HRESULT WINAPI GetVirtualProcessorRegistersCallback(VOID* Context, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, WHV_REGISTER_VALUE* RegisterValues);
-    static HRESULT WINAPI SetVirtualProcessorRegistersCallback(VOID* Context, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues);
-    static HRESULT WINAPI TranslateGvaPageCallback(VOID* Context, WHV_GUEST_VIRTUAL_ADDRESS Gva, WHV_TRANSLATE_GVA_FLAGS TranslateFlags, WHV_TRANSLATE_GVA_RESULT_CODE* TranslationResult, WHV_GUEST_PHYSICAL_ADDRESS* Gpa);
-    static HRESULT WINAPI IoPortCallback(VOID* Context, WHV_EMULATOR_IO_ACCESS_INFO* IoAccess);
-    static HRESULT WINAPI MemoryCallback(VOID* Context, WHV_EMULATOR_MEMORY_ACCESS_INFO* MemoryAccess);
+    static HRESULT WINAPI GetVirtualProcessorRegistersCallback(VOID* Context, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, WHV_REGISTER_VALUE* RegisterValues) noexcept;
+    static HRESULT WINAPI SetVirtualProcessorRegistersCallback(VOID* Context, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues) noexcept;
+    static HRESULT WINAPI TranslateGvaPageCallback(VOID* Context, WHV_GUEST_VIRTUAL_ADDRESS Gva, WHV_TRANSLATE_GVA_FLAGS TranslateFlags, WHV_TRANSLATE_GVA_RESULT_CODE* TranslationResult, WHV_GUEST_PHYSICAL_ADDRESS* Gpa) noexcept;
+    static HRESULT WINAPI IoPortCallback(VOID* Context, WHV_EMULATOR_IO_ACCESS_INFO* IoAccess) noexcept;
+    static HRESULT WINAPI MemoryCallback(VOID* Context, WHV_EMULATOR_MEMORY_ACCESS_INFO* MemoryAccess) noexcept;
 
-    HRESULT HandleIO(WHV_EMULATOR_IO_ACCESS_INFO *IoAccess);
-    HRESULT HandleMMIO(WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess);
+    HRESULT HandleIO(WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) noexcept;
+    HRESULT HandleMMIO(WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess) noexcept;
 
-    bool Initialize();
+    bool Initialize() noexcept;
 
     // Allow WhpxVirtualMachine to access the constructor and Initialize()
     friend class WhpxVirtualMachine;
 
     // ----- Helper methods ---------------------------------------------------
 
-    VPExecutionStatus HandleIO();
-    VPExecutionStatus HandleMMIO();
-    void HandleMSRAccess();
-    void HandleCPUIDAccess();
+    VPExecutionStatus HandleIO() noexcept;
+    VPExecutionStatus HandleMMIO() noexcept;
+    void HandleMSRAccess() noexcept;
+    void HandleCPUIDAccess() noexcept;
 };
 
 }

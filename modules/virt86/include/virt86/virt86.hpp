@@ -61,19 +61,19 @@ using PlatformFactory = Platform& (*)();
 
 inline PlatformFactory PlatformFactories[] = {
 #if defined(VIRT86_HAXM_AVAILABLE)
-    []() -> Platform& { return haxm::HaxmPlatform::Instance(); },
+    []() noexcept -> Platform& { return haxm::HaxmPlatform::Instance(); },
 #endif
 
 #if defined(VIRT86_WHPX_AVAILABLE)
-    []() -> Platform& { return whpx::WhpxPlatform::Instance(); },
+    []() noexcept -> Platform& { return whpx::WhpxPlatform::Instance(); },
 #endif
 
 #if defined(VIRT86_KVM_AVAILABLE)
-    []() -> Platform& { return kvm::KvmPlatform::Instance(); },
+    []() noexcept -> Platform& { return kvm::KvmPlatform::Instance(); },
 #endif
 
 #if defined(VIRT86_HVF_AVAILABLE)
-    []() -> Platform& { return hvf::HvFPlatform::Instance(); },
+    []() noexcept -> Platform& { return hvf::HvFPlatform::Instance(); },
 #endif
 };
 

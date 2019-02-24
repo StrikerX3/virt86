@@ -36,15 +36,26 @@ namespace virt86::kvm {
 
 class KvmPlatform : public Platform {
 public:
-    static KvmPlatform& Instance();
+    ~KvmPlatform() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    KvmPlatform(const KvmPlatform&) = delete;
+    KvmPlatform& operator=(const KvmPlatform&) = delete;
+
+    // Prevent move construction and move assignment
+    KvmPlatform(KvmPlatform&&) = delete;
+    KvmPlatform&& operator=(KvmPlatform&&) = delete;
+
+    // Disallow taking the address
+    KvmPlatform *operator&() = delete;
+    static KvmPlatform& Instance() noexcept;
 
 protected:
-    KvmPlatform();
-    virtual ~KvmPlatform() override;
-
-    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
+    std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) override;
 
 private:
+    KvmPlatform() noexcept;
+   
     int m_fd;
 };
 

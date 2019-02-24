@@ -38,26 +38,37 @@ namespace virt86::haxm {
 
 class HaxmVirtualProcessorSysImpl {
 public:
-    HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys);
-    ~HaxmVirtualProcessorSysImpl();
+    HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys) noexcept;
+    ~HaxmVirtualProcessorSysImpl() noexcept;
 
-    bool Initialize(uint32_t vcpuID, hax_tunnel **out_tunnel, void **out_ioTunnel);
-    void Destroy();
+    // Prevent copy construction and copy assignment
+    HaxmVirtualProcessorSysImpl(const HaxmVirtualProcessorSysImpl&) = delete;
+    HaxmVirtualProcessorSysImpl& operator=(const HaxmVirtualProcessorSysImpl&) = delete;
 
-    bool Run();
+    // Prevent move construction and move assignment
+    HaxmVirtualProcessorSysImpl(HaxmVirtualProcessorSysImpl&&) = delete;
+    HaxmVirtualProcessorSysImpl&& operator=(HaxmVirtualProcessorSysImpl&&) = delete;
+
+    // Disallow taking the address
+    HaxmVirtualProcessorSysImpl *operator&() = delete;
+
+    bool Initialize(uint32_t vcpuID, hax_tunnel **out_tunnel, void **out_ioTunnel) noexcept;
+    void Destroy() noexcept;
+
+    bool Run() noexcept;
     
-    bool InjectInterrupt(uint8_t vector);
+    bool InjectInterrupt(uint8_t vector) noexcept;
 
-    bool GetRegisters(vcpu_state_t *registers);
-    bool SetRegisters(vcpu_state_t *registers);
+    bool GetRegisters(vcpu_state_t *registers) noexcept;
+    bool SetRegisters(vcpu_state_t *registers) noexcept;
 
-    bool GetFPURegisters(fx_layout *registers);
-    bool SetFPURegisters(fx_layout *registers);
+    bool GetFPURegisters(fx_layout *registers) noexcept;
+    bool SetFPURegisters(fx_layout *registers) noexcept;
 
-    bool GetMSRData(hax_msr_data *msrData);
-    bool SetMSRData(hax_msr_data *msrData);
+    bool GetMSRData(hax_msr_data *msrData) noexcept;
+    bool SetMSRData(hax_msr_data *msrData) noexcept;
 
-    bool SetDebug(hax_debug_t *debug);
+    bool SetDebug(hax_debug_t *debug) noexcept;
 
 private:
     HaxmVirtualMachine& m_vm;

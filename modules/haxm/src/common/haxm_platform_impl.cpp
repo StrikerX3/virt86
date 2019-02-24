@@ -28,21 +28,21 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmPlatformImpl::HaxmPlatformImpl()
+HaxmPlatformImpl::HaxmPlatformImpl() noexcept
     : m_haxVer({ 0 })
     , m_haxCaps({ 0 })
     , m_sys(std::make_unique<HaxmPlatformSysImpl>())
 {
 }
 
-HaxmPlatformImpl::~HaxmPlatformImpl() {
+HaxmPlatformImpl::~HaxmPlatformImpl() noexcept {
 }
 
-PlatformInitStatus HaxmPlatformImpl::Initialize() {
+PlatformInitStatus HaxmPlatformImpl::Initialize() noexcept {
     return m_sys->Initialize(&m_haxVer, &m_haxCaps);
 }
 
-bool HaxmPlatformImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) {
+bool HaxmPlatformImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     return m_sys->SetGlobalMemoryLimit(enabled, limitMB);
 }
 

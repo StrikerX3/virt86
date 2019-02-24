@@ -36,18 +36,29 @@ namespace virt86::haxm {
 
 class HaxmVirtualMachine : public VirtualMachine {
 public:
-    const bool FastMMIOEnabled() const { return m_fastMMIO; }
-    const uint32_t ID() const { return m_vmID; }
+    HaxmVirtualMachine(HaxmPlatform& platform, const VMSpecifications& specifications, HaxmPlatformImpl& platformImpl);
+    ~HaxmVirtualMachine() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    HaxmVirtualMachine(const HaxmVirtualMachine&) = delete;
+    HaxmVirtualMachine& operator=(const HaxmVirtualMachine&) = delete;
+
+    // Prevent move construction and move assignment
+    HaxmVirtualMachine(HaxmVirtualMachine&&) = delete;
+    HaxmVirtualMachine&& operator=(HaxmVirtualMachine&&) = delete;
+
+    // Disallow taking the address
+    HaxmVirtualMachine *operator&() = delete;
+
+    const bool FastMMIOEnabled() const noexcept { return m_fastMMIO; }
+    const uint32_t ID() const noexcept { return m_vmID; }
 
 protected:
-    virtual ~HaxmVirtualMachine() override;
-
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept override;
+    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept override;
 
 private:
-    HaxmVirtualMachine(HaxmPlatform& platform, const VMSpecifications& specifications, HaxmPlatformImpl& platformImpl);
     bool Initialize();
 
     HaxmPlatform& m_platform;
@@ -57,7 +68,7 @@ private:
     bool m_fastMMIO;
     uint32_t m_vmID;
 
-    // Allow HaxmPlatform to access the constructor and Initialize()
+    // Allow HaxmPlatform to access Initialize()
     friend class HaxmPlatform;
 };
 

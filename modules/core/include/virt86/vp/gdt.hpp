@@ -69,10 +69,10 @@ struct GDTEntry {
         uint64_t descriptor;
     };
 
-    void Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
+    void Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) noexcept;
 
-    uint32_t GetBase();
-    uint32_t GetLimit();
+    uint32_t GetBase() noexcept;
+    uint32_t GetLimit() noexcept;
 };
 
 using LDTEntry = GDTEntry;

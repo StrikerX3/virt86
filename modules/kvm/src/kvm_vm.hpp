@@ -35,20 +35,31 @@ namespace virt86::kvm {
 
 class KvmVirtualMachine : public VirtualMachine {
 public:
-    const int FileDescriptor() const { return m_fd; }
-    const int KVMFileDescriptor() const { return m_fdKVM; }
+    KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM) noexcept;
+    ~KvmVirtualMachine() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    KvmVirtualMachine(const KvmVirtualMachine&) = delete;
+    KvmVirtualMachine& operator=(const KvmVirtualMachine&) = delete;
+
+    // Prevent move construction and move assignment
+    KvmVirtualMachine(KvmVirtualMachine&&) = delete;
+    KvmVirtualMachine&& operator=(KvmVirtualMachine&&) = delete;
+
+    // Disallow taking the address
+    KvmVirtualMachine *operator&() = delete;
+
+    const int FileDescriptor() const noexcept { return m_fd; }
+    const int KVMFileDescriptor() const noexcept { return m_fdKVM; }
 
 protected:
-    virtual ~KvmVirtualMachine() override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept override;
 
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
-
-    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) override;
-    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) override;
+    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept override;
+    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
 
 private:
-    KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM);
     bool Initialize();
 
     KvmPlatform& m_platform;

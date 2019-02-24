@@ -54,7 +54,7 @@ KvmVirtualProcessor::KvmVirtualProcessor(KvmVirtualMachine& vm, uint32_t vcpuID)
 {
 }
 
-KvmVirtualProcessor::~KvmVirtualProcessor() {
+KvmVirtualProcessor::~KvmVirtualProcessor() noexcept {
     if (m_fd != -1) {
         close(m_fd);
         m_fd = -1;
@@ -117,7 +117,7 @@ bool KvmVirtualProcessor::Initialize() {
 
 }
 
-VPExecutionStatus KvmVirtualProcessor::RunImpl() {
+VPExecutionStatus KvmVirtualProcessor::RunImpl() noexcept {
     if (!UpdateRegisters()) {
         return VPExecutionStatus::Failed;
     }
@@ -129,7 +129,7 @@ VPExecutionStatus KvmVirtualProcessor::RunImpl() {
     return HandleExecResult();
 }
 
-VPExecutionStatus KvmVirtualProcessor::StepImpl() {
+VPExecutionStatus KvmVirtualProcessor::StepImpl() noexcept {
     m_debug.control |= KVM_GUESTDBG_SINGLESTEP;
     if (!SetDebug()) {
         return VPExecutionStatus::Failed;
@@ -153,7 +153,7 @@ VPExecutionStatus KvmVirtualProcessor::StepImpl() {
     return result;
 }
 
-bool KvmVirtualProcessor::SetDebug() {
+bool KvmVirtualProcessor::SetDebug() noexcept {
     bool enable = (m_debug.control & ~KVM_GUESTDBG_ENABLE) != 0;
     if (enable) {
         m_debug.control |= KVM_GUESTDBG_ENABLE;
@@ -165,7 +165,7 @@ bool KvmVirtualProcessor::SetDebug() {
     return ioctl(m_fd, KVM_SET_GUEST_DEBUG, &m_debug) >= 0;
 }
 
-bool KvmVirtualProcessor::UpdateRegisters() {
+bool KvmVirtualProcessor::UpdateRegisters() noexcept {
     // Update CPU state if registers were modified
     if (m_regsChanged) {
         if (ioctl(m_fd, KVM_SET_REGS, &m_regs) < 0) {
@@ -194,7 +194,7 @@ bool KvmVirtualProcessor::UpdateRegisters() {
     return true;
 }
 
-bool KvmVirtualProcessor::RefreshRegisters() {
+bool KvmVirtualProcessor::RefreshRegisters() noexcept {
     // Retrieve registers from CPU state
     if (m_regsDirty) {
         if (ioctl(m_fd, KVM_GET_REGS, &m_regs) < 0) {
@@ -214,7 +214,7 @@ bool KvmVirtualProcessor::RefreshRegisters() {
     return true;
 }
 
-VPExecutionStatus KvmVirtualProcessor::HandleExecResult() {
+VPExecutionStatus KvmVirtualProcessor::HandleExecResult() noexcept {
     // Mark registers as dirty
     m_regsDirty = true;
 
@@ -245,12 +245,12 @@ VPExecutionStatus KvmVirtualProcessor::HandleExecResult() {
     return VPExecutionStatus::OK;
 }
 
-void KvmVirtualProcessor::HandleException() {
+void KvmVirtualProcessor::HandleException() noexcept {
     m_exitInfo.reason = VMExitReason::Exception;
     m_exitInfo.exceptionCode = m_kvmRun->ex.exception;
 }
 
-void KvmVirtualProcessor::HandleIO() {
+void KvmVirtualProcessor::HandleIO() noexcept {
     m_exitInfo.reason = VMExitReason::PIO;
 
     uint8_t *ptr = reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(m_kvmRun) + m_kvmRun->io.data_offset);
@@ -280,7 +280,7 @@ void KvmVirtualProcessor::HandleIO() {
     }
 }
 
-void KvmVirtualProcessor::HandleMMIO() {
+void KvmVirtualProcessor::HandleMMIO() noexcept {
     m_exitInfo.reason = VMExitReason::MMIO;
 
     if (m_kvmRun->mmio.is_write) {
@@ -297,11 +297,11 @@ void KvmVirtualProcessor::HandleMMIO() {
     }
 }
 
-bool KvmVirtualProcessor::PrepareInterrupt(uint8_t vector) {
+bool KvmVirtualProcessor::PrepareInterrupt(uint8_t vector) noexcept {
     return true;
 }
 
-VPOperationStatus KvmVirtualProcessor::InjectInterrupt(uint8_t vector) {
+VPOperationStatus KvmVirtualProcessor::InjectInterrupt(uint8_t vector) noexcept {
     struct kvm_interrupt kvmInterrupt;
     kvmInterrupt.irq = (uint32_t)vector;
     if (ioctl(m_fd, KVM_INTERRUPT, &kvmInterrupt) < 0) {
@@ -311,34 +311,34 @@ VPOperationStatus KvmVirtualProcessor::InjectInterrupt(uint8_t vector) {
     return VPOperationStatus::OK;
 }
 
-bool KvmVirtualProcessor::CanInjectInterrupt() const {
+bool KvmVirtualProcessor::CanInjectInterrupt() const noexcept {
     return m_kvmRun->ready_for_interrupt_injection != 0;
 }
 
-void KvmVirtualProcessor::RequestInterruptWindow() {
+void KvmVirtualProcessor::RequestInterruptWindow() noexcept {
     m_kvmRun->request_interrupt_window = 1;
 }
 
 // ----- Registers ------------------------------------------------------------
 
 #define REFRESH_REGISTERS do { \
-    auto status = RefreshRegisters(); \
+    const auto status = RefreshRegisters(); \
     if (!status) { \
         return VPOperationStatus::Failed; \
     } \
 } while (0)
 
-VPOperationStatus KvmVirtualProcessor::RegRead(const Reg reg, RegValue& value) {
+VPOperationStatus KvmVirtualProcessor::RegRead(const Reg reg, RegValue& value) noexcept {
     REFRESH_REGISTERS;
     return KvmRegRead(reg, value);
 }
 
-VPOperationStatus KvmVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus KvmVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) noexcept {
     REFRESH_REGISTERS;
     return KvmRegWrite(reg, value);
 }
 
-VPOperationStatus KvmVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) {
+VPOperationStatus KvmVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept {
     REFRESH_REGISTERS;
 
     for (size_t i = 0; i < numRegs; i++) {
@@ -351,7 +351,7 @@ VPOperationStatus KvmVirtualProcessor::RegRead(const Reg regs[], RegValue values
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) {
+VPOperationStatus KvmVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
     REFRESH_REGISTERS;
 
     for (size_t i = 0; i < numRegs; i++) {
@@ -364,7 +364,7 @@ VPOperationStatus KvmVirtualProcessor::RegWrite(const Reg regs[], const RegValue
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::KvmRegRead(const Reg reg, RegValue& value) {
+VPOperationStatus KvmVirtualProcessor::KvmRegRead(const Reg reg, RegValue& value) noexcept {
     switch (reg) {
         case Reg::CS:   LoadSegment(value, &m_sregs.cs);  break;
         case Reg::SS:   LoadSegment(value, &m_sregs.ss);  break;
@@ -490,19 +490,19 @@ VPOperationStatus KvmVirtualProcessor::KvmRegRead(const Reg reg, RegValue& value
     return VPOperationStatus::OK;
 }
 
-inline void SetLowByte(__u64& lhs, uint8_t rhs) {
+inline void SetLowByte(__u64& lhs, uint8_t rhs) noexcept {
     lhs = (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
 }
 
-inline void SetHighByte(__u64& lhs, uint8_t rhs) {
+inline void SetHighByte(__u64& lhs, uint8_t rhs) noexcept {
     lhs = (lhs & 0xFFFFFFFF'FFFF00FF) | ((uint64_t&)rhs << 8ull);
 }
 
-inline void SetLowWord(__u64& lhs, uint16_t rhs) {
+inline void SetLowWord(__u64& lhs, uint16_t rhs) noexcept {
     lhs = (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
 }
 
-VPOperationStatus KvmVirtualProcessor::KvmRegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus KvmVirtualProcessor::KvmRegWrite(const Reg reg, const RegValue& value) noexcept {
     switch (reg) {
         case Reg::CS:   StoreSegment(value, &m_sregs.cs);  m_sregsChanged = true;  break;
         case Reg::SS:   StoreSegment(value, &m_sregs.ss);  m_sregsChanged = true;  break;
@@ -633,7 +633,7 @@ VPOperationStatus KvmVirtualProcessor::KvmRegWrite(const Reg reg, const RegValue
 
 // ----- Floating point control registers -------------------------------------
 
-VPOperationStatus KvmVirtualProcessor::GetFPUControl(FPUControl& value) {
+VPOperationStatus KvmVirtualProcessor::GetFPUControl(FPUControl& value) noexcept {
     REFRESH_REGISTERS;
 
     value.cw = m_fpuRegs.fcw;
@@ -648,7 +648,7 @@ VPOperationStatus KvmVirtualProcessor::GetFPUControl(FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetFPUControl(const FPUControl& value) {
+VPOperationStatus KvmVirtualProcessor::SetFPUControl(const FPUControl& value) noexcept {
     REFRESH_REGISTERS;
 
     m_fpuRegs.fcw = value.cw;
@@ -661,29 +661,29 @@ VPOperationStatus KvmVirtualProcessor::SetFPUControl(const FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::GetMXCSR(MXCSR& value) {
+VPOperationStatus KvmVirtualProcessor::GetMXCSR(MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     value.u32 = m_fpuRegs.mxcsr;
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetMXCSR(const MXCSR& value) {
+VPOperationStatus KvmVirtualProcessor::SetMXCSR(const MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     m_fpuRegs.mxcsr = value.u32;
     m_fpuRegsChanged = true;
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::GetMXCSRMask(MXCSR& value) {
+VPOperationStatus KvmVirtualProcessor::GetMXCSRMask(MXCSR& value) noexcept {
     return VPOperationStatus::Unsupported;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
+VPOperationStatus KvmVirtualProcessor::SetMXCSRMask(const MXCSR& value) noexcept {
     return VPOperationStatus::Unsupported;
 }
 // ----- Model specific registers ---------------------------------------------
 
-VPOperationStatus KvmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) {
+VPOperationStatus KvmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) noexcept {
     kvm_msrs *msrData = (kvm_msrs *)malloc(sizeof(kvm_msrs) + 1 * sizeof(kvm_msr_entry));
     memset(msrData, 0, sizeof(kvm_msrs) + 1 * sizeof(kvm_msr_entry));
     msrData->entries[0].index = (__u32) msr;
@@ -699,7 +699,7 @@ VPOperationStatus KvmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& valu
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) {
+VPOperationStatus KvmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) noexcept {
     kvm_msrs *msrData = (kvm_msrs *)malloc(sizeof(kvm_msrs) + 1 * sizeof(kvm_msr_entry));
     memset(msrData, 0, sizeof(kvm_msrs) + 1 * sizeof(kvm_msr_entry));
     msrData->entries[0].index = (__u32) msr;
@@ -715,7 +715,7 @@ VPOperationStatus KvmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) {
+VPOperationStatus KvmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept {
     kvm_msrs *msrData = (kvm_msrs *)malloc(sizeof(kvm_msrs) + numRegs * sizeof(kvm_msr_entry));
     memset(msrData, 0, sizeof(kvm_msrs) + numRegs * sizeof(kvm_msr_entry));
     for (size_t i = 0; i < numRegs; i++) {
@@ -735,7 +735,7 @@ VPOperationStatus KvmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t v
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) {
+VPOperationStatus KvmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept {
     kvm_msrs *msrData = (kvm_msrs *)malloc(sizeof(kvm_msrs) + numRegs * sizeof(kvm_msr_entry));
     memset(msrData, 0, sizeof(kvm_msrs) + numRegs * sizeof(kvm_msr_entry));
     for (size_t i = 0; i < numRegs; i++) {
@@ -755,7 +755,7 @@ VPOperationStatus KvmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint
 
 // ----- Breakpoints ----------------------------------------------------------
 
-VPOperationStatus KvmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
+VPOperationStatus KvmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) noexcept {
     if (enable) {
         m_debug.control |= KVM_GUESTDBG_USE_SW_BP;
     }
@@ -770,7 +770,7 @@ VPOperationStatus KvmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) {
+VPOperationStatus KvmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept {
     bool anyEnabled = false;
     for (int i = 0; i < 4; i++) {
         if (breakpoints.bp[i].localEnable || breakpoints.bp[i].globalEnable) {
@@ -798,7 +798,7 @@ VPOperationStatus KvmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoint
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::ClearHardwareBreakpoints() {
+VPOperationStatus KvmVirtualProcessor::ClearHardwareBreakpoints() noexcept {
     m_debug.control &= ~KVM_GUESTDBG_USE_HW_BP;
     memset(m_debug.arch.debugreg, 0, 8 * sizeof(uint64_t));
     if (!SetDebug()) {
@@ -808,7 +808,7 @@ VPOperationStatus KvmVirtualProcessor::ClearHardwareBreakpoints() {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus KvmVirtualProcessor::GetBreakpointAddress(uint64_t *address) const {
+VPOperationStatus KvmVirtualProcessor::GetBreakpointAddress(uint64_t *address) const noexcept {
     char hardwareBP = static_cast<char>(m_kvmRun->debug.arch.dr6 & 0xF);
 
     // No breakpoints were hit

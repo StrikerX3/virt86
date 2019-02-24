@@ -27,19 +27,19 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmPlatformSysImpl::HaxmPlatformSysImpl()
+HaxmPlatformSysImpl::HaxmPlatformSysImpl() noexcept
     : m_handle(INVALID_HANDLE_VALUE)
 {
 }
 
-HaxmPlatformSysImpl::~HaxmPlatformSysImpl() {
+HaxmPlatformSysImpl::~HaxmPlatformSysImpl() noexcept {
     if (m_handle != INVALID_HANDLE_VALUE) {
         CloseHandle(m_handle);
         m_handle = INVALID_HANDLE_VALUE;
     }
 }
 
-PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) {
+PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept {
     // Open the device
     m_handle = CreateFileW(L"\\\\.\\HAX", 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     if (m_handle == INVALID_HANDLE_VALUE) {
@@ -78,7 +78,7 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     return PlatformInitStatus::OK;
 }
 
-bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) {
+bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     DWORD returnSize;
 
     hax_set_memlimit memlimit;

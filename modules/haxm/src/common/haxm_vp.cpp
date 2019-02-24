@@ -47,14 +47,14 @@ HaxmVirtualProcessor::HaxmVirtualProcessor(HaxmVirtualMachine& vm, HaxmVirtualMa
 {
 }
 
-HaxmVirtualProcessor::~HaxmVirtualProcessor() {
+HaxmVirtualProcessor::~HaxmVirtualProcessor() noexcept {
 }
 
-bool HaxmVirtualProcessor::Initialize() {
+bool HaxmVirtualProcessor::Initialize() noexcept {
     return m_sys->Initialize(m_vcpuID, &m_tunnel, &m_ioTunnel);
 }
 
-VPExecutionStatus HaxmVirtualProcessor::RunImpl() {
+VPExecutionStatus HaxmVirtualProcessor::RunImpl() noexcept {
     UpdateRegisters();
     
     if (!m_sys->Run()) {
@@ -64,13 +64,13 @@ VPExecutionStatus HaxmVirtualProcessor::RunImpl() {
     return HandleExecResult();
 }
 
-VPExecutionStatus HaxmVirtualProcessor::StepImpl() {
+VPExecutionStatus HaxmVirtualProcessor::StepImpl() noexcept {
     m_debug.control |= HAX_DEBUG_STEP;
     if (!SetDebug()) {
         return VPExecutionStatus::Failed;
     }
 
-    auto status = RunImpl();
+    const auto status = RunImpl();
 
     m_debug.control &= ~HAX_DEBUG_STEP;
     if (!SetDebug()) {
@@ -81,15 +81,15 @@ VPExecutionStatus HaxmVirtualProcessor::StepImpl() {
         return status;
     }
 
-    auto result = HandleExecResult();
+    const auto result = HandleExecResult();
     if (m_exitInfo.reason == VMExitReason::SoftwareBreakpoint) {
         m_exitInfo.reason = VMExitReason::Step;
     }
     return result;
 }
 
-bool HaxmVirtualProcessor::SetDebug() {
-    bool enable = (m_debug.control & ~HAX_DEBUG_ENABLE) != 0;
+bool HaxmVirtualProcessor::SetDebug() noexcept {
+    const bool enable = (m_debug.control & ~HAX_DEBUG_ENABLE) != 0;
     if (enable) {
         m_debug.control |= HAX_DEBUG_ENABLE;
     }
@@ -100,7 +100,7 @@ bool HaxmVirtualProcessor::SetDebug() {
     return m_sys->SetDebug(&m_debug);
 }
 
-void HaxmVirtualProcessor::UpdateRegisters() {
+void HaxmVirtualProcessor::UpdateRegisters() noexcept {
     // Update CPU state if registers were modified
     if (m_regsChanged) {
         m_sys->SetRegisters(&m_regs);
@@ -112,7 +112,7 @@ void HaxmVirtualProcessor::UpdateRegisters() {
     }
 }
 
-bool HaxmVirtualProcessor::RefreshRegisters() {
+bool HaxmVirtualProcessor::RefreshRegisters() noexcept {
     // Retrieve registers from CPU state
     if (m_regsDirty) {
         if (!m_sys->GetRegisters(&m_regs)) {
@@ -126,7 +126,7 @@ bool HaxmVirtualProcessor::RefreshRegisters() {
     return true;
 }
 
-VPExecutionStatus HaxmVirtualProcessor::HandleExecResult() {
+VPExecutionStatus HaxmVirtualProcessor::HandleExecResult() noexcept {
     // Mark registers as dirty
     m_regsDirty = true;
 
@@ -158,15 +158,12 @@ VPExecutionStatus HaxmVirtualProcessor::HandleExecResult() {
     return VPExecutionStatus::OK;
 }
 
-void HaxmVirtualProcessor::HandleIO() {
+void HaxmVirtualProcessor::HandleIO() noexcept {
     m_exitInfo.reason = VMExitReason::PIO;
     
-    uint8_t *ptr;
+    uint8_t *ptr = static_cast<uint8_t *>(m_ioTunnel);
     if (m_tunnel->io._df) {
-        ptr = reinterpret_cast<uint8_t *>(m_ioTunnel) + m_tunnel->io._size * (m_tunnel->io._count - 1);
-    }
-    else {
-        ptr = reinterpret_cast<uint8_t *>(m_ioTunnel);
+        ptr += static_cast<uintptr_t>(m_tunnel->io._size) * (m_tunnel->io._count - 1);
     }
 
     for (uint16_t i = 0; i < m_tunnel->io._count; i++) {
@@ -199,10 +196,10 @@ void HaxmVirtualProcessor::HandleIO() {
     }
 }
 
-void HaxmVirtualProcessor::HandleFastMMIO() {
+void HaxmVirtualProcessor::HandleFastMMIO() noexcept {
     m_exitInfo.reason = VMExitReason::MMIO;
 
-    hax_fastmmio *info = reinterpret_cast<hax_fastmmio *>(m_ioTunnel);
+    hax_fastmmio *info = static_cast<hax_fastmmio *>(m_ioTunnel);
 
     if (info->direction < 2) {
         if (info->direction == HAX_IO_IN) {
@@ -217,16 +214,16 @@ void HaxmVirtualProcessor::HandleFastMMIO() {
         // info->gpa and info->gpa2 (instructions such as MOVS require this):
         //  info->direction == 2: gpa ==> gpa2
 
-        uint64_t value = m_io.MMIORead(info->gpa, info->size);
+        const uint64_t value = m_io.MMIORead(info->gpa, info->size);
         m_io.MMIOWrite(info->gpa2, info->size, value);
     }
 }
 
-bool HaxmVirtualProcessor::PrepareInterrupt(uint8_t vector) {
+bool HaxmVirtualProcessor::PrepareInterrupt(uint8_t vector) noexcept {
     return true;
 }
 
-VPOperationStatus HaxmVirtualProcessor::InjectInterrupt(uint8_t vector) {
+VPOperationStatus HaxmVirtualProcessor::InjectInterrupt(uint8_t vector) noexcept {
     if (!m_sys->InjectInterrupt(vector)) {
         return VPOperationStatus::Failed;
     }
@@ -236,42 +233,46 @@ VPOperationStatus HaxmVirtualProcessor::InjectInterrupt(uint8_t vector) {
     return VPOperationStatus::OK;
 }
 
-bool HaxmVirtualProcessor::CanInjectInterrupt() const {
+bool HaxmVirtualProcessor::CanInjectInterrupt() const noexcept {
     return m_tunnel->ready_for_interrupt_injection != 0;
 }
 
-void HaxmVirtualProcessor::RequestInterruptWindow() {
+void HaxmVirtualProcessor::RequestInterruptWindow() noexcept {
     m_tunnel->request_interrupt_window = 1;
 }
 
 // ----- Registers ------------------------------------------------------------
 
 #define REFRESH_REGISTERS do { \
-    auto status = RefreshRegisters(); \
+    const auto status = RefreshRegisters(); \
     if (!status) { \
         return VPOperationStatus::Failed; \
     } \
 } while (0)
 
-static inline uint64_t fixupFlags(uint64_t flags) {
+static inline uint64_t fixupFlags(uint64_t flags) noexcept {
     return (flags | 0x2) & ~0x8028;
 }
 
-VPOperationStatus HaxmVirtualProcessor::RegRead(const Reg reg, RegValue& value) {
+VPOperationStatus HaxmVirtualProcessor::RegRead(const Reg reg, RegValue& value) noexcept {
     REFRESH_REGISTERS;
     return HaxmRegRead(reg, value);
 }
 
-VPOperationStatus HaxmVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus HaxmVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) noexcept {
     REFRESH_REGISTERS;
     return HaxmRegWrite(reg, value);
 }
 
-VPOperationStatus HaxmVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) {
+VPOperationStatus HaxmVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     REFRESH_REGISTERS;
 
     for (size_t i = 0; i < numRegs; i++) {
-        auto result = HaxmRegRead(regs[i], values[i]);
+        const auto result = HaxmRegRead(regs[i], values[i]);
         if (result != VPOperationStatus::OK) {
             return result;
         }
@@ -280,11 +281,15 @@ VPOperationStatus HaxmVirtualProcessor::RegRead(const Reg regs[], RegValue value
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) {
+VPOperationStatus HaxmVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     REFRESH_REGISTERS;
 
     for (size_t i = 0; i < numRegs; i++) {
-        auto result = HaxmRegWrite(regs[i], values[i]);
+        const auto result = HaxmRegWrite(regs[i], values[i]);
         if (result != VPOperationStatus::OK) {
             return result;
         }
@@ -293,7 +298,7 @@ VPOperationStatus HaxmVirtualProcessor::RegWrite(const Reg regs[], const RegValu
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& value) {
+VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& value) noexcept {
     switch (reg) {
     case Reg::CS:   LoadSegment(value, &m_regs._cs);  break;
     case Reg::SS:   LoadSegment(value, &m_regs._ss);  break;
@@ -419,7 +424,7 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& val
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegValue& value) noexcept {
     switch (reg) {
     case Reg::CS:   StoreSegment(value, &m_regs._cs);  m_regsChanged = true;  break;
     case Reg::SS:   StoreSegment(value, &m_regs._ss);  m_regsChanged = true;  break;
@@ -550,7 +555,7 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
 
 // ----- Floating point control registers -------------------------------------
 
-VPOperationStatus HaxmVirtualProcessor::GetFPUControl(FPUControl& value) {
+VPOperationStatus HaxmVirtualProcessor::GetFPUControl(FPUControl& value) noexcept {
     REFRESH_REGISTERS;
 
     value.cw = m_fpuRegs.fcw;
@@ -565,7 +570,7 @@ VPOperationStatus HaxmVirtualProcessor::GetFPUControl(FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetFPUControl(const FPUControl& value) {
+VPOperationStatus HaxmVirtualProcessor::SetFPUControl(const FPUControl& value) noexcept {
     REFRESH_REGISTERS;
 
     m_fpuRegs.fcw = value.cw;
@@ -582,26 +587,26 @@ VPOperationStatus HaxmVirtualProcessor::SetFPUControl(const FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::GetMXCSR(MXCSR& value) {
+VPOperationStatus HaxmVirtualProcessor::GetMXCSR(MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     value.u32 = m_fpuRegs.mxcsr;
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetMXCSR(const MXCSR& value) {
+VPOperationStatus HaxmVirtualProcessor::SetMXCSR(const MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     m_fpuRegs.mxcsr = value.u32;
     m_fpuRegsChanged = true;
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::GetMXCSRMask(MXCSR& value) {
+VPOperationStatus HaxmVirtualProcessor::GetMXCSRMask(MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     value.u32 = m_fpuRegs.mxcsr_mask;
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
+VPOperationStatus HaxmVirtualProcessor::SetMXCSRMask(const MXCSR& value) noexcept {
     REFRESH_REGISTERS;
     m_fpuRegs.mxcsr_mask = value.u32;
     m_fpuRegsChanged = true;
@@ -609,7 +614,7 @@ VPOperationStatus HaxmVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
 }
 // ----- Model specific registers ---------------------------------------------
 
-VPOperationStatus HaxmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) {
+VPOperationStatus HaxmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) noexcept {
     hax_msr_data msrData = { 0 };
     msrData.entries[0].entry = msr;
     msrData.nr_msr = 1;
@@ -622,7 +627,7 @@ VPOperationStatus HaxmVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& val
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) {
+VPOperationStatus HaxmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) noexcept {
     hax_msr_data msrData = { 0 };
     msrData.entries[0].entry = msr;
     msrData.entries[0].value = value;
@@ -635,12 +640,16 @@ VPOperationStatus HaxmVirtualProcessor::SetMSR(const uint64_t msr, const uint64_
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) {
+VPOperationStatus HaxmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     size_t index = 0;
     while (index < numRegs) {
         hax_msr_data msrData = { 0 };
         size_t msrCount = 0;
-        size_t prevIndex = index;
+        const size_t prevIndex = index;
         for (size_t i = 0; i < numRegs && i < HAX_MAX_MSR_ARRAY; i++) {
             msrData.entries[i].entry = msrs[index];
             index++;
@@ -663,7 +672,11 @@ VPOperationStatus HaxmVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) {
+VPOperationStatus HaxmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     size_t index = 0;
     while (index < numRegs) {
         hax_msr_data msrData = { 0 };
@@ -686,7 +699,7 @@ VPOperationStatus HaxmVirtualProcessor::SetMSRs(const uint64_t msrs[], const uin
 
 // ----- Breakpoints ----------------------------------------------------------
 
-VPOperationStatus HaxmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
+VPOperationStatus HaxmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) noexcept {
     if (enable) {
         m_debug.control |= HAX_DEBUG_USE_SW_BP;
     }
@@ -701,7 +714,7 @@ VPOperationStatus HaxmVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) {
+VPOperationStatus HaxmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept {
     bool anyEnabled = false;
     for (int i = 0; i < 4; i++) {
         if (breakpoints.bp[i].localEnable || breakpoints.bp[i].globalEnable) {
@@ -716,10 +729,10 @@ VPOperationStatus HaxmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoin
     m_debug.control |= HAX_DEBUG_USE_HW_BP;
     for (int i = 0; i < 4; i++) {
         m_debug.dr[i] = breakpoints.bp[i].address;
-        m_debug.dr[7] |= (uint64_t)(breakpoints.bp[i].localEnable ? 1 : 0) << (0 + i * 2);
-        m_debug.dr[7] |= (uint64_t)(breakpoints.bp[i].globalEnable ? 1 : 0) << (1 + i * 2);
-        m_debug.dr[7] |= (uint64_t)(static_cast<uint8_t>(breakpoints.bp[i].trigger) & 0x3) << (16 + i * 4);
-        m_debug.dr[7] |= (uint64_t)(static_cast<uint8_t>(breakpoints.bp[i].length) & 0x3) << (18 + i * 4);
+        m_debug.dr[7] |= static_cast<uint64_t>(breakpoints.bp[i].localEnable ? 1 : 0) << (0 + i * 2);
+        m_debug.dr[7] |= static_cast<uint64_t>(breakpoints.bp[i].globalEnable ? 1 : 0) << (1 + i * 2);
+        m_debug.dr[7] |= static_cast<uint64_t>(static_cast<uint8_t>(breakpoints.bp[i].trigger) & 0x3) << (16 + i * 4);
+        m_debug.dr[7] |= static_cast<uint64_t>(static_cast<uint8_t>(breakpoints.bp[i].length) & 0x3) << (18 + i * 4);
     }
 
     if (!SetDebug()) {
@@ -729,7 +742,7 @@ VPOperationStatus HaxmVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoin
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::ClearHardwareBreakpoints() {
+VPOperationStatus HaxmVirtualProcessor::ClearHardwareBreakpoints() noexcept {
     m_debug.control &= ~HAX_DEBUG_USE_HW_BP;
     memset(m_debug.dr, 0, 8 * sizeof(uint64_t));
     if (!SetDebug()) {
@@ -739,9 +752,13 @@ VPOperationStatus HaxmVirtualProcessor::ClearHardwareBreakpoints() {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus HaxmVirtualProcessor::GetBreakpointAddress(uint64_t *address) const {
+VPOperationStatus HaxmVirtualProcessor::GetBreakpointAddress(uint64_t *address) const noexcept {
+    if (address == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     auto debugTunnel = &m_tunnel->debug;
-    char hardwareBP = static_cast<char>(debugTunnel->dr6 & 0xF);
+    const uint8_t hardwareBP = static_cast<uint8_t>(debugTunnel->dr6 & 0xF);
 
     // No breakpoints were hit
     if (hardwareBP == 0 && debugTunnel->rip == 0) {

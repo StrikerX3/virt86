@@ -28,7 +28,7 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys)
+HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys) noexcept
     : m_vm(vm)
     , m_vmSys(vmSys)
     , m_hVM(vmSys.Handle())
@@ -36,11 +36,15 @@ HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm,
 {
 }
 
-HaxmVirtualProcessorSysImpl::~HaxmVirtualProcessorSysImpl() {
+HaxmVirtualProcessorSysImpl::~HaxmVirtualProcessorSysImpl() noexcept {
     Destroy();
 }
 
-bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_tunnel, void** out_ioTunnel) {
+bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_tunnel, void** out_ioTunnel) noexcept {
+    if (out_tunnel == nullptr || out_ioTunnel == nullptr) {
+        return false;
+    }
+
     DWORD returnSize;
     BOOLEAN bResult;
 
@@ -57,7 +61,7 @@ bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_t
 
     // Open virtual processor object
     wchar_t vcpuName[20];
-    swprintf_s(vcpuName, L"\\\\.\\hax_vm%02d_vcpu%02d", m_vm.ID(), vcpuID);
+    swprintf_s(vcpuName, L"\\\\.\\hax_vm%02u_vcpu%02u", m_vm.ID(), vcpuID);
     m_handle = CreateFileW(vcpuName, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     if (m_handle == INVALID_HANDLE_VALUE) {
         return false;
@@ -83,14 +87,14 @@ bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_t
     return true;
 }
 
-void HaxmVirtualProcessorSysImpl::Destroy() {
+void HaxmVirtualProcessorSysImpl::Destroy() noexcept {
     if (m_handle != INVALID_HANDLE_VALUE) {
         CloseHandle(m_handle);
         m_handle = INVALID_HANDLE_VALUE;
     }
 }
 
-bool HaxmVirtualProcessorSysImpl::Run() {
+bool HaxmVirtualProcessorSysImpl::Run() noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -101,7 +105,7 @@ bool HaxmVirtualProcessorSysImpl::Run() {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) {
+bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) noexcept {
     DWORD returnSize;
 
     uint32_t vec32 = vector;
@@ -113,7 +117,7 @@ bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) {
+bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -124,7 +128,7 @@ bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetRegisters(vcpu_state_t* registers) {
+bool HaxmVirtualProcessorSysImpl::SetRegisters(vcpu_state_t* registers) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -135,7 +139,7 @@ bool HaxmVirtualProcessorSysImpl::SetRegisters(vcpu_state_t* registers) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetFPURegisters(fx_layout* registers) {
+bool HaxmVirtualProcessorSysImpl::GetFPURegisters(fx_layout* registers) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -146,7 +150,7 @@ bool HaxmVirtualProcessorSysImpl::GetFPURegisters(fx_layout* registers) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetFPURegisters(fx_layout* registers) {
+bool HaxmVirtualProcessorSysImpl::SetFPURegisters(fx_layout* registers) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -157,7 +161,7 @@ bool HaxmVirtualProcessorSysImpl::SetFPURegisters(fx_layout* registers) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetMSRData(hax_msr_data* msrData) {
+bool HaxmVirtualProcessorSysImpl::GetMSRData(hax_msr_data* msrData) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -168,7 +172,7 @@ bool HaxmVirtualProcessorSysImpl::GetMSRData(hax_msr_data* msrData) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetMSRData(hax_msr_data* msrData) {
+bool HaxmVirtualProcessorSysImpl::SetMSRData(hax_msr_data* msrData) noexcept {
     DWORD returnSize;
 
     return DeviceIoControl(m_handle,
@@ -179,7 +183,7 @@ bool HaxmVirtualProcessorSysImpl::SetMSRData(hax_msr_data* msrData) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetDebug(hax_debug_t* debug) {
+bool HaxmVirtualProcessorSysImpl::SetDebug(hax_debug_t* debug) noexcept {
     DWORD returnSize;
  
     return DeviceIoControl(m_handle,

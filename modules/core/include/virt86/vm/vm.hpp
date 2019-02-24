@@ -87,7 +87,7 @@ public:
     /**
      * Retrieves the set of specifications used to create this virtual machine.
      */
-    const VMSpecifications& GetSpecifications() const { return m_specifications; }
+    const VMSpecifications& GetSpecifications() const noexcept { return m_specifications; }
 
     /**
      * Retrieves the virtual processor with the specified index, if it exists.
@@ -98,7 +98,7 @@ public:
      * Retrieves the number of virtual processors present in this virtual
      * machine.
      */
-    const size_t GetVirtualProcessorCount() const { return m_vps.size(); }
+    const size_t GetVirtualProcessorCount() const noexcept { return m_vps.size(); }
 
     /**
      * Maps a block of host physical memory to the guest.
@@ -136,7 +136,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest memory protection feature.
      */
-    MemoryMappingStatus SetGuestMemoryFlags(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
+    MemoryMappingStatus SetGuestMemoryFlags(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept;
 
     /**
      * Queries the specified range of memory for dirty pages.
@@ -147,7 +147,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * dirty page tracking feature.
      */
-    DirtyPageTrackingStatus QueryDirtyPages(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize);
+    DirtyPageTrackingStatus QueryDirtyPages(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept;
 
     /**
      * Clears the dirty pages for the specified range of memory.
@@ -158,55 +158,55 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * dirty page tracking feature.
      */
-    DirtyPageTrackingStatus ClearDirtyPages(const uint64_t baseAddress, const uint64_t size);
+    DirtyPageTrackingStatus ClearDirtyPages(const uint64_t baseAddress, const uint64_t size) noexcept;
 
     /**
      * Reads a portion of physical memory into the specified value.
      */
-    bool MemRead(const uint64_t paddr, const uint64_t size, void *value) const;
+    bool MemRead(const uint64_t paddr, const uint64_t size, void *value) const noexcept;
 
     /**
      * Writes the specified value into physical memory.
      */
-    bool MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const;
+    bool MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const noexcept;
 
     /**
      * Registers a callback function for the I/O read operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterIOReadCallback(const IOReadFunc_t func);
+    void RegisterIOReadCallback(const IOReadFunc_t func) noexcept;
 
     /**
      * Registers a callback function for the I/O write operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterIOWriteCallback(const IOWriteFunc_t func);
+    void RegisterIOWriteCallback(const IOWriteFunc_t func) noexcept;
 
     /**
      * Registers a callback function for the MMIO read operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterMMIOReadCallback(const MMIOReadFunc_t func);
+    void RegisterMMIOReadCallback(const MMIOReadFunc_t func) noexcept;
 
     /**
      * Registers a callback function for the MMIO write operation.
      * nullptr specifies the no-op handler.
      */
-    void RegisterMMIOWriteCallback(const MMIOWriteFunc_t func);
+    void RegisterMMIOWriteCallback(const MMIOWriteFunc_t func) noexcept;
 
     /**
      * Registers a pointer to arbitrary data to be passed down to the I/O
      * callback functions.
      */
-    void RegisterIOContext(void *context);
+    void RegisterIOContext(void *context) noexcept;
 
     /**
      * Retrieves the platform that created this virtual machine.
      */
-    const Platform& GetPlatform() const { return m_platform; }
+    const Platform& GetPlatform() const noexcept { return m_platform; }
 
 protected:
-    VirtualMachine(Platform& platform, const VMSpecifications& specifications);
+    VirtualMachine(Platform& platform, const VMSpecifications& specifications) noexcept;
 
     /**
      * Does the actual mapping of the host physical memory block to the guest
@@ -223,7 +223,7 @@ protected:
      * If the dirty tracking flag is set but the platform doesn't support
      * dirty page tracking, it will be ignored.
      */
-    virtual MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) = 0;
+    virtual MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept = 0;
 
     /**
      * Does the actual unmapping of the host physical memory block from the
@@ -235,7 +235,7 @@ protected:
      * - Size is not larger than 4 GiB if the platform doesn't support large
      *   memory allocations.
      */
-    virtual MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size);
+    virtual MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) noexcept;
 
     /**
      * Tells the hypervisor to update the flags for the given memory range.
@@ -249,7 +249,7 @@ protected:
      * If the dirty tracking flag is set but the platform doesn't support
      * dirty page tracking, it will be ignored.
      */
-    virtual MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
+    virtual MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept;
 
     /**
      * Asks the hypervisor to fill in the dirty page bitmap for the given
@@ -261,7 +261,7 @@ protected:
      * - Bitmap buffer is page-aligned and has is large enough to contain all
      *   bits for the requested range
      */
-    virtual DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize);
+    virtual DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept;
 
     /**
      * Asks the hypervisor to clear the dirty pages for the given memory range.
@@ -270,7 +270,7 @@ protected:
      * - Base address is page-aligned
      * - Size is non-zero and page-aligned
      */
-    virtual DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size);
+    virtual DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept;
 
     /**
      * Retrieves a pointer to the memory region that contains the given GPA.
@@ -284,7 +284,7 @@ protected:
      * list of owned virtual processors. Automatically invoked by
      * VirtualProcessor and used for cleanup.
      */
-    void RegisterVP(VirtualProcessor *vp);
+    void RegisterVP(std::unique_ptr<VirtualProcessor> vp);
 
     /**
      * Destroys all virtual processors owned by this virtual machine.
@@ -292,7 +292,7 @@ protected:
      * This method is meant to be used in destructors of subclasses to ensure
      * resources are released in the proper order.
      */
-    void DestroyVPs();
+    void DestroyVPs() noexcept;
 
     /**
      * The platform that created this virtual machine.
@@ -324,7 +324,7 @@ private:
     IOHandlers m_io;
 
     // Only let friends take the address
-    VirtualMachine *operator&() { return this; }
+    VirtualMachine *operator&() noexcept { return this; }
 
     // Allow VirtualProcessor to access the I/O handlers
     friend class VirtualProcessor;

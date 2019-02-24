@@ -47,7 +47,7 @@ struct MemoryRegion {
 
     MemoryRegion() = default;
 
-    MemoryRegion(uint64_t baseAddress, uint64_t size, void *hostMemory)
+    MemoryRegion(uint64_t baseAddress, uint64_t size, void *hostMemory) noexcept
         : baseAddress(baseAddress)
         , size(size)
         , hostMemory(hostMemory)

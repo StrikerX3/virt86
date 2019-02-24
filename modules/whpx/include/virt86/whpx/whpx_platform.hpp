@@ -34,15 +34,32 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
+struct WhpxDispatch;
+
 class WhpxPlatform : public Platform {
 public:
-    static WhpxPlatform& Instance();
+    ~WhpxPlatform() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    WhpxPlatform(const WhpxPlatform&) = delete;
+    WhpxPlatform& operator=(const WhpxPlatform&) = delete;
+
+    // Prevent move construction and move assignment
+    WhpxPlatform(WhpxPlatform&&) = delete;
+    WhpxPlatform&& operator=(WhpxPlatform&&) = delete;
+
+    // Disallow taking the address
+    WhpxPlatform *operator&() = delete;
+
+    static WhpxPlatform& Instance() noexcept;
 
 protected:
-    WhpxPlatform();
-    virtual ~WhpxPlatform() override;
+    std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) override;
 
-    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
+private:
+    WhpxPlatform() noexcept;
+
+    static WhpxDispatch *s_dispatch;
 };
 
 }

@@ -62,11 +62,11 @@ bool VirtualProcessor::EnqueueInterrupt(uint8_t vector) {
 
 // ----- Physical memory ------------------------------------------------------
 
-bool VirtualProcessor::MemRead(const uint64_t paddr, const uint64_t size, void *value) const {
+bool VirtualProcessor::MemRead(const uint64_t paddr, const uint64_t size, void *value) const noexcept {
     return m_vm.MemRead(paddr, size, value);
 }
 
-bool VirtualProcessor::MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const {
+bool VirtualProcessor::MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const noexcept {
     return m_vm.MemWrite(paddr, size, value);
 }
 
@@ -89,13 +89,13 @@ static constexpr uint64_t BuildAddress(const uint64_t linAddr, const uint64_t ta
 }
 
 template<uint64_t linAddrBits, uint64_t tableBits, class PagingEntryType>
-static bool GetEntry(VirtualProcessor& vp, PagingEntryType& entry, const uint64_t linAddr, const uint64_t tableAddr) {
+static bool GetEntry(const VirtualProcessor& vp, PagingEntryType& entry, const uint64_t linAddr, const uint64_t tableAddr) noexcept {
     // Ensure we have the correct type of paging entry
     static_assert(EnablePagingEntry<PagingEntryType>::enable);
     // Address bits are checked by BuildAddress below
 
     // Compute the entry address
-    uint64_t entryAddr = BuildAddress<linAddrBits, tableBits>(linAddr, tableAddr);
+    const uint64_t entryAddr = BuildAddress<linAddrBits, tableBits>(linAddr, tableAddr);
 
     // Get the entry
     if (!vp.MemRead(entryAddr, sizeof(PagingEntryType), &entry)) {
@@ -106,7 +106,12 @@ static bool GetEntry(VirtualProcessor& vp, PagingEntryType& entry, const uint64_
     return entry.valid;
 }
 
-bool VirtualProcessor::LinearToPhysical(const uint64_t laddr, uint64_t *paddr) {
+bool VirtualProcessor::LinearToPhysical(const uint64_t laddr, uint64_t *paddr) noexcept {
+    // It's pointless to convert without a place to store the result
+    if (paddr == nullptr) {
+        return false;
+    }
+
     // TODO: check that reserved bits are all zero
 
     // Read registers used by paging
@@ -136,7 +141,7 @@ bool VirtualProcessor::LinearToPhysical(const uint64_t laddr, uint64_t *paddr) {
     // Check Physical Address Extensions flag
     if ((cr4.u64 & CR4_PAE) == 0) {
         // 32-bit paging
-        return LinearToPhysical32(laddr, paddr);
+        return LinearToPhysical32(static_cast<uint32_t>(laddr), paddr);
     }
 
     // Physical Address Extensions are enabled
@@ -144,14 +149,14 @@ bool VirtualProcessor::LinearToPhysical(const uint64_t laddr, uint64_t *paddr) {
     // Check Long Mode Enable flag
     if ((efer.u64 & EFER_LME) == 0) {
         // PAE paging
-        return LinearToPhysicalPAE(laddr, paddr);
+        return LinearToPhysicalPAE(static_cast<uint32_t>(laddr), paddr);
     }
 
     // 4-level paging
     return LinearToPhysical4Level(laddr, paddr);
 }
 
-bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr) {
+bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr) noexcept {
     // TODO: check PAT
 
     // Read registers used in this mode
@@ -169,7 +174,7 @@ bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr)
     // [11: 2] = linaddr [31:22]
     // [ 1: 0] = 0
     PDE32 pde;
-    if (!GetEntry<12, 20>(*this, pde, ((laddr >> 22u) << 2u), (cr3.u32 >> 12u))) {
+    if (!GetEntry<12, 20>(*this, pde, ((static_cast<uint64_t>(laddr) >> 22u) << 2u), (cr3.u32 >> 12u))) {
         return false;
     }
 
@@ -181,7 +186,7 @@ bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr)
         // [39:32] = PDE     [20:13]
         // [31:22] = PDE     [31:22]
         // [21: 0] = linaddr [21: 0]
-        *paddr = BuildAddress<22, 18>(laddr, ((uint64_t)pde.large.addrHigh << 10ull) | ((uint64_t)pde.large.addrLow));
+        *paddr = BuildAddress<22, 18>(laddr, (static_cast<uint64_t>(pde.large.addrHigh) << 10ull) | (static_cast<uint64_t>(pde.large.addrLow)));
         return true;
     }
 
@@ -192,7 +197,7 @@ bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr)
     // [11: 2] = linaddr [21:12]
     // [ 1: 0] = 0
     PTE32 pte;
-    if (!GetEntry<12, 20>(*this, pte, ((laddr >> 12u) << 2u), pde.table.pageFrameNumber)) {
+    if (!GetEntry<12, 20>(*this, pte, ((static_cast<uint64_t>(laddr) >> 12u) << 2u), pde.table.pageFrameNumber)) {
         return false;
     }
 
@@ -204,7 +209,7 @@ bool VirtualProcessor::LinearToPhysical32(const uint32_t laddr, uint64_t *paddr)
     return true;
 }
 
-bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr) {
+bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr) noexcept {
     // Read register used in this mode
     RegValue cr3;
     if (RegRead(Reg::CR3, cr3) != VPOperationStatus::OK) {
@@ -213,7 +218,7 @@ bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr
 
     // Determine PDPTE index, which comes from bits [31:30] of the
     // linear address
-    uint8_t pdpteIndex = laddr >> 30u;
+    const uint8_t pdpteIndex = laddr >> 30u;
 
     // Technically, the CPU maintains PDPTEs 0 through 4 in
     // internal registers, but they are read from physical memory
@@ -223,7 +228,7 @@ bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr
     // [ 4: 3] = PDPTE index [1:0]
     // [ 2: 0] = 0
     PDPTE pdpte;
-    if (!GetEntry<5, 27>(*this, pdpte, (pdpteIndex << 3u), (cr3.u64 >> 5ull))) {
+    if (!GetEntry<5, 27>(*this, pdpte, (static_cast<uint64_t>(pdpteIndex) << 3u), (cr3.u64 >> 5ull))) {
         return false;
     }
 
@@ -233,7 +238,7 @@ bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr
     // [11: 3] = linaddr [11: 3]
     // [ 2: 0] = 0
     PDE64 pde;
-    if (!GetEntry<12, 40>(*this, pde, (laddr & ~0b111), pdpte.table.address)) {
+    if (!GetEntry<12, 40>(*this, pde, (static_cast<uint64_t>(laddr) & ~0b111), pdpte.table.address)) {
         return false;
     }
 
@@ -252,7 +257,7 @@ bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr
     // [11: 3] = linaddr [20:12]
     // [ 2: 0] = 0
     PTE64 pte;
-    if (!GetEntry<12, 40>(*this, pte, ((laddr >> 12u) << 3u), pde.table.address)) {
+    if (!GetEntry<12, 40>(*this, pte, ((static_cast<uint64_t>(laddr) >> 12u) << 3u), pde.table.address)) {
         return false;
     }
 
@@ -263,7 +268,7 @@ bool VirtualProcessor::LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr
     return true;
 }
 
-bool VirtualProcessor::LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr) {
+bool VirtualProcessor::LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr) noexcept {
     // TODO: check CR4.PKE
 
     // Read register used in this mode
@@ -336,7 +341,12 @@ bool VirtualProcessor::LinearToPhysical4Level(const uint64_t laddr, uint64_t *pa
     return true;
 }
 
-bool VirtualProcessor::LMemRead(const uint64_t laddr, const uint64_t size, void *value, uint64_t *bytesRead) {
+bool VirtualProcessor::LMemRead(const uint64_t laddr, const uint64_t size, void *value, uint64_t *bytesRead) noexcept {
+    // Value pointer is required
+    if (value == nullptr) {
+        return false;
+    }
+
     // Compute the address range and align to 4 KiB pages
     uint64_t srcAddrStart = laddr;
     uint64_t srcAddrEnd = ((srcAddrStart + PAGE_SIZE) & ~(PAGE_SIZE - 1)) - 1;
@@ -356,7 +366,7 @@ bool VirtualProcessor::LMemRead(const uint64_t laddr, const uint64_t size, void 
             return false;
         }
 
-        auto result = MemRead(physAddr, copySize, &((char*)value)[pos]);
+        const auto result = MemRead(physAddr, copySize, static_cast<uint8_t*>(value) + pos);
         if (!result) {
             return result;
         }
@@ -376,7 +386,12 @@ bool VirtualProcessor::LMemRead(const uint64_t laddr, const uint64_t size, void 
     return true;
 }
 
-bool VirtualProcessor::LMemWrite(const uint64_t laddr, const uint64_t size, const void *value, uint64_t *bytesWritten) {
+bool VirtualProcessor::LMemWrite(const uint64_t laddr, const uint64_t size, const void *value, uint64_t *bytesWritten) noexcept {
+    // Value pointer is required
+    if (value == nullptr) {
+        return false;
+    }
+
     // Compute the address range and align to 4 KiB pages
     uint64_t srcAddrStart = laddr;
     uint64_t srcAddrEnd = ((srcAddrStart + PAGE_SIZE) & ~(PAGE_SIZE - 1)) - 1;
@@ -396,7 +411,7 @@ bool VirtualProcessor::LMemWrite(const uint64_t laddr, const uint64_t size, cons
             return false;
         }
 
-        auto result = MemWrite(physAddr, copySize, &((char*)value)[pos]);
+        const auto result = MemWrite(physAddr, copySize, static_cast<const uint8_t*>(value) + pos);
         if (!result) {
             return result;
         }
@@ -419,27 +434,31 @@ bool VirtualProcessor::LMemWrite(const uint64_t laddr, const uint64_t size, cons
 // ----- Utility macros for registers -----------------------------------------
 
 #define CHECK_RESULT(expr) do { \
-    auto result = (expr);\
+    const auto result = (expr);\
     if (result != VPOperationStatus::OK) return result; \
 } while (0)
 
 #define CHECK_RESULT_MEM(expr) do { \
-    auto result = (expr);\
+    const auto result = (expr);\
     if (!result) return VPOperationStatus::Failed; \
 } while (0)
 
 // ----- Registers ------------------------------------------------------------
 
-VPOperationStatus VirtualProcessor::RegCopy(const Reg dst, const Reg src) {
+VPOperationStatus VirtualProcessor::RegCopy(const Reg dst, const Reg src) noexcept {
     RegValue tmp;
     CHECK_RESULT(RegRead(src, tmp));
     CHECK_RESULT(RegWrite(dst, tmp));
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) {
+VPOperationStatus VirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     for (size_t i = 0; i < numRegs; i++) {
-        auto status = RegRead(regs[i], values[i]);
+        const auto status = RegRead(regs[i], values[i]);
         if (status != VPOperationStatus::OK) {
             return status;
         }
@@ -447,9 +466,13 @@ VPOperationStatus VirtualProcessor::RegRead(const Reg regs[], RegValue values[],
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) {
+VPOperationStatus VirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     for (size_t i = 0; i < numRegs; i++) {
-        auto status = RegWrite(regs[i], values[i]);
+        const auto status = RegWrite(regs[i], values[i]);
         if (status != VPOperationStatus::OK) {
             return status;
         }
@@ -457,9 +480,13 @@ VPOperationStatus VirtualProcessor::RegWrite(const Reg regs[], const RegValue va
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::RegCopy(const Reg dsts[], const Reg srcs[], const size_t numRegs) {
+VPOperationStatus VirtualProcessor::RegCopy(const Reg dsts[], const Reg srcs[], const size_t numRegs) noexcept {
+    if (dsts == nullptr || srcs == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     for (size_t i = 0; i < numRegs; i++) {
-        auto status = RegCopy(dsts[i], srcs[i]);
+        const auto status = RegCopy(dsts[i], srcs[i]);
         if (status != VPOperationStatus::OK) {
             return status;
         }
@@ -469,9 +496,13 @@ VPOperationStatus VirtualProcessor::RegCopy(const Reg dsts[], const Reg srcs[], 
 
 // ----- Model specific registers ---------------------------------------------
 
-VPOperationStatus VirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) {
+VPOperationStatus VirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     for (size_t i = 0; i < numRegs; i++) {
-        auto status = GetMSR(msrs[i], values[i]);
+        const auto status = GetMSR(msrs[i], values[i]);
         if (status != VPOperationStatus::OK) {
             return status;
         }
@@ -479,9 +510,13 @@ VPOperationStatus VirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t valu
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) {
+VPOperationStatus VirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
     for (size_t i = 0; i < numRegs; i++) {
-        auto status = SetMSR(msrs[i], values[i]);
+        const auto status = SetMSR(msrs[i], values[i]);
         if (status != VPOperationStatus::OK) {
             return status;
         }
@@ -491,7 +526,7 @@ VPOperationStatus VirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_
 
 // ----- Global Descriptor Table ----------------------------------------------
 
-VPOperationStatus VirtualProcessor::GetGDTEntry(const uint16_t selector, GDTEntry& entry) {
+VPOperationStatus VirtualProcessor::GetGDTEntry(const uint16_t selector, GDTEntry& entry) noexcept {
     RegValue gdt;
     CHECK_RESULT(RegRead(Reg::GDTR, gdt));
     if (selector + sizeof(GDTEntry) > gdt.table.limit) {
@@ -501,7 +536,7 @@ VPOperationStatus VirtualProcessor::GetGDTEntry(const uint16_t selector, GDTEntr
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::SetGDTEntry(const uint16_t selector, const GDTEntry& entry) {
+VPOperationStatus VirtualProcessor::SetGDTEntry(const uint16_t selector, const GDTEntry& entry) noexcept {
     RegValue gdt;
     CHECK_RESULT(RegRead(Reg::GDTR, gdt));
     if (selector + sizeof(GDTEntry) > gdt.table.limit) {
@@ -513,7 +548,7 @@ VPOperationStatus VirtualProcessor::SetGDTEntry(const uint16_t selector, const G
 
 // ----- Interrupt Descriptor Table -------------------------------------------
 
-VPOperationStatus VirtualProcessor::GetIDTEntry(const uint8_t vector, IDTEntry& entry) {
+VPOperationStatus VirtualProcessor::GetIDTEntry(const uint8_t vector, IDTEntry& entry) noexcept {
     RegValue idt;
     CHECK_RESULT(RegRead(Reg::IDTR, idt));
     if (vector * sizeof(IDTEntry) > idt.table.limit) {
@@ -523,7 +558,7 @@ VPOperationStatus VirtualProcessor::GetIDTEntry(const uint8_t vector, IDTEntry& 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::SetIDTEntry(const uint8_t vector, const IDTEntry& entry) {
+VPOperationStatus VirtualProcessor::SetIDTEntry(const uint8_t vector, const IDTEntry& entry) noexcept {
     RegValue idt;
     CHECK_RESULT(RegRead(Reg::IDTR, idt));
     if (vector * sizeof(IDTEntry) > idt.table.limit) {
@@ -535,7 +570,7 @@ VPOperationStatus VirtualProcessor::SetIDTEntry(const uint8_t vector, const IDTE
 
 // ----- Local Descriptor Table -----------------------------------------------
 
-VPOperationStatus VirtualProcessor::GetLDTEntry(const uint16_t selector, LDTEntry& entry) {
+VPOperationStatus VirtualProcessor::GetLDTEntry(const uint16_t selector, LDTEntry& entry) noexcept {
     RegValue ldt;
     CHECK_RESULT(RegRead(Reg::LDTR, ldt));
     if (selector + sizeof(LDTEntry) > ldt.segment.limit) {
@@ -545,7 +580,7 @@ VPOperationStatus VirtualProcessor::GetLDTEntry(const uint16_t selector, LDTEntr
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus VirtualProcessor::SetLDTEntry(const uint16_t selector, const LDTEntry& entry) {
+VPOperationStatus VirtualProcessor::SetLDTEntry(const uint16_t selector, const LDTEntry& entry) noexcept {
     RegValue ldt;
     CHECK_RESULT(RegRead(Reg::LDTR, ldt));
     if (selector + sizeof(LDTEntry) > ldt.segment.limit) {
@@ -581,7 +616,7 @@ void VirtualProcessor::InjectPendingInterrupt() {
     {
         std::lock_guard<std::mutex> guard(m_interruptMutex);
 
-        uint8_t vector = m_pendingInterrupts.front();
+        const uint8_t vector = m_pendingInterrupts.front();
         m_pendingInterrupts.pop();
         InjectInterrupt(vector);
     }
@@ -591,23 +626,23 @@ void VirtualProcessor::InjectPendingInterrupt() {
 
 // ----- Optional operations --------------------------------------------------
 
-VPOperationStatus VirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
+VPOperationStatus VirtualProcessor::EnableSoftwareBreakpoints(bool enable) noexcept {
     return VPOperationStatus::Unsupported;
 }
 
-VPOperationStatus VirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) {
+VPOperationStatus VirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept {
     return VPOperationStatus::Unsupported;
 }
 
-VPOperationStatus VirtualProcessor::ClearHardwareBreakpoints() {
+VPOperationStatus VirtualProcessor::ClearHardwareBreakpoints() noexcept {
     return VPOperationStatus::Unsupported;
 }
 
-VPOperationStatus VirtualProcessor::GetBreakpointAddress(uint64_t *address) const {
+VPOperationStatus VirtualProcessor::GetBreakpointAddress(uint64_t *address) const noexcept {
     return VPOperationStatus::Unsupported;
 }
 
-VPExecutionStatus VirtualProcessor::StepImpl() {
+VPExecutionStatus VirtualProcessor::StepImpl() noexcept {
     return VPExecutionStatus::Unsupported;
 }
 

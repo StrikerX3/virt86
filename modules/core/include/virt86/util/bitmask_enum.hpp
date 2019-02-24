@@ -95,7 +95,7 @@ inline constexpr bool is_bitmask_enum_v = is_bitmask_enum<Enum>::enable;
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator |(Enum lhs, Enum rhs) {
+operator |(Enum lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     return static_cast<Enum> (
         static_cast<underlying>(lhs) |
@@ -105,7 +105,7 @@ operator |(Enum lhs, Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator &(Enum lhs, Enum rhs) {
+operator &(Enum lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     return static_cast<Enum> (
         static_cast<underlying>(lhs) &
@@ -115,7 +115,7 @@ operator &(Enum lhs, Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator ^(Enum lhs, Enum rhs) {
+operator ^(Enum lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     return static_cast<Enum> (
         static_cast<underlying>(lhs) ^
@@ -125,7 +125,7 @@ operator ^(Enum lhs, Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator ~(Enum rhs) {
+operator ~(Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     return static_cast<Enum> (
         ~static_cast<underlying>(rhs)
@@ -136,7 +136,7 @@ operator ~(Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator |=(Enum& lhs, Enum rhs) {
+operator |=(Enum& lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     lhs = static_cast<Enum> (
         static_cast<underlying>(lhs) |
@@ -147,7 +147,7 @@ operator |=(Enum& lhs, Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator &=(Enum& lhs, Enum rhs) {
+operator &=(Enum& lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     lhs = static_cast<Enum> (
         static_cast<underlying>(lhs) &
@@ -158,7 +158,7 @@ operator &=(Enum& lhs, Enum rhs) {
 
 template<typename Enum>
 typename std::enable_if_t<is_bitmask_enum_v<Enum>, Enum>
-operator ^=(Enum& lhs, Enum rhs) {
+operator ^=(Enum& lhs, Enum rhs) noexcept {
     using underlying = typename std::underlying_type_t<Enum>;
     lhs = static_cast<Enum> (
         static_cast<underlying>(lhs) ^
@@ -176,52 +176,52 @@ struct BitmaskEnum {
 
     using underlying = typename std::underlying_type_t<Enum>;
 
-    BitmaskEnum(Enum value) : value(value) {
+    BitmaskEnum(Enum value) noexcept : value(value) {
         static_assert(is_bitmask_enum_v<Enum>);
     }
 
     // Convert back to enum if required
-    inline operator Enum() const {
+    inline operator Enum() const noexcept {
         return value;
     }
 
     // Convert to true if there is any bit set in the bitmask
-    inline operator bool() const {
+    inline operator bool() const noexcept {
         return Any();
     }
 
     // Returns true if any bit is set
-    inline bool Any() const {
+    inline bool Any() const noexcept {
         return value != none;
     }
 
     // Returns true if all bits are clear
-    inline bool None() const {
+    inline bool None() const noexcept {
         return value == none;
     }
 
     // Returns true if any bit in the given mask is set
-    inline bool AnyOf(const Enum& mask) const {
+    inline bool AnyOf(const Enum& mask) const noexcept {
         return (value & mask) != none;
     }
 
     // Returns true if all bits in the given mask are set
-    inline bool AllOf(const Enum& mask) const {
+    inline bool AllOf(const Enum& mask) const noexcept {
         return (value & mask) == mask;
     }
 
     // Returns true if none of the bits in the given mask are set
-    inline bool NoneOf(const Enum& mask) const {
+    inline bool NoneOf(const Enum& mask) const noexcept {
         return (value & mask) == none;
     }
 
     // Returns true if any bits excluding the mask are set
-    inline bool AnyExcept(const Enum& mask) const {
+    inline bool AnyExcept(const Enum& mask) const noexcept {
         return (value & ~mask) != none;
     }
 
     // Returns true if no bits excluding the mask are set
-    inline bool NoneExcept(const Enum& mask) const {
+    inline bool NoneExcept(const Enum& mask) const noexcept {
         return (value & ~mask) == none;
     }
 };

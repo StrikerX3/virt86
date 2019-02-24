@@ -30,19 +30,19 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-void LoadSegment(RegValue& value, segment_desc_t *segment);
-void StoreSegment(const RegValue& value, segment_desc_t *segment);
+void LoadSegment(RegValue& value, const segment_desc_t *segment) noexcept;
+void StoreSegment(const RegValue& value, segment_desc_t *segment) noexcept;
 
-void LoadTable(RegValue& value, segment_desc_t *table);
-void StoreTable(const RegValue& value, segment_desc_t *table);
+void LoadTable(RegValue& value, const segment_desc_t *table) noexcept;
+void StoreTable(const RegValue& value, segment_desc_t *table) noexcept;
     
-void LoadSTRegister(RegValue& value, uint8_t index, fx_layout& fpuRegs);
-void StoreSTRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs);
+void LoadSTRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) noexcept;
+void StoreSTRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) noexcept;
 
-void LoadMMRegister(RegValue& value, uint8_t index, fx_layout& fpuRegs);
-void StoreMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs);
+void LoadMMRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) noexcept;
+void StoreMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) noexcept;
 
-bool LoadXMMRegister(RegValue& value, uint8_t index, fx_layout& fpuRegs);
-bool StoreXMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs);
+bool LoadXMMRegister(RegValue& value, uint8_t index, const fx_layout& fpuRegs) noexcept;
+bool StoreXMMRegister(const RegValue& value, uint8_t index, fx_layout& fpuRegs) noexcept;
 
 }
