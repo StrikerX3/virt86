@@ -61,7 +61,7 @@ KvmVirtualProcessor::~KvmVirtualProcessor() noexcept {
     }
 }
 
-bool KvmVirtualProcessor::Initialize() {
+bool KvmVirtualProcessor::Initialize() noexcept {
     // Create the VCPU
     m_fd = ioctl(m_vm.FileDescriptor(), KVM_CREATE_VCPU, m_vcpuID);
     if (m_fd < 0) {

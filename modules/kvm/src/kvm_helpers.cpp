@@ -70,8 +70,8 @@ void StoreTable(const RegValue& value, struct kvm_dtable *table) noexcept {
 }
 
 void LoadSTRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
-    value.st.significand = *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]);
-    value.st.exponentSign = *reinterpret_cast<uint16_t *>(&fpuRegs.fpr[index][8]);
+    value.st.significand = *reinterpret_cast<const uint64_t *>(&fpuRegs.fpr[index][0]);
+    value.st.exponentSign = *reinterpret_cast<const uint16_t *>(&fpuRegs.fpr[index][8]);
 }
 
 void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
@@ -80,17 +80,17 @@ void StoreSTRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRe
 }
 
 void LoadMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
-    value.mm.i64[0] = *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]);
+    value.mm.i64[0] = *reinterpret_cast<const uint64_t *>(&fpuRegs.fpr[index][0]);
 }
 
 void StoreMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
-    *reinterpret_cast<uint64_t *>(&fpuRegs.fpr[index][0]) = value.mm.i64[0];
+    *reinterpret_cast<int64_t *>(&fpuRegs.fpr[index][0]) = value.mm.i64[0];
 }
 
 bool LoadXMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRegs) noexcept {
     if (index < 16) {
-        value.xmm.i64[0] = *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][0]);
-        value.xmm.i64[1] = *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][8]);
+        value.xmm.i64[0] = *reinterpret_cast<const uint64_t *>(&fpuRegs.xmm[index][0]);
+        value.xmm.i64[1] = *reinterpret_cast<const uint64_t *>(&fpuRegs.xmm[index][8]);
         return true;
     }
     return false;
@@ -98,8 +98,8 @@ bool LoadXMMRegister(RegValue& value, uint8_t index, const struct kvm_fpu& fpuRe
 
 bool StoreXMMRegister(const RegValue& value, uint8_t index, struct kvm_fpu& fpuRegs) noexcept {
     if (index < 16) {
-        *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][0]) = value.xmm.i64[0];
-        *reinterpret_cast<uint64_t *>(&fpuRegs.xmm[index][8]) = value.xmm.i64[1];
+        *reinterpret_cast<int64_t *>(&fpuRegs.xmm[index][0]) = value.xmm.i64[0];
+        *reinterpret_cast<int64_t *>(&fpuRegs.xmm[index][8]) = value.xmm.i64[1];
         return true;
     }
     return false;

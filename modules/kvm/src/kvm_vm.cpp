@@ -76,12 +76,11 @@ bool KvmVirtualMachine::Initialize() {
 
     // Create virtual processors
     for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
-        auto vp = new KvmVirtualProcessor(*this, id);
+        auto vp = std::make_unique<KvmVirtualProcessor>(*this, id);
         if (!vp->Initialize()) {
-            delete vp;
             return false;
         }
-        RegisterVP(vp);
+        RegisterVP(std::move(vp));
     }
 
     return true;
