@@ -41,7 +41,7 @@ namespace virt86::whpx {
         goto fail; \
     }
 
-bool WhpxDispatch::Load() {
+bool WhpxDispatch::Load() noexcept {
     if (m_loaded) {
         return true;
     }

@@ -29,6 +29,7 @@ SOFTWARE.
 #include "whpx_dispatch.hpp"
 
 #include <cassert>
+#include <new>
 
 #include <Windows.h>
 
@@ -37,25 +38,26 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-WhpxVirtualProcessor::WhpxVirtualProcessor(WhpxVirtualMachine& vm, uint32_t id)
+WhpxVirtualProcessor::WhpxVirtualProcessor(WhpxVirtualMachine& vm, const WhpxDispatch& dispatch, uint32_t id)
     : VirtualProcessor(vm)
     , m_vm(vm)
+    , m_dispatch(dispatch)
     , m_id(id)
     , m_emuHandle(INVALID_HANDLE_VALUE)
 {
     ZeroMemory(&m_exitContext, sizeof(m_exitContext));
 }
 
-WhpxVirtualProcessor::~WhpxVirtualProcessor() {
+WhpxVirtualProcessor::~WhpxVirtualProcessor() noexcept {
     if (m_emuHandle != INVALID_HANDLE_VALUE) {
-        g_dispatch.WHvEmulatorDestroyEmulator(m_emuHandle);
+        m_dispatch.WHvEmulatorDestroyEmulator(m_emuHandle);
         m_emuHandle = INVALID_HANDLE_VALUE;
     }
-    g_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
+    m_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
 }
 
-bool WhpxVirtualProcessor::Initialize() {
-    HRESULT hr = g_dispatch.WHvCreateVirtualProcessor(m_vm.Handle(), m_id, 0);
+bool WhpxVirtualProcessor::Initialize() noexcept {
+    HRESULT hr = m_dispatch.WHvCreateVirtualProcessor(m_vm.Handle(), m_id, 0);
     if (S_OK != hr) {
         return false;
     }
@@ -68,9 +70,9 @@ bool WhpxVirtualProcessor::Initialize() {
     callbacks.WHvEmulatorTranslateGvaPage = TranslateGvaPageCallback;
     callbacks.WHvEmulatorIoPortCallback = IoPortCallback;
     callbacks.WHvEmulatorMemoryCallback = MemoryCallback;
-    hr = g_dispatch.WHvEmulatorCreateEmulator(&callbacks, &m_emuHandle);
+    hr = m_dispatch.WHvEmulatorCreateEmulator(&callbacks, &m_emuHandle);
     if (S_OK != hr) {
-        g_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
+        m_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
         return false;
     }
 
@@ -90,26 +92,26 @@ bool WhpxVirtualProcessor::Initialize() {
     //
     // Additionally, RDX is initialized to a non-zero value. Let's rectify that
     // while we're at it.
-    WHV_REGISTER_NAME regs[] = { WHvX64RegisterCs, WHvX64RegisterRdx };
+    const WHV_REGISTER_NAME regs[] = { WHvX64RegisterCs, WHvX64RegisterRdx };
     WHV_REGISTER_VALUE values[ARRAYSIZE(regs)];
     values[0].Segment.Base = 0xffff0000;
     values[0].Segment.Limit = 0xffff;
     values[0].Segment.Selector = 0xf000;
     values[0].Segment.Attributes = 0x0093;
     values[1].Reg64 = 0;
-    hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, ARRAYSIZE(regs), values);
+    hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, ARRAYSIZE(regs), values);
     if (S_OK != hr) {
-        g_dispatch.WHvEmulatorDestroyEmulator(m_emuHandle);
+        m_dispatch.WHvEmulatorDestroyEmulator(m_emuHandle);
         m_emuHandle = INVALID_HANDLE_VALUE;
-        g_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
+        m_dispatch.WHvDeleteVirtualProcessor(m_vm.Handle(), m_id);
         return false;
     }
 
     return true;
 }
 
-VPExecutionStatus WhpxVirtualProcessor::RunImpl() {
-    HRESULT hr = g_dispatch.WHvRunVirtualProcessor(m_vm.Handle(), m_id, &m_exitContext, sizeof(m_exitContext));
+VPExecutionStatus WhpxVirtualProcessor::RunImpl() noexcept {
+    const HRESULT hr = m_dispatch.WHvRunVirtualProcessor(m_vm.Handle(), m_id, &m_exitContext, sizeof(m_exitContext));
     if (S_OK != hr) {
         return VPExecutionStatus::Failed;
     }
@@ -132,10 +134,10 @@ VPExecutionStatus WhpxVirtualProcessor::RunImpl() {
     return VPExecutionStatus::OK;
 }
 
-VPExecutionStatus WhpxVirtualProcessor::HandleIO() {
+VPExecutionStatus WhpxVirtualProcessor::HandleIO() noexcept {
     WHV_EMULATOR_STATUS emuStatus;
 
-    HRESULT hr = g_dispatch.WHvEmulatorTryIoEmulation(m_emuHandle, this, &m_exitContext.VpContext, &m_exitContext.IoPortAccess, &emuStatus);
+    const HRESULT hr = m_dispatch.WHvEmulatorTryIoEmulation(m_emuHandle, this, &m_exitContext.VpContext, &m_exitContext.IoPortAccess, &emuStatus);
     if (S_OK != hr) {
         return VPExecutionStatus::Failed;
     }
@@ -148,10 +150,10 @@ VPExecutionStatus WhpxVirtualProcessor::HandleIO() {
     return VPExecutionStatus::OK;
 }
 
-VPExecutionStatus WhpxVirtualProcessor::HandleMMIO() {
+VPExecutionStatus WhpxVirtualProcessor::HandleMMIO() noexcept {
     WHV_EMULATOR_STATUS emuStatus;
 
-    HRESULT hr = g_dispatch.WHvEmulatorTryMmioEmulation(m_emuHandle, this, &m_exitContext.VpContext, &m_exitContext.MemoryAccess, &emuStatus);
+    const HRESULT hr = m_dispatch.WHvEmulatorTryMmioEmulation(m_emuHandle, this, &m_exitContext.VpContext, &m_exitContext.MemoryAccess, &emuStatus);
     if (S_OK != hr) {
         return VPExecutionStatus::Failed;
     }
@@ -164,7 +166,7 @@ VPExecutionStatus WhpxVirtualProcessor::HandleMMIO() {
     return VPExecutionStatus::OK;
 }
 
-void WhpxVirtualProcessor::HandleMSRAccess() {
+void WhpxVirtualProcessor::HandleMSRAccess() noexcept {
     m_exitInfo.reason = VMExitReason::MSRAccess;
     m_exitInfo.msr.isWrite = m_exitContext.MsrAccess.AccessInfo.IsWrite == TRUE;
     m_exitInfo.msr.msrNumber = m_exitContext.MsrAccess.MsrNumber;
@@ -172,7 +174,7 @@ void WhpxVirtualProcessor::HandleMSRAccess() {
     m_exitInfo.msr.rdx = m_exitContext.MsrAccess.Rdx;
 }
 
-void WhpxVirtualProcessor::HandleCPUIDAccess() {
+void WhpxVirtualProcessor::HandleCPUIDAccess() noexcept {
     m_exitInfo.reason = VMExitReason::CPUID;
     m_exitInfo.cpuid.rax = m_exitContext.CpuidAccess.Rax;
     m_exitInfo.cpuid.rcx = m_exitContext.CpuidAccess.Rcx;
@@ -184,8 +186,8 @@ void WhpxVirtualProcessor::HandleCPUIDAccess() {
     m_exitInfo.cpuid.defaultRbx = m_exitContext.CpuidAccess.DefaultResultRbx;
 }
 
-bool WhpxVirtualProcessor::PrepareInterrupt(uint8_t vector) {
-    HRESULT hr = g_dispatch.WHvCancelRunVirtualProcessor(m_vm.Handle(), m_id, 0);
+bool WhpxVirtualProcessor::PrepareInterrupt(uint8_t vector) noexcept {
+    const HRESULT hr = m_dispatch.WHvCancelRunVirtualProcessor(m_vm.Handle(), m_id, 0);
     if (S_OK != hr) {
         return false;
     }
@@ -193,10 +195,10 @@ bool WhpxVirtualProcessor::PrepareInterrupt(uint8_t vector) {
     return true;
 }
 
-VPOperationStatus WhpxVirtualProcessor::InjectInterrupt(uint8_t vector) {
-    WHV_REGISTER_NAME reg[] = { WHvRegisterPendingInterruption };
+VPOperationStatus WhpxVirtualProcessor::InjectInterrupt(uint8_t vector) noexcept {
+    const WHV_REGISTER_NAME reg[] = { WHvRegisterPendingInterruption };
     WHV_REGISTER_VALUE val[1];
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
@@ -206,7 +208,7 @@ VPOperationStatus WhpxVirtualProcessor::InjectInterrupt(uint8_t vector) {
     val[0].PendingInterruption.InterruptionType = WHvX64PendingInterrupt;
     val[0].PendingInterruption.InterruptionVector = vector;
 
-    hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
@@ -214,44 +216,48 @@ VPOperationStatus WhpxVirtualProcessor::InjectInterrupt(uint8_t vector) {
     return VPOperationStatus::OK;
 }
 
-bool WhpxVirtualProcessor::CanInjectInterrupt() const {
+bool WhpxVirtualProcessor::CanInjectInterrupt() const noexcept {
     // TODO: how to check for this?
     return true;
 }
 
-void WhpxVirtualProcessor::RequestInterruptWindow() {
+void WhpxVirtualProcessor::RequestInterruptWindow() noexcept {
     // TODO: how to do this?
 }
 
 // ----- Registers ------------------------------------------------------------
 
-VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg reg, RegValue& value) {
+VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg reg, RegValue& value) noexcept {
     return RegRead(&reg, &value, 1);
 }
 
-VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) noexcept {
     return RegWrite(&reg, &value, 1);
 }
 
-VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) {
-    WHV_REGISTER_NAME *whvRegs = new WHV_REGISTER_NAME[numRegs];
-    WHV_REGISTER_VALUE *whvVals = new WHV_REGISTER_VALUE[numRegs];
+VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
+    WHV_REGISTER_NAME *whvRegs = new(std::nothrow) WHV_REGISTER_NAME[numRegs];
+    WHV_REGISTER_VALUE *whvVals = new(std::nothrow) WHV_REGISTER_VALUE[numRegs];
+
+    if (whvRegs == nullptr || whvVals == nullptr) {
+        delete[] whvRegs;
+        delete[] whvVals;
+        return VPOperationStatus::Failed;
+    }
 
     for (int i = 0; i < numRegs; i++) {
-        auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
+        const auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
         if (xlatResult != VPOperationStatus::OK) {
             return xlatResult;
         }
     }
 
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals);
-    VPOperationStatus result;
-    if (S_OK != hr) {
-        result = VPOperationStatus::Failed;
-    }
-    else {
-        result = VPOperationStatus::OK;
-    }
+    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals);
+    const VPOperationStatus result = (S_OK == hr) ? VPOperationStatus::OK : VPOperationStatus::Failed;
 
     for (int i = 0; i < numRegs; i++) {
         values[i] = TranslateRegisterValue(regs[i], whvVals[i]);
@@ -262,26 +268,30 @@ VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg regs[], RegValue value
     return result;
 }
 
-VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) {
-    WHV_REGISTER_NAME *whvRegs = new WHV_REGISTER_NAME[numRegs];
-    WHV_REGISTER_VALUE *whvVals = new WHV_REGISTER_VALUE[numRegs];
+VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
+    if (regs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
+    WHV_REGISTER_NAME *whvRegs = new(std::nothrow) WHV_REGISTER_NAME[numRegs];
+    WHV_REGISTER_VALUE *whvVals = new(std::nothrow) WHV_REGISTER_VALUE[numRegs];
+
+    if (whvRegs == nullptr || whvVals == nullptr) {
+        delete[] whvRegs;
+        delete[] whvVals;
+        return VPOperationStatus::Failed;
+    }
 
     for (int i = 0; i < numRegs; i++) {
-        auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
+        const auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
         if (xlatResult != VPOperationStatus::OK) {
             return xlatResult;
         }
         TranslateRegisterValue(regs[i], values[i], whvVals[i]);
     }
 
-    HRESULT hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals);
-    VPOperationStatus result;
-    if (S_OK != hr) {
-        result = VPOperationStatus::Failed;
-    }
-    else {
-        result = VPOperationStatus::OK;
-    }
+    const HRESULT hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals);
+    const VPOperationStatus result = (S_OK == hr) ? VPOperationStatus::OK : VPOperationStatus::Failed;
 
     delete[] whvVals;
     delete[] whvRegs;
@@ -290,17 +300,17 @@ VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg regs[], const RegValu
 
 // ----- Floating point control registers -------------------------------------
 
-VPOperationStatus WhpxVirtualProcessor::GetFPUControl(FPUControl& value) {
-    WHV_REGISTER_NAME reg[2] = { WHvX64RegisterFpControlStatus, WHvX64RegisterXmmControlStatus };
+VPOperationStatus WhpxVirtualProcessor::GetFPUControl(FPUControl& value) noexcept {
+    const WHV_REGISTER_NAME reg[2] = { WHvX64RegisterFpControlStatus, WHvX64RegisterXmmControlStatus };
     WHV_REGISTER_VALUE val[2];
 
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 2, val);
+    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 2, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
 
-    auto& fp = val[0].FpControlStatus;
-    auto& mm = val[1].XmmControlStatus;
+    const auto& fp = val[0].FpControlStatus;
+    const auto& mm = val[1].XmmControlStatus;
     value.cw = fp.FpControl;
     value.sw = fp.FpStatus;
     value.tw = fp.FpTag;
@@ -313,9 +323,9 @@ VPOperationStatus WhpxVirtualProcessor::GetFPUControl(FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus WhpxVirtualProcessor::SetFPUControl(const FPUControl& value) {
-    WHV_REGISTER_NAME reg[2] = { WHvX64RegisterFpControlStatus, WHvX64RegisterXmmControlStatus };
-    WHV_REGISTER_VALUE val[2];
+VPOperationStatus WhpxVirtualProcessor::SetFPUControl(const FPUControl& value) noexcept {
+    const WHV_REGISTER_NAME reg[2] = { WHvX64RegisterFpControlStatus, WHvX64RegisterXmmControlStatus };
+    WHV_REGISTER_VALUE val[2] = { 0 };
 
     auto& fp = val[0].FpControlStatus;
     auto& mm = val[1].XmmControlStatus;
@@ -328,7 +338,7 @@ VPOperationStatus WhpxVirtualProcessor::SetFPUControl(const FPUControl& value) {
     mm.LastFpDs = value.ds;
     mm.LastFpRdp = value.rdp;
 
-    HRESULT hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 2, val);
+    const HRESULT hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 2, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
@@ -336,29 +346,29 @@ VPOperationStatus WhpxVirtualProcessor::SetFPUControl(const FPUControl& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus WhpxVirtualProcessor::GetMXCSR(MXCSR& value) {
-    WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
+VPOperationStatus WhpxVirtualProcessor::GetMXCSR(MXCSR& value) noexcept {
+    const WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
     WHV_REGISTER_VALUE val[1];
 
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
 
-    auto& mm = val[0].XmmControlStatus;
+    const auto& mm = val[0].XmmControlStatus;
     value.u32 = mm.XmmStatusControl;
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus WhpxVirtualProcessor::SetMXCSR(const MXCSR& value) {
-    WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
-    WHV_REGISTER_VALUE val[1];
+VPOperationStatus WhpxVirtualProcessor::SetMXCSR(const MXCSR& value) noexcept {
+    const WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
+    WHV_REGISTER_VALUE val[1] = { 0 };
 
     auto& mm = val[0].XmmControlStatus;
     mm.XmmStatusControl = value.u32;
 
-    HRESULT hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    const HRESULT hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
@@ -366,29 +376,29 @@ VPOperationStatus WhpxVirtualProcessor::SetMXCSR(const MXCSR& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus WhpxVirtualProcessor::GetMXCSRMask(MXCSR& value) {
-    WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
+VPOperationStatus WhpxVirtualProcessor::GetMXCSRMask(MXCSR& value) noexcept {
+    const WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
     WHV_REGISTER_VALUE val[1];
 
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
 
-    auto& mm = val[0].XmmControlStatus;
+    const auto& mm = val[0].XmmControlStatus;
     value.u32 = mm.XmmStatusControlMask;
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus WhpxVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
-    WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
-    WHV_REGISTER_VALUE val[1];
+VPOperationStatus WhpxVirtualProcessor::SetMXCSRMask(const MXCSR& value) noexcept {
+    const WHV_REGISTER_NAME reg[1] = { WHvX64RegisterXmmControlStatus };
+    WHV_REGISTER_VALUE val[1] = { 0 };
 
     auto& mm = val[0].XmmControlStatus;
     mm.XmmStatusControlMask = value.u32;
 
-    HRESULT hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
+    const HRESULT hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, reg, 1, val);
     if (S_OK != hr) {
         return VPOperationStatus::Failed;
     }
@@ -398,17 +408,27 @@ VPOperationStatus WhpxVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
 
 // ----- Model specific registers ---------------------------------------------
 
-VPOperationStatus WhpxVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) {
+VPOperationStatus WhpxVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) noexcept {
     return GetMSRs(&msr, &value, 1);
 }
 
-VPOperationStatus WhpxVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) {
+VPOperationStatus WhpxVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) noexcept {
     return SetMSRs(&msr, &value, 1);
 }
 
-VPOperationStatus WhpxVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) {
-    WHV_REGISTER_NAME *regs = new WHV_REGISTER_NAME[numRegs];
-    WHV_REGISTER_VALUE *vals = new WHV_REGISTER_VALUE[numRegs];
+VPOperationStatus WhpxVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
+    WHV_REGISTER_NAME *regs = new(std::nothrow) WHV_REGISTER_NAME[numRegs];
+    WHV_REGISTER_VALUE *vals = new(std::nothrow) WHV_REGISTER_VALUE[numRegs];
+
+    if (regs == nullptr || vals == nullptr) {
+        delete[] regs;
+        delete[] vals;
+        return VPOperationStatus::Failed;
+    }
 
     for (size_t i = 0; i < numRegs; i++) {
         if (!TranslateMSR(msrs[i], regs[i])) {
@@ -418,16 +438,12 @@ VPOperationStatus WhpxVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t 
         }
     }
 
-    HRESULT hr = g_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, numRegs, vals);
-    VPOperationStatus result;
+    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, numRegs, vals);
+    const VPOperationStatus result = (S_OK == hr) ? VPOperationStatus::OK : VPOperationStatus::Failed;
     if (S_OK == hr) {
         for (size_t i = 0; i < numRegs; i++) {
             values[i] = vals[i].Reg64;
         }
-        result = VPOperationStatus::OK;
-    }
-    else {
-        result = VPOperationStatus::Failed;
     }
 
     delete[] regs;
@@ -435,9 +451,19 @@ VPOperationStatus WhpxVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t 
     return result;
 }
 
-VPOperationStatus WhpxVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) {
-    WHV_REGISTER_NAME *regs = new WHV_REGISTER_NAME[numRegs];
-    WHV_REGISTER_VALUE *vals = new WHV_REGISTER_VALUE[numRegs];
+VPOperationStatus WhpxVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept {
+    if (msrs == nullptr || values == nullptr) {
+        return VPOperationStatus::InvalidArguments;
+    }
+
+    WHV_REGISTER_NAME *regs = new(std::nothrow) WHV_REGISTER_NAME[numRegs];
+    WHV_REGISTER_VALUE *vals = new(std::nothrow) WHV_REGISTER_VALUE[numRegs];
+
+    if (regs == nullptr || vals == nullptr) {
+        delete[] regs;
+        delete[] vals;
+        return VPOperationStatus::Failed;
+    }
 
     for (size_t i = 0; i < numRegs; i++) {
         if (!TranslateMSR(msrs[i], regs[i])) {
@@ -448,14 +474,8 @@ VPOperationStatus WhpxVirtualProcessor::SetMSRs(const uint64_t msrs[], const uin
         vals[i].Reg64 = values[i];
     }
 
-    HRESULT hr = g_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, numRegs, vals);
-    VPOperationStatus result;
-    if (S_OK == hr) {
-        result = VPOperationStatus::OK;
-    }
-    else {
-        result = VPOperationStatus::Failed;
-    }
+    const HRESULT hr = m_dispatch.WHvSetVirtualProcessorRegisters(m_vm.Handle(), m_id, regs, numRegs, vals);
+    const VPOperationStatus result = (S_OK == hr) ? VPOperationStatus::OK : VPOperationStatus::Failed;
 
     delete[] regs;
     delete[] vals;
@@ -469,9 +489,9 @@ HRESULT WhpxVirtualProcessor::GetVirtualProcessorRegistersCallback(
     const WHV_REGISTER_NAME* RegisterNames,
     UINT32 RegisterCount,
     WHV_REGISTER_VALUE* RegisterValues
-) {
-    WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
-    return g_dispatch.WHvGetVirtualProcessorRegisters(vp->m_vm.Handle(), vp->m_id, RegisterNames, RegisterCount, RegisterValues);
+) noexcept {
+    const WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
+    return vp->m_dispatch.WHvGetVirtualProcessorRegisters(vp->m_vm.Handle(), vp->m_id, RegisterNames, RegisterCount, RegisterValues);
 }
 
 HRESULT WhpxVirtualProcessor::SetVirtualProcessorRegistersCallback(
@@ -479,32 +499,32 @@ HRESULT WhpxVirtualProcessor::SetVirtualProcessorRegistersCallback(
     const WHV_REGISTER_NAME* RegisterNames,
     UINT32 RegisterCount,
     const WHV_REGISTER_VALUE* RegisterValues
-) {
-    WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
-    return g_dispatch.WHvSetVirtualProcessorRegisters(vp->m_vm.Handle(), vp->m_id, RegisterNames, RegisterCount, RegisterValues);
+) noexcept {
+    const WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
+    return vp->m_dispatch.WHvSetVirtualProcessorRegisters(vp->m_vm.Handle(), vp->m_id, RegisterNames, RegisterCount, RegisterValues);
 }
 
-HRESULT WhpxVirtualProcessor::TranslateGvaPageCallback(VOID* Context, WHV_GUEST_VIRTUAL_ADDRESS Gva, WHV_TRANSLATE_GVA_FLAGS TranslateFlags, WHV_TRANSLATE_GVA_RESULT_CODE* TranslationResult, WHV_GUEST_PHYSICAL_ADDRESS* Gpa) {
-    WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
+HRESULT WhpxVirtualProcessor::TranslateGvaPageCallback(VOID* Context, WHV_GUEST_VIRTUAL_ADDRESS Gva, WHV_TRANSLATE_GVA_FLAGS TranslateFlags, WHV_TRANSLATE_GVA_RESULT_CODE* TranslationResult, WHV_GUEST_PHYSICAL_ADDRESS* Gpa) noexcept {
+    const WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
     WHV_TRANSLATE_GVA_RESULT result;
-    HRESULT hr = g_dispatch.WHvTranslateGva(vp->m_vm.Handle(), vp->m_id, Gva, TranslateFlags, &result, Gpa);
+    const HRESULT hr = vp->m_dispatch.WHvTranslateGva(vp->m_vm.Handle(), vp->m_id, Gva, TranslateFlags, &result, Gpa);
     if (S_OK == hr) {
         *TranslationResult = result.ResultCode;
     }
     return hr;
 }
 
-HRESULT WhpxVirtualProcessor::IoPortCallback(VOID *Context, WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) {
+HRESULT WhpxVirtualProcessor::IoPortCallback(VOID *Context, WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) noexcept {
     WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
     return vp->HandleIO(IoAccess);
 }
 
-HRESULT WhpxVirtualProcessor::MemoryCallback(VOID *Context, WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess) {
+HRESULT WhpxVirtualProcessor::MemoryCallback(VOID *Context, WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess) noexcept {
     WhpxVirtualProcessor *vp = (WhpxVirtualProcessor *)Context;
     return vp->HandleMMIO(MemoryAccess);
 }
 
-HRESULT WhpxVirtualProcessor::HandleIO(WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) {
+HRESULT WhpxVirtualProcessor::HandleIO(WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) noexcept {
     if (IoAccess->Direction == WHV_IO_IN) {
         IoAccess->Data = m_io.IORead(IoAccess->Port, IoAccess->AccessSize);
     }
@@ -515,7 +535,7 @@ HRESULT WhpxVirtualProcessor::HandleIO(WHV_EMULATOR_IO_ACCESS_INFO *IoAccess) {
     return S_OK;
 }
 
-HRESULT WhpxVirtualProcessor::HandleMMIO(WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess) {
+HRESULT WhpxVirtualProcessor::HandleMMIO(WHV_EMULATOR_MEMORY_ACCESS_INFO *MemoryAccess) noexcept {
     if (MemoryAccess->Direction == WHV_IO_IN) {
         uint64_t value = m_io.MMIORead(MemoryAccess->GpaAddress, MemoryAccess->AccessSize);
         switch (MemoryAccess->AccessSize) {

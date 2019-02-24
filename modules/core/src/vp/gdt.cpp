@@ -27,7 +27,7 @@ SOFTWARE.
 
 namespace virt86 {
 
-void GDTEntry::Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
+void GDTEntry::Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) noexcept {
 	this->descriptor = 0ULL;
 
 	this->data.baseLow = base & 0xFFFF;
@@ -41,11 +41,11 @@ void GDTEntry::Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
 	this->data.flags = flags & 0xF;
 }
 
-uint32_t GDTEntry::GetBase() {
+uint32_t GDTEntry::GetBase() noexcept {
     return ((data.baseLow) | (data.baseMid << 16) | (data.baseHigh << 24));
 }
 
-uint32_t GDTEntry::GetLimit() {
+uint32_t GDTEntry::GetLimit() noexcept {
     uint32_t limit = ((data.limitLow) | (data.limitHigh << 16));
     // If we use 4 KB pages, extend the limit to reflect that
     if (data.flags & GDT_FL_GRANULARITY) {

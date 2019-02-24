@@ -161,12 +161,12 @@ enum class Reg {
 };
 
 template<class T>
-inline T RegOffset(Reg base, Reg reg) {
+inline T RegOffset(Reg base, Reg reg) noexcept {
     return static_cast<T>(base) - static_cast<T>(base);
 }
 
 template<class T>
-inline Reg RegAdd(Reg base, T offset) {
+inline Reg RegAdd(Reg base, T offset) noexcept {
     return static_cast<Reg>(static_cast<T>(base) + offset);
 }
 
@@ -264,15 +264,15 @@ union RegValue {
     
     RegValue() = default;
 
-    RegValue(const uint8_t& u8) : u64(u8) {}
-    RegValue(const uint16_t& u16) : u64(u16) {}
-    RegValue(const uint32_t& u32) : u64(u32) {}
-    RegValue(const uint64_t& u64) : u64(u64) {}
+    RegValue(const uint8_t& u8) noexcept : u64(u8) {}
+    RegValue(const uint16_t& u16) noexcept : u64(u16) {}
+    RegValue(const uint32_t& u32) noexcept : u64(u32) {}
+    RegValue(const uint64_t& u64) noexcept : u64(u64) {}
 
-    RegValue(const int8_t& i8) : u64(i8) {}
-    RegValue(const int16_t& i16) : u64(i16) {}
-    RegValue(const int32_t& i32) : u64(i32) {}
-    RegValue(const int64_t& i64) : u64(i64) {}
+    RegValue(const int8_t& i8) noexcept : u64(i8) {}
+    RegValue(const int16_t& i16) noexcept : u64(i16) {}
+    RegValue(const int32_t& i32) noexcept : u64(i32) {}
+    RegValue(const int64_t& i64) noexcept : u64(i64) {}
 };
 
 // ----- Register bits and masks ----------------------------------------------
@@ -367,10 +367,10 @@ constexpr uint64_t DR7_LOCAL(uint8_t index) { return 1ull << (index << 1); }
 // Global DR# breapoint enable
 constexpr uint64_t DR7_GLOBAL(uint8_t index) { return 1ull << ((index << 1) + 1); }
 // Conditions for DR#
-constexpr uint64_t DR7_COND_SHIFT(uint8_t index) { return (index << 2) + 16; }
+constexpr uint64_t DR7_COND_SHIFT(uint8_t index) { return (static_cast<uint64_t>(index) << 2ull) + 16; }
 constexpr uint64_t DR7_COND(uint8_t index) { return 0b11ull << DR7_COND_SHIFT(index); }
 // Size of DR# breakpoint
-constexpr uint64_t DR7_SIZE_SHIFT(uint8_t index) { return (index << 2) + 18; }
+constexpr uint64_t DR7_SIZE_SHIFT(uint8_t index) { return (static_cast<uint64_t>(index) << 2ull) + 18; }
 constexpr uint64_t DR7_SIZE(uint8_t index) { return 0b11ull << DR7_SIZE_SHIFT(index); }
 
 constexpr uint64_t DR7_COND_EXEC = 0b00u;        // Break on execution

@@ -27,7 +27,7 @@ SOFTWARE.
 
 namespace virt86 {
 
-void IDTEntry::Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) {
+void IDTEntry::Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) noexcept {
 	this->descriptor = 0ULL;
 
 	this->data.offsetLow = offset & 0xFFFF;
@@ -41,11 +41,11 @@ void IDTEntry::Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t att
 	this->data.present = (attributes >> 3) & 0x1;
 }
 
-uint32_t IDTEntry::GetOffset() {
-	return ((uint32_t)data.offsetLow) | (((uint32_t)data.offsetHigh) << 16);
+uint32_t IDTEntry::GetOffset() noexcept {
+	return static_cast<uint32_t>(data.offsetLow) | (static_cast<uint32_t>(data.offsetHigh) << 16);
 }
 
-void IDTEntry::SetOffset(uint32_t offset) {
+void IDTEntry::SetOffset(uint32_t offset) noexcept {
 	this->data.offsetLow = offset & 0xFFFF;
 	this->data.offsetHigh = (offset >> 16);
 }

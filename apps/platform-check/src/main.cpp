@@ -60,14 +60,15 @@ int main() {
     printf("Virtualization platforms available on this system:\n");
     printf("\n");
     for (size_t i = 0; i < array_size(PlatformFactories); i++) {
-        auto& platform = PlatformFactories[i]();
+        const auto& platform = PlatformFactories[i]();
 
         printf("%s - ", platform.GetName().c_str());
 
-        auto initStatus = platform.GetInitStatus();
+        const auto initStatus = platform.GetInitStatus();
         switch (initStatus) {
         case PlatformInitStatus::OK: printf("Available\n"); break;
         case PlatformInitStatus::Failed: printf("Initialization failed\n"); break;
+        case PlatformInitStatus::Uninitialized: printf("Uninitialized\n"); break;
         case PlatformInitStatus::Unavailable: printf("Unavailable\n"); break;
         case PlatformInitStatus::Unsupported: printf("Unsupported\n"); break;
         default: printf("Unknown initialization status\n");
@@ -78,9 +79,9 @@ int main() {
             continue;
         }
 
-        auto& features = platform.GetFeatures();
+        const auto& features = platform.GetFeatures();
         printf("  Features:\n");
-        printf("    Maximum number of VCPUs: %d per VM, %d global\n", features.maxProcessorsPerVM, features.maxProcessorsGlobal);
+        printf("    Maximum number of VCPUs: %u per VM, %u global\n", features.maxProcessorsPerVM, features.maxProcessorsGlobal);
         printf("    Unrestricted guest: %s\n", (features.unrestrictedGuest) ? "supported" : "unsuported");
         printf("    Extended Page Tables: %s\n", (features.extendedPageTables) ? "supported" : "unsuported");
         printf("    Guest debugging: %s\n", (features.guestDebugging) ? "available" : "unavailable");
@@ -99,7 +100,7 @@ int main() {
             }
         }
         printf("    Floating point extensions:");
-        auto fpExts = BitmaskEnum(features.floatingPointExtensions);
+        const auto fpExts = BitmaskEnum(features.floatingPointExtensions);
         if (!fpExts) printf(" None");
         else {
             if (fpExts.AnyOf(FloatingPointExtension::SSE2)) printf(" SSE2");
@@ -110,7 +111,7 @@ int main() {
         }
         printf("\n");
         printf("    Extended control registers:");
-        auto extCRs = BitmaskEnum(features.extendedControlRegisters);
+        const auto extCRs = BitmaskEnum(features.extendedControlRegisters);
         if (!extCRs) printf(" None");
         else {
             if (extCRs.AnyOf(ExtendedControlRegister::CR8)) printf(" CR8");
@@ -119,7 +120,7 @@ int main() {
         }
         printf("\n");
         printf("    Extended VM exits:");
-        auto extVMExits = BitmaskEnum(features.extendedVMExits);
+        const auto extVMExits = BitmaskEnum(features.extendedVMExits);
         if (!extVMExits) printf(" None");
         else {
             if (extVMExits.AnyOf(ExtendedVMExit::CPUID)) printf(" CPUID");
@@ -128,7 +129,7 @@ int main() {
         }
         printf("\n");
         printf("    Exception exits:");
-        auto excptExits = BitmaskEnum(features.exceptionExits);
+        const auto excptExits = BitmaskEnum(features.exceptionExits);
         if (!excptExits) printf(" None");
         else {
             if (excptExits.AnyOf(ExceptionCode::DivideErrorFault)) printf(" DivideErrorFault");

@@ -27,18 +27,22 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmVirtualMachineSysImpl::HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl)
+HaxmVirtualMachineSysImpl::HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl) noexcept
     : m_platformImpl(platformImpl)
     , m_handle(INVALID_HANDLE_VALUE)
     , m_hHAXM(platformImpl.m_sys->Handle())
 {
 }
 
-HaxmVirtualMachineSysImpl::~HaxmVirtualMachineSysImpl() {
+HaxmVirtualMachineSysImpl::~HaxmVirtualMachineSysImpl() noexcept {
     Destroy();
 }
 
-bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t *out_vmID) {
+bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t *out_vmID) noexcept {
+    if (out_vmID == nullptr) {
+        return false;
+    }
+
     DWORD returnSize;
     BOOLEAN bResult;
 
@@ -56,7 +60,7 @@ bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t 
 
     // VM created successfully; open the object
     wchar_t vmName[13];
-    swprintf_s(vmName, L"\\\\.\\hax_vm%02d", vmID);
+    swprintf_s(vmName, L"\\\\.\\hax_vm%02u", vmID);
     m_handle = CreateFileW(vmName, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     if (m_handle == INVALID_HANDLE_VALUE) {
         *out_vmID = 0xFFFFFFFF;
@@ -68,14 +72,14 @@ bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t 
     return true;
 }
 
-void HaxmVirtualMachineSysImpl::Destroy() {
+void HaxmVirtualMachineSysImpl::Destroy() noexcept {
     if (m_handle != INVALID_HANDLE_VALUE) {
         CloseHandle(m_handle);
         m_handle = INVALID_HANDLE_VALUE;
     }
 }
 
-bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) {
+bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) noexcept {
     DWORD returnSize;
     
     return DeviceIoControl(m_handle,
@@ -86,7 +90,7 @@ bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) {
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
     DWORD returnSize;
     BOOLEAN bResult;
 
@@ -124,7 +128,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t bas
     return MemoryMappingStatus::OK;
 }
 
-bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) {
+bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) noexcept {
     DWORD returnSize;
 
     hax_set_ram_info setMemInfo;
@@ -141,7 +145,7 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, con
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     DWORD returnSize;
     BOOLEAN bResult;
 
@@ -182,7 +186,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_
     return MemoryMappingStatus::OK;
 }
 
-bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) {
+bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) noexcept {
     DWORD returnSize;
 
     hax_set_ram_info2 setMemInfo;
@@ -201,7 +205,7 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-bool HaxmVirtualMachineSysImpl::SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+bool HaxmVirtualMachineSysImpl::SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept {
     DWORD returnSize;
 
     hax_protect_ram_info protectInfo = { 0 };

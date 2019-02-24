@@ -29,25 +29,25 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmPlatform& HaxmPlatform::Instance() {
+HaxmPlatform& HaxmPlatform::Instance() noexcept {
     static HaxmPlatform instance;
     return instance;
 }
 
-HaxmPlatform::HaxmPlatform()
+HaxmPlatform::HaxmPlatform() noexcept
     : Platform("Intel HAXM")
     , m_delegate(std::make_unique<Delegate>())
 {
     auto& impl = m_delegate->impl;
 
-    auto initResult = impl.Initialize();
+    const auto initResult = impl.Initialize();
     if (initResult != PlatformInitStatus::OK) {
         m_initStatus = initResult;
         return;
     }
     
     // Publish capabilities
-    auto& caps = impl.m_haxCaps;
+    const auto& caps = impl.m_haxCaps;
     if (caps.wstatus & HAX_CAP_STATUS_WORKING) {
         m_initStatus = PlatformInitStatus::OK;
         m_features.maxProcessorsPerVM = 64;
@@ -68,18 +68,17 @@ HaxmPlatform::HaxmPlatform()
     }
 }
 
-HaxmPlatform::~HaxmPlatform() {
+HaxmPlatform::~HaxmPlatform() noexcept {
     DestroyVMs();
 }
 
-bool HaxmPlatform::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) {
+bool HaxmPlatform::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     return m_delegate->impl.SetGlobalMemoryLimit(enabled, limitMB);
 }
 
-VirtualMachine *HaxmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
-    auto vm = new HaxmVirtualMachine(*this, specifications, m_delegate->impl);
+std::unique_ptr<VirtualMachine> HaxmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = std::make_unique<HaxmVirtualMachine>(*this, specifications, m_delegate->impl);
     if (!vm->Initialize()) {
-        delete vm;
         return nullptr;
     }
     return vm;

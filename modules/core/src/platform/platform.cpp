@@ -27,8 +27,9 @@ SOFTWARE.
 
 namespace virt86 {
 
-Platform::Platform(const char *name)
+Platform::Platform(const char *name) noexcept
     : m_name(name)
+    , m_initStatus(PlatformInitStatus::Uninitialized)
 {
 }
 
@@ -36,10 +37,9 @@ Platform::~Platform() noexcept {
 }
 
 const std::optional<std::reference_wrapper<VirtualMachine>> Platform::CreateVM(const VMSpecifications& specifications) {
-    VirtualMachine *vm = CreateVMImpl(specifications);
+    auto vm = CreateVMImpl(specifications);
     if (vm != nullptr) {
-        m_vms.emplace_back(vm);
-        return *vm;
+        return *m_vms.emplace_back(std::move(vm));
     }
 
     return std::nullopt;
@@ -56,7 +56,7 @@ const bool Platform::FreeVM(VirtualMachine& vm) {
     return false;
 }
 
-void Platform::DestroyVMs() {
+void Platform::DestroyVMs() noexcept {
     m_vms.clear();
 }
 

@@ -38,6 +38,7 @@ enum class VPOperationStatus {
     OK,                  // Operation completed succesfully
 
     Failed,              // The operation failed
+    InvalidArguments,    // Invalid arguments (such as null pointers) were specified
     InvalidSelector,     // An invalid selector was specified
     InvalidRegister,     // An invalid register was specified
     BreakpointNeverHit,  // A breakpoint was never hit

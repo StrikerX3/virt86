@@ -31,17 +31,22 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-WhpxDispatch g_dispatch;
+WhpxDispatch *WhpxPlatform::s_dispatch = new(std::nothrow) WhpxDispatch();
 
-WhpxPlatform& WhpxPlatform::Instance() {
+WhpxPlatform& WhpxPlatform::Instance() noexcept {
     static WhpxPlatform instance;
     return instance;
 }
 
-WhpxPlatform::WhpxPlatform()
+WhpxPlatform::WhpxPlatform() noexcept
     : Platform("Microsoft Windows Hypervisor Platform")
 {
-    if (!g_dispatch.Load()) {
+    if (s_dispatch == nullptr) {
+        m_initStatus = PlatformInitStatus::Failed;
+        return;
+    }
+
+    if (!s_dispatch->Load()) {
         m_initStatus = PlatformInitStatus::Unavailable;
         return;
     }
@@ -50,7 +55,7 @@ WhpxPlatform::WhpxPlatform()
 
     // Check for presence of the hypervisor platform
     UINT32 size;
-    HRESULT hr = g_dispatch.WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &cap, sizeof(WHV_CAPABILITY), &size);
+    HRESULT hr = s_dispatch->WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &cap, sizeof(WHV_CAPABILITY), &size);
     if (S_OK != hr) {
         m_initStatus = PlatformInitStatus::Failed;
     }
@@ -60,12 +65,12 @@ WhpxPlatform::WhpxPlatform()
     }
 
     // Retrieve and publish feature set
-    hr = g_dispatch.WHvGetCapability(WHvCapabilityCodeFeatures, &cap, sizeof(WHV_CAPABILITY), &size);
+    hr = s_dispatch->WHvGetCapability(WHvCapabilityCodeFeatures, &cap, sizeof(WHV_CAPABILITY), &size);
     if (S_OK != hr) {
         m_initStatus = PlatformInitStatus::Failed;
     }
 
-    WhpxDefs::WHV_CAPABILITY_FEATURES features = cap.Features;
+    const WhpxDefs::WHV_CAPABILITY_FEATURES features = cap.Features;
     m_features.floatingPointExtensions = FloatingPointExtension::SSE2;
     m_features.extendedControlRegisters = ExtendedControlRegister::XCR0 | ExtendedControlRegister::CR8 | ExtendedControlRegister::MXCSRMask;
     m_features.maxProcessorsPerVM = 64; // TODO: check value
@@ -81,7 +86,7 @@ WhpxPlatform::WhpxPlatform()
     m_initStatus = PlatformInitStatus::OK;
 
     // Retrieve and publish extended VM exits
-    hr = g_dispatch.WHvGetCapability(WHvCapabilityCodeExtendedVmExits, &cap, sizeof(WHV_CAPABILITY), &size);
+    hr = s_dispatch->WHvGetCapability(WHvCapabilityCodeExtendedVmExits, &cap, sizeof(WHV_CAPABILITY), &size);
     if (S_OK != hr) {
         m_initStatus = PlatformInitStatus::Failed;
     }
@@ -94,7 +99,7 @@ WhpxPlatform::WhpxPlatform()
     }
     if (cap.ExtendedVmExits.ExceptionExit) {
         m_features.extendedVMExits |= ExtendedVMExit::Exception;
-        hr = g_dispatch.WHvGetCapability(WHvCapabilityCodeExceptionExitBitmap, &cap, sizeof(WHV_CAPABILITY), &size);
+        hr = s_dispatch->WHvGetCapability(WHvCapabilityCodeExceptionExitBitmap, &cap, sizeof(WHV_CAPABILITY), &size);
         if (S_OK != hr) {
             m_initStatus = PlatformInitStatus::Failed;
         }
@@ -102,16 +107,16 @@ WhpxPlatform::WhpxPlatform()
     }
 }
 
-WhpxPlatform::~WhpxPlatform() {
+WhpxPlatform::~WhpxPlatform() noexcept {
     if (m_initStatus == PlatformInitStatus::OK) {
         DestroyVMs();
     }
+    delete s_dispatch;
 }
 
-VirtualMachine *WhpxPlatform::CreateVMImpl(const VMSpecifications& specifications) {
-    auto vm = new WhpxVirtualMachine(*this, specifications);
+std::unique_ptr<VirtualMachine> WhpxPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = std::make_unique<WhpxVirtualMachine>(*this, *s_dispatch, specifications);
     if (!vm->Initialize()) {
-        delete vm;
         return nullptr;
     }
     return vm;

@@ -29,7 +29,7 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) {
+VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) noexcept {
     switch (reg) {
     case Reg::CS: name = WHvX64RegisterCs; break;
     case Reg::SS: name = WHvX64RegisterSs; break;
@@ -110,8 +110,8 @@ VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) 
     return VPOperationStatus::OK;
 }
 
-RegValue TranslateRegisterValue(const Reg reg, WHV_REGISTER_VALUE& value) {
-    RegValue result;
+RegValue TranslateRegisterValue(const Reg reg, const WHV_REGISTER_VALUE& value) noexcept {
+    RegValue result{ 0 };
     switch (reg) {
     case Reg::CS: case Reg::SS: case Reg::DS: case Reg::ES: case Reg::FS: case Reg::GS:
     case Reg::LDTR: case Reg::TR:
@@ -203,7 +203,7 @@ RegValue TranslateRegisterValue(const Reg reg, WHV_REGISTER_VALUE& value) {
     return result;
 }
 
-void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_VALUE& output) {
+void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_VALUE& output) noexcept {
     switch (reg) {
     case Reg::CS: case Reg::SS: case Reg::DS: case Reg::ES: case Reg::FS: case Reg::GS:
     case Reg::LDTR: case Reg::TR:
@@ -295,7 +295,7 @@ void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_V
     }
 }
 
-bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) {
+bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) noexcept {
     // Only the following MSRs are supported:
     // TODO: make this list queryable
     //

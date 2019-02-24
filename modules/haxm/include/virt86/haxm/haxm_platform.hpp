@@ -38,17 +38,29 @@ namespace virt86::haxm {
 
 class HaxmPlatform : public Platform {
 public:
-    static HaxmPlatform& Instance();
+    ~HaxmPlatform() noexcept final;
 
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB);
+    // Prevent copy construction and copy assignment
+    HaxmPlatform(const HaxmPlatform&) = delete;
+    HaxmPlatform& operator=(const HaxmPlatform&) = delete;
+
+    // Prevent move construction and move assignment
+    HaxmPlatform(HaxmPlatform&&) = delete;
+    HaxmPlatform&& operator=(HaxmPlatform&&) = delete;
+
+    // Disallow taking the address
+    HaxmPlatform *operator&() = delete;
+
+    static HaxmPlatform& Instance() noexcept;
+
+    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
 protected:
-    HaxmPlatform();
-    virtual ~HaxmPlatform() override;
-
-    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
+    std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) override;
 
 private:
+    HaxmPlatform() noexcept;
+
     struct Delegate;
     std::unique_ptr<Delegate> m_delegate;
 };

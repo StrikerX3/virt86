@@ -36,12 +36,23 @@ class HaxmPlatformSysImpl;
 
 class HaxmPlatformImpl {
 public:
-    HaxmPlatformImpl();
-    ~HaxmPlatformImpl();
+    HaxmPlatformImpl() noexcept;
+    ~HaxmPlatformImpl() noexcept;
 
-    PlatformInitStatus Initialize();
+    // Prevent copy construction and copy assignment
+    HaxmPlatformImpl(const HaxmPlatformImpl&) = delete;
+    HaxmPlatformImpl& operator=(const HaxmPlatformImpl&) = delete;
 
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB);
+    // Prevent move construction and move assignment
+    HaxmPlatformImpl(HaxmPlatformImpl&&) = delete;
+    HaxmPlatformImpl&& operator=(HaxmPlatformImpl&&) = delete;
+
+    // Disallow taking the address
+    HaxmPlatformImpl *operator&() = delete;
+
+    PlatformInitStatus Initialize() noexcept;
+
+    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     hax_module_version m_haxVer;
     hax_capabilityinfo m_haxCaps;

@@ -35,12 +35,12 @@ SOFTWARE.
 
 namespace virt86::kvm {
 
-KvmPlatform& KvmPlatform::Instance() {
+KvmPlatform& KvmPlatform::Instance() noexcept {
     static KvmPlatform instance;
     return instance;
 }
 
-KvmPlatform::KvmPlatform()
+KvmPlatform::KvmPlatform() noexcept
     : Platform("KVM")
     , m_fd(-1)
 {
@@ -148,7 +148,7 @@ KvmPlatform::KvmPlatform()
     }
 }
 
-KvmPlatform::~KvmPlatform() {
+KvmPlatform::~KvmPlatform() noexcept {
     DestroyVMs();
     if (m_fd != -1) {
         close(m_fd);
@@ -156,10 +156,9 @@ KvmPlatform::~KvmPlatform() {
     }
 }
 
-VirtualMachine *KvmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
-    auto vm = new KvmVirtualMachine(*this, specifications, m_fd);
+std::unique_ptr<VirtualMachine> KvmPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = std::make_unique<KvmVirtualMachine>(*this, specifications, m_fd);
     if (!vm->Initialize()) {
-        delete vm;
         return nullptr;
     }
     return vm;

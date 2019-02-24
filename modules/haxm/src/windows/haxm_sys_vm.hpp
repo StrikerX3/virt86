@@ -37,23 +37,34 @@ namespace virt86::haxm {
 
 class HaxmVirtualMachineSysImpl {
 public:
-    HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl);
-    ~HaxmVirtualMachineSysImpl();
+    HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl) noexcept;
+    ~HaxmVirtualMachineSysImpl() noexcept;
 
-    bool Initialize(const size_t numProcessors, uint32_t *out_vmID);
-    void Destroy();
+    // Prevent copy construction and copy assignment
+    HaxmVirtualMachineSysImpl(const HaxmVirtualMachineSysImpl&) = delete;
+    HaxmVirtualMachineSysImpl& operator=(const HaxmVirtualMachineSysImpl&) = delete;
 
-    bool ReportQEMUVersion(hax_qemu_version& version);
+    // Prevent move construction and move assignment
+    HaxmVirtualMachineSysImpl(HaxmVirtualMachineSysImpl&&) = delete;
+    HaxmVirtualMachineSysImpl&& operator=(HaxmVirtualMachineSysImpl&&) = delete;
 
-    MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory);
-    bool UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size);
+    // Disallow taking the address
+    HaxmVirtualMachineSysImpl *operator&() = delete;
+
+    bool Initialize(const size_t numProcessors, uint32_t *out_vmID) noexcept;
+    void Destroy() noexcept;
+
+    bool ReportQEMUVersion(hax_qemu_version& version) noexcept;
+
+    MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept;
+    bool UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) noexcept;
     
-    MemoryMappingStatus MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory);
-    bool UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size);
+    MemoryMappingStatus MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept;
+    bool UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) noexcept;
 
-    bool SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags);
+    bool SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept;
 
-    const HANDLE Handle() { return m_handle; }
+    const HANDLE Handle() noexcept { return m_handle; }
 
 private:
     HaxmPlatformImpl& m_platformImpl;

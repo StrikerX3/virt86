@@ -35,14 +35,25 @@ namespace virt86::haxm {
 
 class HaxmPlatformSysImpl {
 public:
-    HaxmPlatformSysImpl();
-    ~HaxmPlatformSysImpl();
+    HaxmPlatformSysImpl() noexcept;
+    ~HaxmPlatformSysImpl() noexcept;
 
-    PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps);
+    // Prevent copy construction and copy assignment
+    HaxmPlatformSysImpl(const HaxmPlatformSysImpl&) = delete;
+    HaxmPlatformSysImpl& operator=(const HaxmPlatformSysImpl&) = delete;
 
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB);
+    // Prevent move construction and move assignment
+    HaxmPlatformSysImpl(HaxmPlatformSysImpl&&) = delete;
+    HaxmPlatformSysImpl&& operator=(HaxmPlatformSysImpl&&) = delete;
 
-    const HANDLE Handle() const { return m_handle; }
+    // Disallow taking the address
+    HaxmPlatformSysImpl *operator&() = delete;
+
+    PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept;
+
+    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
+
+    const HANDLE Handle() const noexcept { return m_handle; }
 
 private:
     HANDLE m_handle;

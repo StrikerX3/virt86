@@ -138,12 +138,12 @@ public:
     /**
      * Reads a portion of physical memory into the specified value.
      */
-    bool MemRead(const uint64_t paddr, const uint64_t size, void *value) const;
+    bool MemRead(const uint64_t paddr, const uint64_t size, void *value) const noexcept;
 
     /**
      * Writes the specified value into physical memory.
      */
-    bool MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const;
+    bool MemWrite(const uint64_t paddr, const uint64_t size, const void *value) const noexcept;
 
     // ----- Linear memory ----------------------------------------------------
 
@@ -162,7 +162,7 @@ public:
      * and IA-32 Architectures Software Developer Manuals", Volume 3, section
      * 4.1, "Paging Modes and Control Bits".
      */
-    bool LinearToPhysical(const uint64_t laddr, uint64_t *paddr);
+    bool LinearToPhysical(const uint64_t laddr, uint64_t *paddr) noexcept;
 
     /**
      * Reads a portion of linear memory into the specified value. x86 virtual
@@ -170,7 +170,7 @@ public:
      * memory contents. Optionally, the caller may receive the number of bytes
      * read during the operation.
      */
-    bool LMemRead(const uint64_t laddr, const uint64_t size, void *value, uint64_t *bytesRead = nullptr);
+    bool LMemRead(const uint64_t laddr, const uint64_t size, void *value, uint64_t *bytesRead = nullptr) noexcept;
 
     /**
      * Writes the specified value into linear memory. x86 virtual address
@@ -178,71 +178,71 @@ public:
      * contents. Optionally, the caller may receive the number of bytes written
      * during the operation.
      */
-    bool LMemWrite(const uint64_t laddr, const uint64_t size, const void *value, uint64_t *bytesWritten = nullptr);
+    bool LMemWrite(const uint64_t laddr, const uint64_t size, const void *value, uint64_t *bytesWritten = nullptr) noexcept;
 
     // ----- Registers --------------------------------------------------------
 
     /**
      * Reads from a register.
      */
-    virtual VPOperationStatus RegRead(const Reg reg, RegValue& value) = 0;
+    virtual VPOperationStatus RegRead(const Reg reg, RegValue& value) noexcept = 0;
 
     /**
      * Writes to a register.
      */
-    virtual VPOperationStatus RegWrite(const Reg reg, const RegValue& value) = 0;
+    virtual VPOperationStatus RegWrite(const Reg reg, const RegValue& value) noexcept = 0;
 
     /**
      * Copies the value between two segment registers.
      */
-    VPOperationStatus RegCopy(const Reg dst, const Reg src);
+    VPOperationStatus RegCopy(const Reg dst, const Reg src) noexcept;
 
     /**
      * Reads from segment registers in bulk.
      */
-    virtual VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs);
+    virtual VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept;
 
     /**
      * Writes to segment registers in bulk.
      */
-    virtual VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs);
+    virtual VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept;
 
     /**
      * Copies the values between segment registers in bulk.
      */
-    VPOperationStatus RegCopy(const Reg dsts[], const Reg srcs[], const size_t numRegs);
+    VPOperationStatus RegCopy(const Reg dsts[], const Reg srcs[], const size_t numRegs) noexcept;
 
     // ----- Floating point control registers ---------------------------------
 
     /**
      * Reads the FPU control registers.
      */
-    virtual VPOperationStatus GetFPUControl(FPUControl& value) = 0;
+    virtual VPOperationStatus GetFPUControl(FPUControl& value) noexcept = 0;
 
     /**
      * Writes the FPU control registers.
      */
-    virtual VPOperationStatus SetFPUControl(const FPUControl& value) = 0;
+    virtual VPOperationStatus SetFPUControl(const FPUControl& value) noexcept = 0;
 
     /**
      * Reads the MXCSR register.
      */
-    virtual VPOperationStatus GetMXCSR(MXCSR& value) = 0;
+    virtual VPOperationStatus GetMXCSR(MXCSR& value) noexcept = 0;
 
     /**
      * Writes the MXCSR registers.
      */
-    virtual VPOperationStatus SetMXCSR(const MXCSR& value) = 0;
+    virtual VPOperationStatus SetMXCSR(const MXCSR& value) noexcept = 0;
 
     /**
      * Reads the MXCSR_MASK register.
      */
-    virtual VPOperationStatus GetMXCSRMask(MXCSR& value) = 0;
+    virtual VPOperationStatus GetMXCSRMask(MXCSR& value) noexcept = 0;
 
     /**
      * Writes the MXCSR_MASK registers.
      */
-    virtual VPOperationStatus SetMXCSRMask(const MXCSR& value) = 0;
+    virtual VPOperationStatus SetMXCSRMask(const MXCSR& value) noexcept = 0;
  
     // ----- Model specific registers -----------------------------------------
 
@@ -253,7 +253,7 @@ public:
      * Returns VPOperationStatus::InvalidRegister if the platform doesn't
      * expose the requested MSR.
      */
-    virtual VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) = 0;
+    virtual VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) noexcept = 0;
 
     /**
      * Writes to an MSR.
@@ -262,7 +262,7 @@ public:
      * Returns VPOperationStatus::InvalidRegister if the platform doesn't
      * expose the requested MSR.
      */
-    virtual VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) = 0;
+    virtual VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) noexcept = 0;
 
     /**
      * Reads from MSRs in bulk.
@@ -271,7 +271,7 @@ public:
      * Returns VPOperationStatus::InvalidRegister if the platform doesn't
      * expose one of the requested MSRs.
      */
-    virtual VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs);
+    virtual VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept;
 
     /**
      * Writes to MSRs in bulk.
@@ -280,43 +280,43 @@ public:
      * Returns VPOperationStatus::InvalidRegister if the platform doesn't
      * expose one of the requested MSRs.
      */
-    virtual VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs);
+    virtual VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept;
 
     // ----- Global Descriptor Table ------------------------------------------
 
     /**
      * Retrieves an entry from the Global Descriptor Table.
      */
-    VPOperationStatus GetGDTEntry(const uint16_t selector, GDTEntry& entry);
+    VPOperationStatus GetGDTEntry(const uint16_t selector, GDTEntry& entry) noexcept;
 
     /**
      * Modifies an entry from the Global Descriptor Table.
      */
-    VPOperationStatus SetGDTEntry(const uint16_t selector, const GDTEntry& entry);
+    VPOperationStatus SetGDTEntry(const uint16_t selector, const GDTEntry& entry) noexcept;
 
     // ----- Interrupt Descriptor Table ---------------------------------------
 
     /**
      * Retrieves an entry from the Interrupt Descriptor Table.
      */
-    VPOperationStatus GetIDTEntry(const uint8_t vector, IDTEntry& entry);
+    VPOperationStatus GetIDTEntry(const uint8_t vector, IDTEntry& entry) noexcept;
 
     /**
      * Modifies an entry from the Interrupt Descriptor Table.
      */
-    VPOperationStatus SetIDTEntry(const uint8_t vector, const IDTEntry& entry);
+    VPOperationStatus SetIDTEntry(const uint8_t vector, const IDTEntry& entry) noexcept;
 
     // ----- Local Descriptor Table -------------------------------------------
 
     /**
      * Retrieves an entry from the Local Descriptor Table.
      */
-    VPOperationStatus GetLDTEntry(const uint16_t selector, LDTEntry& entry);
+    VPOperationStatus GetLDTEntry(const uint16_t selector, LDTEntry& entry) noexcept;
 
     /**
      * Modifies an entry from the Local Descriptor Table.
      */
-    VPOperationStatus SetLDTEntry(const uint16_t selector, const LDTEntry& entry);
+    VPOperationStatus SetLDTEntry(const uint16_t selector, const LDTEntry& entry) noexcept;
 
     // ----- Breakpoints ------------------------------------------------------
 
@@ -331,7 +331,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest breakpoint capability.
      */
-    virtual VPOperationStatus EnableSoftwareBreakpoints(bool enable);
+    virtual VPOperationStatus EnableSoftwareBreakpoints(bool enable) noexcept;
 
     /**
      * Configures up to 4 hardware breakpoints.
@@ -342,7 +342,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest breakpoint capability.
      */
-    virtual VPOperationStatus SetHardwareBreakpoints(HardwareBreakpoints breakpoints);
+    virtual VPOperationStatus SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept;
 
     /**
      * Clears all hardware breakpoints.
@@ -350,7 +350,7 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest breakpoint capability.
      */
-    virtual VPOperationStatus ClearHardwareBreakpoints();
+    virtual VPOperationStatus ClearHardwareBreakpoints() noexcept;
 
     /**
      * Retrieves the address of the most recently hit breakpoint. Must be
@@ -363,32 +363,27 @@ public:
      * This is an optional operation, supported by platforms that provide the
      * guest breakpoint capability.
      */
-    virtual VPOperationStatus GetBreakpointAddress(uint64_t *address) const;
+    virtual VPOperationStatus GetBreakpointAddress(uint64_t *address) const noexcept;
 
     // ----- Data -------------------------------------------------------------
 
     /**
      * Retrieves information the hypervisor exit.
      */
-    const VMExitInfo& GetVMExitInfo() const { return m_exitInfo; }
+    const VMExitInfo& GetVMExitInfo() const noexcept { return m_exitInfo; }
 
     /**
      * Retrieves the virtual machine that owns this virtual processor.
      */
-    const VirtualMachine& GetVirtualMachine() const { return m_vm; }
+    const VirtualMachine& GetVirtualMachine() const noexcept { return m_vm; }
 
 protected:
     VirtualProcessor(VirtualMachine& vm);
 
     /**
-     * The hypervisor exit information.
-     */
-    VMExitInfo m_exitInfo;
-
-    /**
      * Tells the hypervisor to run the virtual processor until interrupted.
      */
-    virtual VPExecutionStatus RunImpl() = 0;
+    virtual VPExecutionStatus RunImpl() noexcept = 0;
 
     /**
      * Tells the hypervisor to run one instruction on the virtual processor.
@@ -396,7 +391,7 @@ protected:
      * This is an optional operation, supported by platforms that provide the
      * guest breakpoint capability.
      */
-    virtual VPExecutionStatus StepImpl();
+    virtual VPExecutionStatus StepImpl() noexcept;
 
     /**
      * Gives a chance to perform additional operations on the virtual processor
@@ -404,22 +399,22 @@ protected:
      *
      * Returns true if the virtual processor is ready to receive the interrupt.
      */
-    virtual bool PrepareInterrupt(uint8_t vector) = 0;
+    virtual bool PrepareInterrupt(uint8_t vector) noexcept = 0;
 
     /**
      * Tells the hypervisor to inject an interrupt into the virtual processor.
      */
-    virtual VPOperationStatus InjectInterrupt(uint8_t vector) = 0;
+    virtual VPOperationStatus InjectInterrupt(uint8_t vector) noexcept = 0;
 
     /**
      * Determines if an interrupt can be injected into the virtual processor.
      */
-    virtual bool CanInjectInterrupt() const = 0;
+    virtual bool CanInjectInterrupt() const noexcept = 0;
 
     /**
      * Requests for an interrupt injection window.
      */
-    virtual void RequestInterruptWindow() = 0;
+    virtual void RequestInterruptWindow() noexcept = 0;
     
     /**
      * Reference to the virtual machine that owns this virtual processor.
@@ -430,6 +425,11 @@ protected:
      * Reference to the I/O handles of the virtual machine.
      */
     const IOHandlers& m_io;
+
+    /**
+     * The hypervisor exit information.
+     */
+    VMExitInfo m_exitInfo;
 
     // Allow VirtualMachine to access the constructor
     friend class VirtualMachine;
@@ -447,19 +447,19 @@ private:
      * Converts the given linear address into a physical address under 32-bit
      * paging mode.
      */
-    bool LinearToPhysical32(const uint32_t laddr, uint64_t *paddr);
+    bool LinearToPhysical32(const uint32_t laddr, uint64_t *paddr) noexcept;
 
     /**
      * Converts the given linear address into a physical address under PAE
      * paging mode.
      */
-    bool LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr);
+    bool LinearToPhysicalPAE(const uint32_t laddr, uint64_t *paddr) noexcept;
 
     /**
      * Converts the given linear address into a physical address under 4-level
      * paging mode.
      */
-    bool LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr);
+    bool LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr) noexcept;
 };
 
 }

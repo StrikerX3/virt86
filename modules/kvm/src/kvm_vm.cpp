@@ -38,11 +38,11 @@ SOFTWARE.
 namespace virt86::kvm {
 
 // Checks if the memory region exactly matches the given memory address range
-static bool regionEquals(kvm_userspace_memory_region& rgn, const uint64_t baseAddress, const uint64_t size) {
+static bool regionEquals(kvm_userspace_memory_region& rgn, const uint64_t baseAddress, const uint64_t size) noexcept {
     return rgn.guest_phys_addr == baseAddress && rgn.memory_size == size;
 }
 
-KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM)
+KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMSpecifications& specifications, int fdKVM) noexcept
     : VirtualMachine(platform, specifications)
     , m_platform(platform)
     , m_fdKVM(fdKVM)
@@ -51,7 +51,7 @@ KvmVirtualMachine::KvmVirtualMachine(KvmPlatform& platform, const VMSpecificatio
 {
 }
 
-KvmVirtualMachine::~KvmVirtualMachine() {
+KvmVirtualMachine::~KvmVirtualMachine() noexcept {
     DestroyVPs();
     if (m_fd != -1) {
         close(m_fd);
@@ -76,18 +76,17 @@ bool KvmVirtualMachine::Initialize() {
 
     // Create virtual processors
     for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
-        auto vp = new KvmVirtualProcessor(*this, id);
+        auto vp = std::make_unique<KvmVirtualProcessor>(*this, id);
         if (!vp->Initialize()) {
-            delete vp;
             return false;
         }
-        RegisterVP(vp);
+        RegisterVP(std::move(vp));
     }
 
     return true;
 }
 
-MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     kvm_userspace_memory_region& memoryRegion = m_memoryRegions.emplace_back();
     memoryRegion.guest_phys_addr = baseAddress;
     memoryRegion.memory_size = size;
@@ -111,7 +110,7 @@ MemoryMappingStatus KvmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAdd
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept {
     // Find memory range that corresponds to the specified address range
     auto memoryRegion = std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(),
         [=](kvm_userspace_memory_region& memRgn) { return regionEquals(memRgn, baseAddress, size); });
@@ -131,7 +130,7 @@ MemoryMappingStatus KvmVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t ba
     return MemoryMappingStatus::OK;
 }
 
-DirtyPageTrackingStatus KvmVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
+DirtyPageTrackingStatus KvmVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept {
     // Find memory range that corresponds to the specified address range
     auto memoryRegion = std::find_if(m_memoryRegions.begin(), m_memoryRegions.end(),
         [=](kvm_userspace_memory_region& memRgn) { return regionEquals(memRgn, baseAddress, size); });
@@ -150,7 +149,7 @@ DirtyPageTrackingStatus KvmVirtualMachine::QueryDirtyPagesImpl(const uint64_t ba
     return DirtyPageTrackingStatus::OK;
 }
 
-DirtyPageTrackingStatus KvmVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) {
+DirtyPageTrackingStatus KvmVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept {
     // Delegate to QueryDirtyPagesImpl as it will clear the dirty bitmap for
     // the memory slot
     const size_t bitmapSize = (size / PAGE_SIZE + sizeof(uint64_t) - 1) / sizeof(uint64_t);

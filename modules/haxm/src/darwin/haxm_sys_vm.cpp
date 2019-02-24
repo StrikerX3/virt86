@@ -32,18 +32,18 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmVirtualMachineSysImpl::HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl)
+HaxmVirtualMachineSysImpl::HaxmVirtualMachineSysImpl(HaxmPlatformImpl& platformImpl) noexcept
     : m_platformImpl(platformImpl)
     , m_fd(-1)
     , m_fdHAXM(platformImpl.m_sys->FileDescriptor())
 {
 }
 
-HaxmVirtualMachineSysImpl::~HaxmVirtualMachineSysImpl() {
+HaxmVirtualMachineSysImpl::~HaxmVirtualMachineSysImpl() noexcept {
     Destroy();
 }
 
-bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t *out_vmID) {
+bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t *out_vmID) noexcept {
     // Ask HAXM to create a VM
     uint32_t vmID;
     int result = ioctl(m_fdHAXM, HAX_IOCTL_CREATE_VM, &vmID);
@@ -65,18 +65,18 @@ bool HaxmVirtualMachineSysImpl::Initialize(const size_t numProcessors, uint32_t 
     return true;
 }
 
-void HaxmVirtualMachineSysImpl::Destroy() {
+void HaxmVirtualMachineSysImpl::Destroy() noexcept {
     if (m_fd != -1) {
         close(m_fd);
         m_fd = -1;
     }
 }
 
-bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) {
+bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) noexcept {
     return ioctl(m_fd, HAX_VM_IOCTL_NOTIFY_QEMU_VERSION, &version) >= 0;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
     // Allocate memory
     hax_alloc_ram_info memInfo;
     memInfo.va = (uint64_t)memory;
@@ -100,7 +100,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t bas
     return MemoryMappingStatus::OK;
 }
 
-bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) {
+bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) noexcept {
     hax_set_ram_info setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = 0;
@@ -109,7 +109,7 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, con
     return ioctl(m_fd, HAX_VM_IOCTL_SET_RAM, &setMemInfo) >= 0;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     // Allocate memory
     hax_ramblock_info memInfo;
     memInfo.start_va = (uint64_t)memory;
@@ -136,7 +136,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_
     return MemoryMappingStatus::OK;
 }
 
-bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) {
+bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) noexcept {
     hax_set_ram_info2 setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = 0;
@@ -147,7 +147,7 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemoryLarge(const uint64_t baseAddress
     return ioctl(m_fd, HAX_VM_IOCTL_SET_RAM2, &setMemInfo) >= 0;
 }
 
-bool HaxmVirtualMachineSysImpl::SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+bool HaxmVirtualMachineSysImpl::SetGuestMemoryFlagsLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept {
     hax_protect_ram_info protectInfo = { 0 };
     protectInfo.pa_start = baseAddress;
     protectInfo.size = size;

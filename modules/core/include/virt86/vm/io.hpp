@@ -43,11 +43,11 @@ struct IOHandlers {
     MMIOReadFunc_t MMIOReadFunc;
     MMIOWriteFunc_t MMIOWriteFunc;
 
-    uint32_t IORead(uint16_t port, size_t size) const { return IOReadFunc(context, port, size); }
-    void IOWrite(uint16_t port, size_t size, uint32_t value) const { return IOWriteFunc(context, port, size, value); }
+    uint32_t IORead(uint16_t port, size_t size) const noexcept { return IOReadFunc(context, port, size); }
+    void IOWrite(uint16_t port, size_t size, uint32_t value) const noexcept { return IOWriteFunc(context, port, size, value); }
 
-    uint64_t MMIORead(uint64_t address, size_t size) const { return MMIOReadFunc(context, address, size); }
-    void MMIOWrite(uint64_t address, size_t size, uint64_t value) const { return MMIOWriteFunc(context, address, size, value); }
+    uint64_t MMIORead(uint64_t address, size_t size) const noexcept { return MMIOReadFunc(context, address, size); }
+    void MMIOWrite(uint64_t address, size_t size, uint64_t value) const noexcept { return MMIOWriteFunc(context, address, size, value); }
 
     void *context;
 };

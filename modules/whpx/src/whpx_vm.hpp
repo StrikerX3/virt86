@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "virt86/vm/vm.hpp"
 #include "virt86/whpx/whpx_platform.hpp"
+#include "whpx_dispatch.hpp"
 
 #include <Windows.h>
 #include <WinHvPlatform.h>
@@ -36,27 +37,39 @@ namespace virt86::whpx {
 
 class WhpxVirtualMachine : public VirtualMachine {
 public:
-    const WHV_PARTITION_HANDLE Handle() const { return m_handle; }
+    WhpxVirtualMachine(WhpxPlatform& platform, const WhpxDispatch& dispatch, const VMSpecifications& specifications) noexcept;
+    ~WhpxVirtualMachine() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    WhpxVirtualMachine(const WhpxVirtualMachine&) = delete;
+    WhpxVirtualMachine& operator=(const WhpxVirtualMachine&) = delete;
+
+    // Prevent move construction and move assignment
+    WhpxVirtualMachine(WhpxVirtualMachine&&) = delete;
+    WhpxVirtualMachine&& operator=(WhpxVirtualMachine&&) = delete;
+
+    // Disallow taking the address
+    WhpxVirtualMachine *operator&() = delete;
+
+    const WHV_PARTITION_HANDLE Handle() const noexcept { return m_handle; }
 
 protected:
-    virtual ~WhpxVirtualMachine() override;
 
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept override;
+    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
 
-    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) override;
-    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) override;
+    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept override;
+    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
 
 private:
     WhpxPlatform& m_platform;
+    const WhpxDispatch& m_dispatch;
 
     WHV_PARTITION_HANDLE m_handle;
 
-    WhpxVirtualMachine(WhpxPlatform& platform, const VMSpecifications& specifications);
     bool Initialize();
 
-    // Allow WhpxPlatform to access the constructor and Initialize()
+    // Allow WhpxPlatform to access Initialize()
     friend class WhpxPlatform;
 };
 

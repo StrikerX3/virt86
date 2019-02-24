@@ -61,7 +61,7 @@ SOFTWARE.
     typedef returnType (WINAPI *name##_t) parameters;
 
 #define WHPX_DEFINE_FUNC(returnType, name, parameters) \
-    name##_t name;
+    name##_t name = nullptr; 
 
 WHPX_PLATFORM_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 WHPX_EMULATION_FUNCTIONS(WHPX_TYPEDEF_FUNC);
@@ -69,7 +69,9 @@ WHPX_EMULATION_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 namespace virt86::whpx {
 
 struct WhpxDispatch {
-    bool Load();
+    WhpxDispatch() = default;
+
+    bool Load() noexcept;
     bool m_loaded = false;
 
     HMODULE m_hWinHvPlatform = NULL;
@@ -78,7 +80,5 @@ struct WhpxDispatch {
     HMODULE m_hWinHvEmulation = NULL;
     WHPX_EMULATION_FUNCTIONS(WHPX_DEFINE_FUNC)
 };
-
-extern WhpxDispatch g_dispatch;
 
 }

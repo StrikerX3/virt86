@@ -33,7 +33,7 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
-HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys)
+HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm, HaxmVirtualMachineSysImpl& vmSys) noexcept
     : m_vm(vm)
     , m_vmSys(vmSys)
     , m_fdVM(vmSys.FileDescriptor())
@@ -41,11 +41,11 @@ HaxmVirtualProcessorSysImpl::HaxmVirtualProcessorSysImpl(HaxmVirtualMachine& vm,
 {
 }
 
-HaxmVirtualProcessorSysImpl::~HaxmVirtualProcessorSysImpl() {
+HaxmVirtualProcessorSysImpl::~HaxmVirtualProcessorSysImpl() noexcept {
     Destroy();
 }
 
-bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_tunnel, void** out_ioTunnel) {
+bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_tunnel, void** out_ioTunnel) noexcept {
     // Create virtual processor
     int result = ioctl(m_fdVM, HAX_VM_IOCTL_VCPU_CREATE, &vcpuID);
     if (result < 0) {
@@ -75,47 +75,47 @@ bool HaxmVirtualProcessorSysImpl::Initialize(uint32_t vcpuID, hax_tunnel** out_t
     return true;
 }
 
-void HaxmVirtualProcessorSysImpl::Destroy() {
+void HaxmVirtualProcessorSysImpl::Destroy() noexcept {
     if (m_fd != -1) {
         close(m_fd);
         m_fd = -1;
     }
 }
 
-bool HaxmVirtualProcessorSysImpl::Run() {
+bool HaxmVirtualProcessorSysImpl::Run() noexcept {
     return ioctl(m_fd, HAX_VCPU_IOCTL_RUN) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) {
+bool HaxmVirtualProcessorSysImpl::InjectInterrupt(uint8_t vector) noexcept {
     uint32_t vector32 = static_cast<uint32_t>(vector);
     return ioctl(m_fd, HAX_VCPU_IOCTL_INTERRUPT, &vector32) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) {
+bool HaxmVirtualProcessorSysImpl::GetRegisters(vcpu_state_t* registers) noexcept {
     return ioctl(m_fd, HAX_VCPU_GET_REGS, registers) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetRegisters(vcpu_state_t* registers) {
+bool HaxmVirtualProcessorSysImpl::SetRegisters(vcpu_state_t* registers) noexcept {
     return ioctl(m_fd, HAX_VCPU_SET_REGS, registers) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetFPURegisters(fx_layout* registers) {
+bool HaxmVirtualProcessorSysImpl::GetFPURegisters(fx_layout* registers) noexcept {
     return ioctl(m_fd, HAX_VCPU_IOCTL_GET_FPU, registers) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetFPURegisters(fx_layout* registers) {
+bool HaxmVirtualProcessorSysImpl::SetFPURegisters(fx_layout* registers) noexcept {
     return ioctl(m_fd, HAX_VCPU_IOCTL_SET_FPU, registers) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::GetMSRData(hax_msr_data* msrData) {
+bool HaxmVirtualProcessorSysImpl::GetMSRData(hax_msr_data* msrData) noexcept {
     return ioctl(m_fd, HAX_VCPU_IOCTL_GET_MSRS, msrData) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetMSRData(hax_msr_data* msrData) {
+bool HaxmVirtualProcessorSysImpl::SetMSRData(hax_msr_data* msrData) noexcept {
     return ioctl(m_fd, HAX_VCPU_IOCTL_SET_MSRS, msrData) >= 0;
 }
 
-bool HaxmVirtualProcessorSysImpl::SetDebug(hax_debug_t* debug) {
+bool HaxmVirtualProcessorSysImpl::SetDebug(hax_debug_t* debug) noexcept {
     return ioctl(m_fd, HAX_IOCTL_VCPU_DEBUG, debug) >= 0;
 }
 
