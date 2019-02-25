@@ -59,8 +59,8 @@ namespace virt86 {
  * Indicates the platform initialization status.
  */
 enum class PlatformInitStatus {
-    OK,             // Platform initialized successfully
     Uninitialized,  // Platform is uninitialized
+    OK,             // Platform initialized successfully
     Unavailable,    // Platform is unavailable
     Unsupported,    // Platform is unsupported on the host
     Failed,         // Initialization failed for another reason
