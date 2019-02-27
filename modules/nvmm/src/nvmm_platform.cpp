@@ -64,10 +64,9 @@ NVMMPlatform::~NVMMPlatform() {
     // TODO: Close/release/free platform
 }
 
-VirtualMachine *NVMMPlatform::CreateVMImpl(const VMSpecifications& specifications) {
-    auto vm = new NVMMVirtualMachine(*this, specifications);
+std::unique_ptr<VirtualMachine> NVMMPlatform::CreateVMImpl(const VMSpecifications& specifications) {
+    auto vm = std::make_unique<NVMMVirtualMachine>(*this, specifications);
     if (!vm->Initialize()) {
-        delete vm;
         return nullptr;
     }
     return vm;

@@ -66,10 +66,8 @@ target_include_directories(virt86-nvmm
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-add_precompiled_header(virt86-nvmm src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
-
 # Tell dependents that NVMM is available via compiler definition
-target_compile_definitions(virt86-nvmm PUBLIC VIRT86_nvmm_AVAILABLE=1)
+target_compile_definitions(virt86-nvmm PUBLIC VIRT86_NVMM_AVAILABLE=1)
 
 ##############################
 # Installation

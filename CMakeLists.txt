@@ -27,15 +27,13 @@ cmake_minimum_required(VERSION 3.12)
 
 project(virt86 VERSION 1.0.1)
 
-# Differentiate between Linux and macOS
-if(UNIX AND NOT APPLE)
+# Identify NetBSD and Linux
+if(CMAKE_SYSTEM_NAME MATCHES "NetBSD")
+    set(NETBSD TRUE)
+elseif(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
 
-# Identify NetBSD
-if(CMAKE_SYSTEM_NAME MATCHES "NetBSD")
-    set(NETBSD TRUE)
-endif()
 
 # Define properties and include helpers for Visual Studio
 if(MSVC)

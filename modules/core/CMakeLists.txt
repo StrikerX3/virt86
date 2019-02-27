@@ -105,7 +105,7 @@ if(MSVC)
     vs_use_edit_and_continue()
 
     set_target_properties(virt86-core PROPERTIES FOLDER Libraries)
-else()
+elseif(NOT NETBSD)
     add_precompiled_header(virt86-core src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 endif()
 

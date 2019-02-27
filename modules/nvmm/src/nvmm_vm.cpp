@@ -28,18 +28,18 @@ SOFTWARE.
 
 namespace virt86::nvmm {
 
-NVMMVirtualMachine::NVMMVirtualMachine(NVMMPlatform& platform, const VMSpecifications& specifications)
+NVMMVirtualMachine::NVMMVirtualMachine(NVMMPlatform& platform, const VMSpecifications& specifications) noexcept
     : VirtualMachine(platform, specifications)
     , m_platform(platform)
 {
 }
 
-NVMMVirtualMachine::~NVMMVirtualMachine() {
+NVMMVirtualMachine::~NVMMVirtualMachine() noexcept {
     DestroyVPs();
     // TODO: Close/release/free VM
 }
 
-bool NVMMVirtualMachine::Initialize() {
+bool NVMMVirtualMachine::Initialize() noexcept {
     // TODO: Create the VM
     // TODO: Initialize virtual machine based on VMSpecifications (m_specifications).
     // Unsupported parameters should be ignored.
@@ -48,42 +48,41 @@ bool NVMMVirtualMachine::Initialize() {
 
     // Create virtual processors
     for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
-        auto vp = new NVMMVirtualProcessor(*this, id);
+        auto vp = std::make_unique<NVMMVirtualProcessor>(*this, id);
         if (!vp->Initialize()) {
-            delete vp;
             return false;
         }
-        RegisterVP(vp);
+        RegisterVP(std::move(vp));
     }
 
     return true;
 }
 
-MemoryMappingStatus NVMMVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) {
+MemoryMappingStatus NVMMVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     // TODO: Map the specified GPA range to the guest.
 
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus NVMMVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) {
+MemoryMappingStatus NVMMVirtualMachine::UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) noexcept {
     // TODO: Unmap the specified GPA range from the guest.
 
     return MemoryMappingStatus::OK;
 }
 
-MemoryMappingStatus NVMMVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) {
+MemoryMappingStatus NVMMVirtualMachine::SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept {
     // TODO: Configure the flags of the specified GPA range.
 
     return MemoryMappingStatus::OK;
 }
 
-DrtyPageTrackingStatus NVMMVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) {
+DrtyPageTrackingStatus NVMMVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept {
     // TODO: Query the dirty page bitmap for the specified GPA range.
 
     return DirtyPageTrackingStatus::OK;
 }
 
-DirtyPageTrackingStatus NVMMVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) {
+DirtyPageTrackingStatus NVMMVirtualMachine::ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept {
     // TODO: Clear the dirty page bitmap for the specified GPA range.
 
     return DirtyPageTrackingStatus::OK;

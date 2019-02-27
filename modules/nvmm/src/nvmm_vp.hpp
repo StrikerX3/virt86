@@ -34,50 +34,60 @@ class NVMMVirtualMachine;
 
 class NVMMVirtualProcessor : public VirtualProcessor {
 public:
-    VPExecutionStatus RunImpl() override;
-    VPExecutionStatus StepImpl() override;
+    NVMMVirtualProcessor(NVMMVirtualMachine& vm, uint32_t vcpuID) noexcept;
+    ~NVMMVirtualProcessor() noexcept override;
 
-    bool PrepareInterrupt(uint8_t vector) override;
-    VPOperationStatus InjectInterrupt(uint8_t vector) override;
-    bool CanInjectInterrupt() const override;
-    void RequestInterruptWindow() override;
+    // Prevent copy construction and copy assignment
+    NVMMVirtualProcessor(const NVMMVirtualProcessor&) = delete;
+    NVMMVirtualProcessor& operator=(const NVMMVirtualProcessor&) = delete;
 
-    VPOperationStatus RegRead(const Reg reg, RegValue& value) override;
-    VPOperationStatus RegWrite(const Reg reg, const RegValue& value) override;
-    VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs) override;
-    VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) override;
+    // Prevent move construction and move assignment
+    NVMMVirtualProcessor(NVMMVirtualProcessor&&) = delete;
+    NVMMVirtualProcessor&& operator=(NVMMVirtualProcessor&&) = delete;
 
-    VPOperationStatus GetFPUControl(FPUControl& value) override;
-    VPOperationStatus SetFPUControl(const FPUControl& value) override;
+    // Disallow taking the address
+    NVMMVirtualProcessor *operator&() = delete;
 
-    VPOperationStatus GetMXCSR(MXCSR& value) override;
-    VPOperationStatus SetMXCSR(const MXCSR& value) override;
+    VPExecutionStatus RunImpl() noexcept override;
+    VPExecutionStatus StepImpl() noexcept override;
 
-    VPOperationStatus GetMXCSRMask(MXCSR& value) override;
-    VPOperationStatus SetMXCSRMask(const MXCSR& value) override;
+    bool PrepareInterrupt(uint8_t vector) noexcept override;
+    VPOperationStatus InjectInterrupt(uint8_t vector) noexcept override;
+    bool CanInjectInterrupt() const noexcept override;
+    void RequestInterruptWindow() noexcept override;
 
-    VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) override;
-    VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) override;
-    VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) override;
-    VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) override;
+    VPOperationStatus RegRead(const Reg reg, RegValue& value) noexcept override;
+    VPOperationStatus RegWrite(const Reg reg, const RegValue& value) noexcept override;
+    VPOperationStatus RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept override;
+    VPOperationStatus RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept override;
 
-    VPOperationStatus EnableSoftwareBreakpoints(bool enable) override;
-    VPOperationStatus SetHardwareBreakpoints(HardwareBreakpoints breakpoints) override;
-    VPOperationStatus ClearHardwareBreakpoints() override;
-    VPOperationStatus GetBreakpointAddress(uint64_t *address) const override;
+    VPOperationStatus GetFPUControl(FPUControl& value) noexcept override;
+    VPOperationStatus SetFPUControl(const FPUControl& value) noexcept override;
 
-protected:
-    NVMMVirtualProcessor(NVMMVirtualMachine& vm, uint32_t vcpuID);
-    ~NVMMVirtualProcessor() override;
+    VPOperationStatus GetMXCSR(MXCSR& value) noexcept override;
+    VPOperationStatus SetMXCSR(const MXCSR& value) noexcept override;
+
+    VPOperationStatus GetMXCSRMask(MXCSR& value) noexcept override;
+    VPOperationStatus SetMXCSRMask(const MXCSR& value) noexcept override;
+
+    VPOperationStatus GetMSR(const uint64_t msr, uint64_t& value) noexcept override;
+    VPOperationStatus SetMSR(const uint64_t msr, const uint64_t value) noexcept override;
+    VPOperationStatus GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept override;
+    VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept override;
+
+    VPOperationStatus EnableSoftwareBreakpoints(bool enable) noexcept override;
+    VPOperationStatus SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept override;
+    VPOperationStatus ClearHardwareBreakpoints() noexcept override;
+    VPOperationStatus GetBreakpointAddress(uint64_t *address) const noexcept override;
 
 private:
     NVMMVirtualMachine& m_vm;
 
     uint32_t m_vcpuID;
 
-    bool Initialize();
+    bool Initialize() noexcept;
 
-    VPExecutionStatus HandleExecResult();
+    VPExecutionStatus HandleExecResult() noexcept;
 
     // Allow NVMMVirtualMachine to access the constructor and Initialize()
     friend class NVMMVirtualMachine;

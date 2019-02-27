@@ -32,23 +32,35 @@ SOFTWARE.
 namespace virt86::nvmm {
 
 class NVMMVirtualMachine : public VirtualMachine {
-protected:
-    virtual ~NVMMVirtualMachine() override;
+public:
+    NVMMVirtualMachine(NVMMPlatform& platform, const VMSpecifications& specifications);  // TODO: modify the constructor to pass down handles or file descriptors as needed
+    ~NVMMVirtualMachine() noexcept final;
 
+    // Prevent copy construction and copy assignment
+    NVMMVirtualMachine(const NVMMVirtualMachine&) = delete;
+    NVMMVirtualMachine& operator=(const NVMMVirtualMachine&) = delete;
+
+    // Prevent move construction and move assignment
+    NVMMVirtualMachine(NVMMVirtualMachine&&) = delete;
+    NVMMVirtualMachine&& operator=(NVMMVirtualMachine&&) = delete;
+
+    // Disallow taking the address
+    NVMMVirtualMachine *operator&() = delete;
+
+    bool Initialize();
+
+protected:
     // TODO: UnmapGuestMemoryImpl, SetGuestMemoryFlagsImpl and the dirty page
     // tracking operations are optional and may be removed if NVMM doesn't
     // support them
-    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) override;
-    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) override;
-    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) override;
+    MemoryMappingStatus MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept override;
+    MemoryMappingStatus UnmapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
+    MemoryMappingStatus SetGuestMemoryFlagsImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags) noexcept override;
 
-    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) override;
-    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) override;
+    DirtyPageTrackingStatus QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept override;
+    DirtyPageTrackingStatus ClearDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size) noexcept override;
 
 private:
-    NVMMVirtualMachine(NVMMPlatform& platform, const VMSpecifications& specifications);  // TODO: modify the constructor to pass down handles or file descriptors as needed
-    bool Initialize();
-
     NVMMPlatform& m_platform;
 
     // Allow NVMMPlatform to access the constructor and Initialize()

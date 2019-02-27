@@ -37,14 +37,25 @@ namespace virt86::nvmm {
 
 class NVMMPlatform : public Platform {
 public:
+    ~NVMMPlatform() noexcept final;
+
+    // Prevent copy construction and copy assignment
+    NVMMPlatform(const NVMMPlatform&) = delete;
+    NVMMPlatform& operator=(const NVMMPlatform&) = delete;
+
+    // Prevent move construction and move assignment
+    NVMMPlatform(NVMMPlatform&&) = delete;
+    NVMMPlatform&& operator=(NVMMPlatform&&) = delete;
+
+    // Disallow taking the address
+    NVMMPlatform *operator&() = delete;
+
     static NVMMPlatform& Instance();
 
 protected:
     NVMMPlatform();
-    virtual ~NVMMPlatform() override;
 
-    VirtualMachine *CreateVMImpl(const VMSpecifications& specifications) override;
-
+    std::unique_ptr<VirtualMachine> CreateVMImpl(const VMSpecifications& specifications) override;
 };
 
 }

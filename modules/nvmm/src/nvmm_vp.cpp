@@ -28,18 +28,18 @@ SOFTWARE.
 
 namespace virt86::nvmm {
 
-NVMMVirtualProcessor::NVMMVirtualProcessor(NVMMVirtualMachine& vm, uint32_t vcpuID)
+NVMMVirtualProcessor::NVMMVirtualProcessor(NVMMVirtualMachine& vm, uint32_t vcpuID) noexcept
     : VirtualProcessor(vm)
     , m_vm(vm)
     , m_vcpuID(vcpuID)
 {
 }
 
-NVMMVirtualProcessor::~NVMMVirtualProcessor() {
+NVMMVirtualProcessor::~NVMMVirtualProcessor() noexcept {
     // TODO: Close/release/free VCPU
 }
 
-bool NVMMVirtualProcessor::Initialize() {
+bool NVMMVirtualProcessor::Initialize() noexcept {
     // TODO: Create the VCPU
     // TODO: Initialize any additional features available to the platform
 
@@ -47,7 +47,7 @@ bool NVMMVirtualProcessor::Initialize() {
 
 }
 
-VPExecutionStatus NVMMVirtualProcessor::RunImpl() {
+VPExecutionStatus NVMMVirtualProcessor::RunImpl() noexcept {
     // TODO: Request VCPU to run
     // If registers are cached in this class, update the VCPU state before running
     // (see HAXM or KVM for examples of this)
@@ -55,7 +55,7 @@ VPExecutionStatus NVMMVirtualProcessor::RunImpl() {
     return HandleExecResult();
 }
 
-VPExecutionStatus NVMMVirtualProcessor::StepImpl() {
+VPExecutionStatus NVMMVirtualProcessor::StepImpl() noexcept {
     // TODO: If NVMM does not support guest debugging or single stepping, this
     // function should return VPExecutionStatus::Unsupported.
     // Otherwise, implement as follows:
@@ -82,7 +82,7 @@ VPExecutionStatus NVMMVirtualProcessor::StepImpl() {
     return result;
 }
 
-VPExecutionStatus NVMMVirtualProcessor::HandleExecResult() {
+VPExecutionStatus NVMMVirtualProcessor::HandleExecResult() noexcept {
     // TODO: If registers are cached in this class, mark registers as dirty
     // (typically by setting a bool flag to true)
 
@@ -91,7 +91,7 @@ VPExecutionStatus NVMMVirtualProcessor::HandleExecResult() {
     return VPExecutionStatus::OK;
 }
 
-bool NVMMVirtualProcessor::PrepareInterrupt(uint8_t vector) {
+bool NVMMVirtualProcessor::PrepareInterrupt(uint8_t vector) noexcept {
     // TODO: Some hypervisors (e.g. WHPX) won't stop running the VCPU if no
     // exit conditions are met. This method gives a chance to cancel, pause
     // or otherwise interrupt execution so that an interrupt can be injected.
@@ -100,25 +100,25 @@ bool NVMMVirtualProcessor::PrepareInterrupt(uint8_t vector) {
     return true;
 }
 
-VPOperationStatus NVMMVirtualProcessor::InjectInterrupt(uint8_t vector) {
+VPOperationStatus NVMMVirtualProcessor::InjectInterrupt(uint8_t vector) noexcept {
     // TODO: Inject interrupt
     return VPOperationStatus::OK;
 }
 
-bool NVMMVirtualProcessor::CanInjectInterrupt() const {
+bool NVMMVirtualProcessor::CanInjectInterrupt() const noexcept {
     // TODO: If NVMM provides a flag indicating that there is an open window
     // for interrupt injection, return that here, otherwise just return true.
     return true;
 }
 
-void NVMMVirtualProcessor::RequestInterruptWindow() {
+void NVMMVirtualProcessor::RequestInterruptWindow() noexcept {
     // TODO: If NVMM requires a window for interrupt injection to be opened, do
     // it here
 }
 
 // ----- Registers ------------------------------------------------------------
 
-VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg reg, RegValue& value) {
+VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg reg, RegValue& value) noexcept {
     // TODO: Read the specified register into the value. Be sure to zero extend
     // smaller registers, since client code might access a value type larger
     // than the register.
@@ -127,7 +127,7 @@ VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg reg, RegValue& value) 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) {
+VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg reg, const RegValue& value) noexcept {
     // TODO: Write the specified register to the VCPU state.
     // If NVMM provides a way to access smaller registers such as AH, AL, AX
     // and EAX directly, use them as the hypervisor will likely perform zero
@@ -139,7 +139,7 @@ VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg reg, const RegValue& 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) {
+VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg regs[], RegValue values[], const size_t numRegs) noexcept {
     // TODO: Read the specified registers into the values.
     // If NVMM provides a more efficient way of reading registers in bulk, use
     // that here. Otherwise, this method can be removed from this subclass, as
@@ -150,7 +150,7 @@ VPOperationStatus NVMMVirtualProcessor::RegRead(const Reg regs[], RegValue value
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) {
+VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
     // TODO: Write the specified registers to the VCPU state.
     // If NVMM provides a more efficient way of writing registers in bulk, use
     // that here. Otherwise, this method can be removed from this subclass, as
@@ -163,35 +163,35 @@ VPOperationStatus NVMMVirtualProcessor::RegWrite(const Reg regs[], const RegValu
 
 // ----- Floating point control registers -------------------------------------
 
-VPOperationStatus NVMMVirtualProcessor::GetFPUControl(FPUControl& value) {
+VPOperationStatus NVMMVirtualProcessor::GetFPUControl(FPUControl& value) noexcept {
     // TODO: Read the FPU control registers.
     // If they're cached, refresh them
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetFPUControl(const FPUControl& value) {
+VPOperationStatus NVMMVirtualProcessor::SetFPUControl(const FPUControl& value) noexcept {
     // TODO: Write the FPU control registers.
     // If they're cached, mark them dirty.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::GetMXCSR(MXCSR& value) {
+VPOperationStatus NVMMVirtualProcessor::GetMXCSR(MXCSR& value) noexcept {
     // TODO: Read the MXCSR register.
     // Refresh registers if cached.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetMXCSR(const MXCSR& value) {
+VPOperationStatus NVMMVirtualProcessor::SetMXCSR(const MXCSR& value) noexcept {
     // TODO: Write the MXCSR register.
     // Mark as dirty if cached.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::GetMXCSRMask(MXCSR& value) {
+VPOperationStatus NVMMVirtualProcessor::GetMXCSRMask(MXCSR& value) noexcept {
     // TODO: Read the MXCSR_MASK register if supported.
     // Refresh registers if cached.
     // Return VPOperationStatus::Unsupported if MXCSR_MASK is unavailable.
@@ -199,7 +199,7 @@ VPOperationStatus NVMMVirtualProcessor::GetMXCSRMask(MXCSR& value) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
+VPOperationStatus NVMMVirtualProcessor::SetMXCSRMask(const MXCSR& value) noexcept {
     // TODO: Write the MXCSR_MASK register if supported.
     // Mark as dirty if cached.
     // Return VPOperationStatus::Unsupported if MXCSR_MASK is unavailable.
@@ -208,26 +208,26 @@ VPOperationStatus NVMMVirtualProcessor::SetMXCSRMask(const MXCSR& value) {
 }
 // ----- Model specific registers ---------------------------------------------
 
-VPOperationStatus NVMMVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) {
+VPOperationStatus NVMMVirtualProcessor::GetMSR(const uint64_t msr, uint64_t& value) noexcept {
     // TODO: Read the specified MSR.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) {
+VPOperationStatus NVMMVirtualProcessor::SetMSR(const uint64_t msr, const uint64_t value) noexcept {
     // TODO: Write the specified MSR.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) {
+VPOperationStatus NVMMVirtualProcessor::GetMSRs(const uint64_t msrs[], uint64_t values[], const size_t numRegs) noexcept {
     // TODO: Read the specified MSRs.
     // If NVMM provides an efficient way to read MSRs in bulk, use that.
 
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) {
+VPOperationStatus NVMMVirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept {
     // TODO: Write the specified MSRs.
     // If NVMM provides an efficient way to write MSRs in bulk, use that.
 
@@ -236,7 +236,7 @@ VPOperationStatus NVMMVirtualProcessor::SetMSRs(const uint64_t msrs[], const uin
 
 // ----- Breakpoints ----------------------------------------------------------
 
-VPOperationStatus NVMMVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
+VPOperationStatus NVMMVirtualProcessor::EnableSoftwareBreakpoints(bool enable) noexcept {
     // TODO: Enable software breakpoints.
     // If NVMM doesn't support guest debugging, remove this method from this
     // subclass as the default implementation returns
@@ -245,7 +245,7 @@ VPOperationStatus NVMMVirtualProcessor::EnableSoftwareBreakpoints(bool enable) {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) {
+VPOperationStatus NVMMVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoints breakpoints) noexcept {
     // TODO: Configure hardware breakpoints.
     // If NVMM doesn't support guest debugging, remove this method from this
     // subclass as the default implementation returns
@@ -254,7 +254,7 @@ VPOperationStatus NVMMVirtualProcessor::SetHardwareBreakpoints(HardwareBreakpoin
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::ClearHardwareBreakpoints() {
+VPOperationStatus NVMMVirtualProcessor::ClearHardwareBreakpoints() noexcept {
     // TODO: Reset hardware breakpoints.
     // If NVMM doesn't support guest debugging, remove this method from this
     // subclass as the default implementation returns
@@ -263,7 +263,7 @@ VPOperationStatus NVMMVirtualProcessor::ClearHardwareBreakpoints() {
     return VPOperationStatus::OK;
 }
 
-VPOperationStatus NVMMVirtualProcessor::GetBreakpointAddress(uint64_t *address) const {
+VPOperationStatus NVMMVirtualProcessor::GetBreakpointAddress(uint64_t *address) const noexcept {
     // TODO: Determine breakpoint address by checking the debug registers.
     // If NVMM doesn't support guest debugging, remove this method from this
     // subclass as the default implementation returns
