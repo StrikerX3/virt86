@@ -94,7 +94,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t bas
     setMemInfo.va = (uint64_t)memory;
     setMemInfo.size = size;
     setMemInfo.flags = BitmaskEnum(flags).AnyOf(MemoryFlags::Write) ? 0 : HAX_RAM_INFO_ROM;
-    result = ioctl(m_fd, HAX_VM_IOCTL_SET_RAM, &setMemInfo);
+    int result = ioctl(m_fd, HAX_VM_IOCTL_SET_RAM, &setMemInfo);
     if (result < 0) {
         return MemoryMappingStatus::Failed;
     }
@@ -132,7 +132,7 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_
     setMemInfo.reserved1 = 0;
     setMemInfo.reserved2 = 0;
     setMemInfo.flags = BitmaskEnum(flags).AnyOf(MemoryFlags::Write) ? 0 : HAX_RAM_INFO_ROM;
-    result = ioctl(m_fd, HAX_VM_IOCTL_SET_RAM2, &setMemInfo);
+    int result = ioctl(m_fd, HAX_VM_IOCTL_SET_RAM2, &setMemInfo);
     if (result < 0) {
         return MemoryMappingStatus::Failed;
     }
