@@ -90,11 +90,10 @@ bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) noe
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapHostMemory(void *memory, const uint32_t size) noexcept {
     DWORD returnSize;
     BOOLEAN bResult;
 
-    // Allocate memory
     hax_alloc_ram_info memInfo;
     memInfo.va = (uint64_t)memory;
     memInfo.size = size;
@@ -107,8 +106,13 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t bas
     if (!bResult) {
         return MemoryMappingStatus::AlreadyAllocated;
     }
+    return MemoryMappingStatus::OK;
+}
 
-    // Configure memory
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
+    DWORD returnSize;
+    BOOLEAN bResult;
+
     hax_set_ram_info setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = (uint64_t)memory;
@@ -145,11 +149,10 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, con
         (LPOVERLAPPED)NULL) == TRUE;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapHostMemoryLarge(void *memory, const uint64_t size) noexcept {
     DWORD returnSize;
     BOOLEAN bResult;
 
-    // Allocate memory
     hax_ramblock_info memInfo;
     memInfo.start_va = (uint64_t)memory;
     memInfo.size = size;
@@ -163,8 +166,13 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_
     if (!bResult) {
         return MemoryMappingStatus::AlreadyAllocated;
     }
+    return MemoryMappingStatus::OK;
+}
 
-    // Configure memory
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
+    DWORD returnSize;
+    BOOLEAN bResult;
+
     hax_set_ram_info2 setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = (uint64_t)memory;

@@ -1,5 +1,5 @@
 /*
-HAXM system-based virtual machine implementation for Mac OS X.
+HAXM system-based virtual machine implementation for Linux.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -56,9 +56,11 @@ public:
 
     bool ReportQEMUVersion(hax_qemu_version& version) noexcept;
 
+    MemoryMappingStatus MapHostMemory(void *memory, const uint32_t size) noexcept;
     MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept;
     bool UnmapGuestMemory(const uint64_t baseAddress, const uint32_t size) noexcept;
-
+    
+    MemoryMappingStatus MapHostMemoryLarge(void *memory, const uint64_t size) noexcept;
     MemoryMappingStatus MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept;
     bool UnmapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size) noexcept;
 

@@ -210,15 +210,15 @@ protected:
 
     /**
      * Does the actual mapping of the host physical memory block to the guest
-     * on the underlying hypervisor platform, using 32-bit memory region size.
+     * on the underlying hypervisor platform.
      *
      * The following preconditions are true when this method is invoked:
      * - Base address is page-aligned
      * - Size is non-zero and page-aligned
      * - Host memory block is page-aligned
      *
-     * If the platform does not support GPA remapping when attempting to map
-     * a region that was previously mapped, the function must fail.
+     * If the platform does not support GPA aliasing when attempting to map a
+     * region that was previously mapped, the function must fail.
      *
      * If the dirty tracking flag is set but the platform doesn't support
      * dirty page tracking, it will be ignored.

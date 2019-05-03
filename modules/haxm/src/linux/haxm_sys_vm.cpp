@@ -76,8 +76,7 @@ bool HaxmVirtualMachineSysImpl::ReportQEMUVersion(hax_qemu_version& version) noe
     return ioctl(m_fd, HAX_VM_IOCTL_NOTIFY_QEMU_VERSION, &version) >= 0;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
-    // Allocate memory
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapHostMemory(void *memory, const uint32_t size) noexcept {
     hax_alloc_ram_info memInfo;
     memInfo.va = (uint64_t)memory;
     memInfo.size = size;
@@ -85,8 +84,11 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t bas
     if (result < 0) {
         return MemoryMappingStatus::AlreadyAllocated;
     }
+    
+    return MemoryMappingStatus::OK;
+}
 
-    // Configure memory
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemory(const uint64_t baseAddress, const uint32_t size, const MemoryFlags flags, void *memory) noexcept {
     hax_set_ram_info setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = (uint64_t)memory;
@@ -109,8 +111,7 @@ bool HaxmVirtualMachineSysImpl::UnmapGuestMemory(const uint64_t baseAddress, con
     return ioctl(m_fd, HAX_VM_IOCTL_SET_RAM, &setMemInfo) >= 0;
 }
 
-MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
-    // Allocate memory
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapHostMemoryLarge(void *memory, const uint64_t size) noexcept {
     hax_ramblock_info memInfo;
     memInfo.start_va = (uint64_t)memory;
     memInfo.size = size;
@@ -120,7 +121,10 @@ MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_
         return MemoryMappingStatus::AlreadyAllocated;
     }
 
-    // Configure memory
+    return MemoryMappingStatus::OK;
+}
+
+MemoryMappingStatus HaxmVirtualMachineSysImpl::MapGuestMemoryLarge(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     hax_set_ram_info2 setMemInfo;
     setMemInfo.pa_start = baseAddress;
     setMemInfo.va = (uint64_t)memory;

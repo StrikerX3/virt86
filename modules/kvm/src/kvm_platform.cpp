@@ -98,6 +98,7 @@ KvmPlatform::KvmPlatform() noexcept
     m_features.partialDirtyBitmap = false;
     m_features.largeMemoryAllocation = true;
     m_features.partialUnmapping = false;
+    m_features.memoryAliasing = true;
     m_features.memoryUnmapping = false;
     m_features.partialMMIOInstructions = false;
     m_features.floatingPointExtensions = FloatingPointExtension::SSE2;

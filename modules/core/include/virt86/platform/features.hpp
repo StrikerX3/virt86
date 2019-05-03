@@ -162,6 +162,12 @@ struct PlatformFeatures {
     bool largeMemoryAllocation = false;
 
     /**
+     * Guest memory aliasing (mapping one host memory range to multiple guest
+     * memory ranges) is supported.
+     */
+    bool memoryAliasing = false;
+
+    /**
      * Memory unmapping is supported.
      */
     bool memoryUnmapping = false;

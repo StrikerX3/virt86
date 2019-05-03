@@ -82,6 +82,7 @@ WhpxPlatform::WhpxPlatform() noexcept
     m_features.dirtyPageTracking = features.DirtyPageTracking;
     m_features.partialDirtyBitmap = true;
     m_features.partialUnmapping = features.PartialUnmap;
+    m_features.memoryAliasing = true; // TODO: check if this is true on every version of WHPX; 17763 supports it
     m_features.memoryUnmapping = true;
     m_initStatus = PlatformInitStatus::OK;
 
