@@ -71,12 +71,29 @@ bool HaxmVirtualMachine::Initialize() {
 MemoryMappingStatus HaxmVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
     // Use the regular version for memory ranges up to 4 GiB
     if (size <= 0xFFFFFFFFull) {
+        // FIXME: (optimization) Avoid calling this method if the host memory
+        // was already allocated previously, as it incurs user to kernel space
+        // transition costs
+        auto result = m_sys->MapHostMemory(memory, static_cast<uint32_t>(size));
+        if (result != MemoryMappingStatus::OK && result != MemoryMappingStatus::AlreadyAllocated) {
+            return result;
+        }
+
         return m_sys->MapGuestMemory(baseAddress, static_cast<uint32_t>(size), flags, memory);
     }
 
-    // HAXM module must support 64-bit memory operations
+    // HAXM module must support 64-bit memory operations to map guest memory
+    // ranges larger than 4 GiB
     if ((m_platformImpl.m_haxCaps.winfo & (HAX_CAP_64BIT_SETRAM | HAX_CAP_64BIT_RAMBLOCK)) == 0) {
         return MemoryMappingStatus::Unsupported;
+    }
+
+    // FIXME: (optimization) Avoid calling this method if the host memory
+    // was already allocated previously, as it incurs user to kernel space
+    // transition costs
+    auto result = m_sys->MapHostMemoryLarge(memory, size);
+    if (result != MemoryMappingStatus::OK && result != MemoryMappingStatus::AlreadyAllocated) {
+        return result;
     }
 
     return m_sys->MapGuestMemoryLarge(baseAddress, size, flags, memory);

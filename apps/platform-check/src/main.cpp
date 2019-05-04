@@ -89,11 +89,12 @@ int main() {
         printf("    Dirty page tracking: %s\n", (features.dirtyPageTracking) ? "available" : "unavailable");
         printf("    Partial dirty bitmap: %s\n", (features.partialDirtyBitmap) ? "supported" : "unsupported");
         printf("    Large memory allocation: %s\n", (features.largeMemoryAllocation) ? "supported" : "unsuported");
+        printf("    Memory aliasing: %s\n", (features.memoryAliasing) ? "supported" : "unsuported");
         printf("    Memory unmapping: %s\n", (features.memoryUnmapping) ? "supported" : "unsuported");
         printf("    Partial unmapping: %s\n", (features.partialUnmapping) ? "supported" : "unsuported");
         printf("    Partial MMIO instructions: %s\n", (features.partialMMIOInstructions) ? "yes" : "no");
         printf("    Custom CPUID results: %s\n", (features.customCPUIDs) ? "supported" : "unsupported");
-        if (features.customCPUIDs) {
+        if (features.customCPUIDs && features.supportedCustomCPUIDs.size() > 0) {
             printf("       Function        EAX         EBX         ECX         EDX\n");
             for (auto it = features.supportedCustomCPUIDs.cbegin(); it != features.supportedCustomCPUIDs.cend(); it++) {
                 printf("      0x%08x = 0x%08x  0x%08x  0x%08x  0x%08x\n", it->function, it->eax, it->ebx, it->ecx, it->edx);

@@ -58,6 +58,7 @@ HaxmPlatform::HaxmPlatform() noexcept
         m_features.guestDebugging = (caps.winfo & HAX_CAP_DEBUG) != 0;
         m_features.guestMemoryProtection = (caps.winfo & HAX_CAP_RAM_PROTECTION) != 0;
         m_features.largeMemoryAllocation = (caps.winfo & HAX_CAP_64BIT_SETRAM) != 0;
+        m_features.memoryAliasing = true;
         m_features.memoryUnmapping = true;
         m_features.partialUnmapping = true;  // TODO: since when?
         m_features.partialMMIOInstructions = true;
