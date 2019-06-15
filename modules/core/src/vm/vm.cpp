@@ -77,7 +77,7 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
         return MemoryMappingStatus::MisalignedSize;
     }
 
-    // Platform must support large memory allocation in order to unmap more
+    // Platform must support large memory allocation in order to map more
     // than 4 GiB of guest memory
     if ((size > 0xFFFFFFFFull) && !m_platform.GetFeatures().largeMemoryAllocation) {
         return MemoryMappingStatus::Unsupported;
