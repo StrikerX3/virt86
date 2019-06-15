@@ -61,8 +61,13 @@ HaxmPlatform::HaxmPlatform() noexcept
         m_features.memoryAliasing = true;
         m_features.memoryUnmapping = true;
         m_features.partialUnmapping = true;  // TODO: since when?
-        m_features.partialMMIOInstructions = true;
-        m_features.extendedControlRegisters =  ExtendedControlRegister::MXCSRMask;
+        m_features.partialMMIOInstructions = (caps.winfo & HAX_CAP_IMPLICIT_RAMBLOCK) == 0;
+        m_features.extendedControlRegisters = ExtendedControlRegister::MXCSRMask;
+
+        // MMIO instructions are no longer partially executed as of HAXM 7.5.1,
+        // which also introduced the HAX_CAP_IMPLICIT_RAMBLOCK feature flag.
+        // This seems to be the only way to differentiate between 7.5.1 and
+        // older versions.
     }
     else {
         m_initStatus = PlatformInitStatus::Unsupported;
