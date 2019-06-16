@@ -2,7 +2,6 @@ language: cpp
 branches:
   only:
   - master
-  - travis-deploy
 
 matrix:
   include:

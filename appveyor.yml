@@ -3,6 +3,7 @@ version: '1.0.1-b{build}'
 branches:
   only:
   - master
+  - travis-deploy
 
 only_commits:
   files:
