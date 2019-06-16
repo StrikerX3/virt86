@@ -59,7 +59,8 @@ script:
 - cp ${TRAVIS_BUILD_DIR}/LICENSE ${VIRT86_ARTIFACT_PATH}
 - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_CONFIGURATION} -DCMAKE_INSTALL_PREFIX=${VIRT86_ARTIFACT_PATH}
 - make install
-- if [ -z "${TRAVIS_TAG}" ] then
+- if test -z "${TRAVIS_TAG}"
+  then
   VIRT86_VERSION=b${TRAVIS_BUILD_NUMBER}
   else
   VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-)
