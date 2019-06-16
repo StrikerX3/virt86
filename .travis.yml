@@ -71,12 +71,10 @@ script:
 
 deploy:
   provider: bintray
-  edge:
-    branch: v1.8.47
   file: bintray.json
   user: strikerx3
   key:
-    secure: RrhEUD77O1jJ+pbtG24ymEs7T87H4+KoQ1gCpgUOU52dlcoOzZwkUMqPIFIpqFwmK4gwKof6yTFMrVQ0o3naUsHmEQzr+rTSs1v+Zgec2ygB37s0Wxwj+F6LIcawVDLNULH7h7a41yRqqlizXhfMJ75sF16rIkigF/l0/Nupx+Lr99EBp5RgJnqX93VmYJzq8rDpZ1ULfjIYIHCO5BIuLHPQz+aXps44u3ece2Lw8CnmQFXamncQtSFtuars9QOkdY3xlrY9Nay29G71rQgJw/jyfx+AV+ei657zUDKwvsBNJWy48B+XFdmkasvJ7ymz+WLEDYWseFOJMzA9OCCPaVFFUDCZXsWbBZSEGXIjdhuOjnSl8nA/JBd911VOpK1hT0L13B36kitguc1GzkZIitUcb8OJMo8RCCVa+h2pmW9yf4DHsnhE5LVSRJS74txWEPV1Vs5XMe/5G5pY6+GXedPQRk7Bw8IhLQaim9CG4pN7ZzXcwHiiEtMQrqpH8U0NOyhHy6d1TuPrjGb3eg5aXzmbiWHytF7Z8VJxa/8nS1PhHoAkpDZMJrMoNYPrkpkuVfC9R4t19cBMP+OnqDZsQQI+8fYE3Sj+bDRFYnn8lMON6bGofhXWvkb00DRJOl3zNM3B6sUeTdOO5sseLaCCmOiW7veF2eYBQlJzIXM+2E8=
+    secure: 7BSDYBGV5ncYNrQlBfCqIDK+PiuRTQv1RDhOXK4vwaXMswF17w50k3hrWUog2VLj
   skip_cleanup: true
   dry_run: false
   on:
