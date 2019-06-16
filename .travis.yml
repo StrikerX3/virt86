@@ -1,5 +1,4 @@
 language: cpp
-
 branches:
   only:
   - master
@@ -7,45 +6,45 @@ branches:
 
 matrix:
   include:
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - BUILD_CONFIGURATION=Debug
-        - VIRT86_COMPILER_NAME=GCC7
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - BUILD_CONFIGURATION=Debug
+    - VIRT86_COMPILER_NAME=GCC7
 
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - BUILD_CONFIGURATION=Release
-        - VIRT86_COMPILER_NAME=GCC7
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - BUILD_CONFIGURATION=Release
+    - VIRT86_COMPILER_NAME=GCC7
 
-    - os: osx
-      osx_image: xcode10.1
-      env:
-        - BUILD_CONFIGURATION=Debug
-        - VIRT86_COMPILER_NAME=LLVM
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - BUILD_CONFIGURATION=Debug
+    - VIRT86_COMPILER_NAME=LLVM
 
-    - os: osx
-      osx_image: xcode10.1
-      env:
-        - BUILD_CONFIGURATION=Release
-        - VIRT86_COMPILER_NAME=LLVM
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - BUILD_CONFIGURATION=Release
+    - VIRT86_COMPILER_NAME=LLVM
 
 before_install:
 - eval "${MATRIX_EVAL}"
@@ -59,12 +58,20 @@ script:
 - cp ${TRAVIS_BUILD_DIR}/LICENSE ${VIRT86_ARTIFACT_PATH}
 - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_CONFIGURATION} -DCMAKE_INSTALL_PREFIX=${VIRT86_ARTIFACT_PATH}
 - make install
-- >
+- |
   if [[ -z "${TRAVIS_TAG}" ]]; then
-    VIRT86_VERSION=b${TRAVIS_BUILD_NUMBER};
+    VIRT86_VERSION=1.0.1-b${TRAVIS_BUILD_NUMBER};
   else
     VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-);
   fi
 - VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
 - tar -zcvf ${VIRT86_PACKAGE_NAME} ${VIRT86_ARTIFACT_PATH}
 - echo Created package ${VIRT86_PACKAGE_NAME}
+
+deploy:
+  provider: bintray
+  file: "bintray.json"
+  user: "strikerx3"
+  key:
+    secure: BilD2Eweprs4NZVRpJ3/qwqSipcJ7ndt24PaUJElMBVEjVfDyYjxa6Jwlla/yfJbsmKKZRulcjx1clo8ZQnE78Xg2aBQdoTQ8uuXIEz4whGq+C7GpAcPbx2hI9pHjnBPreGvWT70yCdDq+/3pgtp0QH9pPwTtEYROVU7Vcy4piJHEOJDtpE/hd/EKqd/Ri+WFXRx4nqEHYACzridjK4m4U8svvqdMmA/O2wiC8JQKMZZJGrRL78uwUeLY7VxxeNeOQREYXVnv9K6kNfQoWafYUlTDpBZPzxzbdkUePNRN88/gyTroulWtoxxIG0XeLG5JnutB9uxPa2jkqVZMi4/i5Ols29c1yl8LbyS+AnHPtjE4iCCbz5puy7PVnWDcQX9VgZxVwEZvtf1WiJOtmaGdiHiQ0xVTbi8IS8T3lMbD0uSQ9SGMAndbGRbT9UggC6ct9M25XhU3U954C9KqzVBGgc/c4YKeBIWe2fjVc5oEEU3RyPMRD42WaNOuC6LlFewGoKPCusIQEWllErAQy4DqxYB03GS0uryYtctAVeOLQze6sUszFW+FYcDFnZVanUCgcwm3PBZ+V7XY9dsF0DO1ohuSV1v4ZIG/sn+HREl0Nff/mxrsc1c1VH/TRQo0jtsQWWtblK1P0/mLbd8+o1BsYfClcszoj+qK1r4ZRurCew=
+  skip_cleanup: true
