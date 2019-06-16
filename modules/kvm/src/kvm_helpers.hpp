@@ -27,6 +27,8 @@ SOFTWARE.
 
 #include "virt86/vp/regs.hpp"
 
+#include <linux/kvm.h>
+
 namespace virt86::kvm {
 
 void LoadSegment(RegValue& value, const struct kvm_segment *segment) noexcept;
