@@ -19,9 +19,15 @@
         "gpgSign": false
     },
 
-    "files":
-        [
-        {"includePattern": "build/(virt86-.*.tar.gz)", "uploadPattern": "$1"}
-        ],
+    "files": [
+        {
+            "includePattern": "build/(virt86-.*.tar.gz)",
+            "uploadPattern": "$1",
+            "matrixParams": {
+                "override": 1
+            }
+        }
+    ],
+
     "publish": true
 }
