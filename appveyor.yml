@@ -86,4 +86,4 @@ deploy:
   version: 1.0.1
   publish: true
   override: true
-  explode: true
+  explode: false
