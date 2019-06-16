@@ -28,6 +28,8 @@ SOFTWARE.
 #include "virt86/vp/regs.hpp"
 
 #include <cstddef>
+#include <cstdlib>
+
 #include <linux/kvm.h>
 
 namespace virt86::kvm {
