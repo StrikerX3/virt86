@@ -93,8 +93,8 @@ if(MSVC)
     vs_use_edit_and_continue()
 
     set_target_properties(virt86-haxm PROPERTIES FOLDER Libraries)
-elseif(NOT APPLE)
-    add_precompiled_header(virt86-haxm src/common/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
+else()
+    #add_precompiled_header(virt86-haxm src/common/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
 endif()
 
 # Tell dependents that HAXM is available via compiler definition

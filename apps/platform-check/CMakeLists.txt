@@ -42,7 +42,7 @@ if(MSVC)
 
     set_target_properties(virt86-platform-check PROPERTIES FOLDER Applications)
 else()
-    add_precompiled_header(virt86-platform-check src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
+    #add_precompiled_header(virt86-platform-check src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 endif()
 
 ##############################
