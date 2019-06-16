@@ -3,6 +3,7 @@ language: cpp
 branches:
   only:
   - master
+  - travis-deploy
 
 matrix:
   include:
@@ -17,13 +18,54 @@ matrix:
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - BUILD_CONFIGURATION=Debug
+        - VIRT86_COMPILER_NAME=GCC7
+
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - BUILD_CONFIGURATION=Release
+        - VIRT86_COMPILER_NAME=GCC7
+
     - os: osx
       osx_image: xcode10.1
+      env:
+        - BUILD_CONFIGURATION=Debug
+        - VIRT86_COMPILER_NAME=LLVM
+
+    - os: osx
+      osx_image: xcode10.1
+      env:
+        - BUILD_CONFIGURATION=Release
+        - VIRT86_COMPILER_NAME=LLVM
 
 before_install:
 - eval "${MATRIX_EVAL}"
+- VIRT86_ARTIFACT_PATH="${TRAVIS_BUILD_DIR}/build/_artifact"
 
 script:
 - mkdir build
 - cd build
-- cmake .. && make
+- mkdir ${VIRT86_ARTIFACT_PATH}
+- cp ${TRAVIS_BUILD_DIR}/README.md ${VIRT86_ARTIFACT_PATH}
+- cp ${TRAVIS_BUILD_DIR}/LICENSE ${VIRT86_ARTIFACT_PATH}
+- cmake .. -DCMAKE_BUILD_TYPE=${BUILD_CONFIGURATION} -DCMAKE_INSTALL_PREFIX=${VIRT86_ARTIFACT_PATH}
+- make install
+- if [ -z "${TRAVIS_TAG}" ] then
+  VIRT86_VERSION=b${TRAVIS_BUILD_NUMBER}
+  else
+  VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-)
+  fi
+- VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
+- tar -zcvf ${VIRT86_PACKAGE_NAME} ${VIRT86_ARTIFACT_PATH}
+- echo Created package ${VIRT86_PACKAGE_NAME}
+- echo Contents
+- ls ${VIRT86_ARTIFACT_PATH}
