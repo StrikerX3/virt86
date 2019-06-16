@@ -19,6 +19,7 @@ matrix:
     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - BUILD_CONFIGURATION=Debug
     - VIRT86_COMPILER_NAME=GCC7
+    - VIRT86_SYSTEM_NAME=Linux
 
   - os: linux
     dist: xenial
@@ -33,18 +34,21 @@ matrix:
     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - BUILD_CONFIGURATION=Release
     - VIRT86_COMPILER_NAME=GCC7
+    - VIRT86_SYSTEM_NAME=Linux
 
   - os: osx
     osx_image: xcode10.1
     env:
     - BUILD_CONFIGURATION=Debug
     - VIRT86_COMPILER_NAME=LLVM
+    - VIRT86_SYSTEM_NAME=Mac
 
   - os: osx
     osx_image: xcode10.1
     env:
     - BUILD_CONFIGURATION=Release
     - VIRT86_COMPILER_NAME=LLVM
+    - VIRT86_SYSTEM_NAME=Mac
 
 before_install:
 - eval "${MATRIX_EVAL}"
@@ -64,7 +68,7 @@ script:
   else
     VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-);
   fi
-- VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
+- VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_SYSTEM_NAME}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
 - cd ${VIRT86_ARTIFACT_PATH}
 - tar -zcvf "${TRAVIS_BUILD_DIR}/build/${VIRT86_PACKAGE_NAME}" *
 - echo Created package ${VIRT86_PACKAGE_NAME}
