@@ -64,7 +64,7 @@ script:
 - make install
 - |
   if [[ -z "${TRAVIS_TAG}" ]]; then
-    VIRT86_VERSION=1.0.1-b${TRAVIS_BUILD_NUMBER};
+    VIRT86_VERSION=1.0.2-b${TRAVIS_BUILD_NUMBER};
   else
     VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-);
   fi
