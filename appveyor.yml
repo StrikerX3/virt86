@@ -1,27 +1,17 @@
 version: '1.0.1-b{build}'
 
-for:
--
-  branches:
-    only:
-    - master
+branches:
+  only:
+  - master
+  - /v\d+\.\d+\.\d+/
 
-  only_commits:
-    files:
-      - CMakeLists.txt
-      - appveyor.yml
-      - modules/
-      - apps/
-      - cmake/
-
--
-  branches:
-    only:
-    - /v\d+\.\d+\.\d+/
-
-  only_commits:
-    files:
-      - '**/*'
+#only_commits:
+#  files:
+#    - CMakeLists.txt
+#    - appveyor.yml
+#    - modules/
+#    - apps/
+#    - cmake/
 
 image:
 - Visual Studio 2017
