@@ -80,6 +80,7 @@ deploy:
     dry_run: false
     on:
       branch: master
+
   - provider: bintray
     file: bintray.json
     user: strikerx3
