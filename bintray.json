@@ -21,7 +21,7 @@
 
     "files":
         [
-        {"includePattern": "\\./build/(virt86-.*\\.tar\\.gz)", "uploadPattern": "$1"}
+        {"includePattern": "\\\\./build/(virt86-.*\\\\.tar\\\\.gz)", "uploadPattern": "$1"}
         ],
     "publish": true
 }
