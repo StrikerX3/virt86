@@ -73,8 +73,7 @@ deploy:
   provider: bintray
   file: bintray.json
   user: strikerx3
-  key:
-    secure: 7BSDYBGV5ncYNrQlBfCqIDK+PiuRTQv1RDhOXK4vwaXMswF17w50k3hrWUog2VLj
+  key: b394b3e43ee8b463cb87b86219117c4a6d37a027
   skip_cleanup: true
   dry_run: false
   on:
