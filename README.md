@@ -2,7 +2,7 @@
 
 | Windows | Linux and Mac OS X | Downloads |
 |:-------:|:------------------:|:---------:|
-| [![AppVeyor build status](https://img.shields.io/appveyor/ci/strikerx3/virt86/master.svg?label=AppVeyor%20build&logo=appveyor&style=flat)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) | ![Travis CI build status](https://img.shields.io/travis/com/strikerx3/virt86/master.svg?label=Travis%20CI%20build&logo=travis&style=flat) | [![Bintray downloads](https://img.shields.io/bintray/v/strikerx3/virt86/virt86.svg?style=flat)](https://bintray.com/strikerx3/virt86/virt86/_latestVersion) |
+| [![AppVeyor build status](https://img.shields.io/appveyor/ci/strikerx3/virt86/master.svg?label=AppVeyor%20build&logo=appveyor&style=flat)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) | [![Travis CI build status](https://img.shields.io/travis/com/strikerx3/virt86/master.svg?label=Travis%20CI%20build&logo=travis&style=flat)](https://travis-ci.com/StrikerX3/virt86) | [![Bintray downloads](https://img.shields.io/bintray/v/strikerx3/virt86/virt86.svg?style=flat)](https://bintray.com/strikerx3/virt86/virt86/_latestVersion) |
 
 virt86 interfaces with the major x86 hardware-assisted virtualization engines
 [Intel HAXM](https://github.com/intel/haxm),
