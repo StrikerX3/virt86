@@ -12,13 +12,16 @@
 
     "version": {
         "name": "1.0.1",
+        "desc": "virt86 1.0.1",
+        "released": "2019-06-15",
         "vcs_tag": "1.0.1-test",
+        "attributes": [],
         "gpgSign": false
     },
 
     "files":
         [
-        {"includePattern": "build/(.*\\.tar\\.gz)", "uploadPattern": "$1"}
+        {"includePattern": "\\./build/(virt86-.*\\.tar\\.gz)", "uploadPattern": "$1"}
         ],
     "publish": true
 }
