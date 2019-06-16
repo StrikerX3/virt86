@@ -1,6 +1,8 @@
 # virt86
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/qbe0h2k9pl2sselw/branch/master?svg=true)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) [![Travis CI build Status](https://travis-ci.com/StrikerX3/virt86.svg?branch=master)](https://travis-ci.com/StrikerX3/virt86)
+| Windows | Linux and Mac OS X |
+|:-------:|:------------------:|
+| [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/qbe0h2k9pl2sselw/branch/master?svg=true)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) | [![Travis CI build status](https://travis-ci.com/StrikerX3/virt86.svg?branch=master)](https://travis-ci.com/StrikerX3/virt86) [![Bintray downloads](https://api.bintray.com/packages/strikerx3/virt86/virt86/images/download.svg)](https://bintray.com/strikerx3/virt86/virt86/_latestVersion) |
 
 virt86 interfaces with the major x86 hardware-assisted virtualization engines
 [Intel HAXM](https://github.com/intel/haxm),

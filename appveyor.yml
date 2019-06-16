@@ -73,3 +73,16 @@ after_test:
     $zipFullPath = "$($binPath)$($zipName)"
     ZipFiles "$($zipFullPath)" "$($binPath)" | Out-Null
     Push-AppveyorArtifact "$($zipFullPath)" -FileName $zipName
+
+deploy:
+- provider: BinTray
+  username: strikerx3
+  api_key:
+    secure: MBloC3yYRMJJW4YwiQr15SO89uaxGb0o1BmE0NL0AyfHnSNVr79pBH45CloK9arG
+  subject: strikerx3
+  repo: virt86
+  package: virt86
+  version: 1.0.1
+  publish: true
+  override: true
+  explode: true
