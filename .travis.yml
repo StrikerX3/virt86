@@ -1,29 +1,92 @@
 language: cpp
-
 branches:
   only:
   - master
+  - /v\d+\.\d+\.\d+/
 
 matrix:
   include:
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - os: osx
-      osx_image: xcode10.1
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - BUILD_CONFIGURATION=Debug
+    - VIRT86_COMPILER_NAME=GCC7
+
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - BUILD_CONFIGURATION=Release
+    - VIRT86_COMPILER_NAME=GCC7
+
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - BUILD_CONFIGURATION=Debug
+    - VIRT86_COMPILER_NAME=LLVM
+
+  - os: osx
+    osx_image: xcode10.1
+    env:
+    - BUILD_CONFIGURATION=Release
+    - VIRT86_COMPILER_NAME=LLVM
 
 before_install:
 - eval "${MATRIX_EVAL}"
+- VIRT86_ARTIFACT_PATH="${TRAVIS_BUILD_DIR}/build/_artifact"
 
 script:
 - mkdir build
 - cd build
-- cmake .. && make
+- mkdir ${VIRT86_ARTIFACT_PATH}
+- cp ${TRAVIS_BUILD_DIR}/README.md ${VIRT86_ARTIFACT_PATH}
+- cp ${TRAVIS_BUILD_DIR}/LICENSE ${VIRT86_ARTIFACT_PATH}
+- cmake .. -DCMAKE_BUILD_TYPE=${BUILD_CONFIGURATION} -DCMAKE_INSTALL_PREFIX=${VIRT86_ARTIFACT_PATH}
+- make install
+- |
+  if [[ -z "${TRAVIS_TAG}" ]]; then
+    VIRT86_VERSION=1.0.1-b${TRAVIS_BUILD_NUMBER};
+  else
+    VIRT86_VERSION=$(echo ${TRAVIS_TAG} | cut -c2-);
+  fi
+- VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
+- cd ${VIRT86_ARTIFACT_PATH}
+- tar -zcvf "${TRAVIS_BUILD_DIR}/build/${VIRT86_PACKAGE_NAME}" *
+- echo Created package ${VIRT86_PACKAGE_NAME}
+- cd ${TRAVIS_BUILD_DIR}
+
+deploy:
+  - provider: bintray
+    file: bintray.json
+    user: strikerx3
+    key:
+      secure: Bs10p5Nan5V//6uuRsBeyucc8wlbYdpBwLCYZdINTrTHyVu5Epwdt+wPaRUxTYeFha6ujk+YQWNBajRVh5g+A8KxLxy+ItHBmdgVK53X2ev5pvVVUryTfDxiyrHsvs1DUTKvwkWqPNCAvXwetXz+r3XF04xzY/PyCtFWBNjcB2IG2qeHbqdjx/QChCEw6+tAEVyw0obbfZOlRZbyTrbjQSotj2vsGnfuk29Pqmf5i06y+vDPEqQm5pAi0HRMWV/8MHnY3hWlqbg2qTB7rRXWyhkn4sCntwkT/lh+PZEA9RPuRGEQdZx0L3KW0r+KeJTCOAsFZFG7kXwMSpRaTJeYjvmwf8tDkMCTDcQvnoQ/o7cWkWgWFUYynoCGZdNEWhykCzpp10lN5sH6Sy9kzQIE6UBn6iCSaIqt6yfn3dpuMH50ktdnImMYZiwgCBXds8NeobzYVxASWWEECHc5vVYhwb5ertZzGwO5XT7oFb5T0fdKQENQ3vBsy64AWaQhdwjrXBWty6JJpEGCh5n4GEPya7pm4NrSlyzgI+lq1AZAxiWAPbBI//3RkXcOek7Dnl05HPjy5uTHeVwd7Ewio2P3t1IPzWi3LCwgupaxhvQ9VBoPFIbH1M6Sh6e6CQyMqMo5ZDnSOzNko3suqsq5NMyGE4Dbh6sK3nzP02E7Ezfi6Yc=
+    skip_cleanup: true
+    dry_run: false
+    on:
+      branch: master
+
+  - provider: bintray
+    file: bintray.json
+    user: strikerx3
+    key:
+      secure: Bs10p5Nan5V//6uuRsBeyucc8wlbYdpBwLCYZdINTrTHyVu5Epwdt+wPaRUxTYeFha6ujk+YQWNBajRVh5g+A8KxLxy+ItHBmdgVK53X2ev5pvVVUryTfDxiyrHsvs1DUTKvwkWqPNCAvXwetXz+r3XF04xzY/PyCtFWBNjcB2IG2qeHbqdjx/QChCEw6+tAEVyw0obbfZOlRZbyTrbjQSotj2vsGnfuk29Pqmf5i06y+vDPEqQm5pAi0HRMWV/8MHnY3hWlqbg2qTB7rRXWyhkn4sCntwkT/lh+PZEA9RPuRGEQdZx0L3KW0r+KeJTCOAsFZFG7kXwMSpRaTJeYjvmwf8tDkMCTDcQvnoQ/o7cWkWgWFUYynoCGZdNEWhykCzpp10lN5sH6Sy9kzQIE6UBn6iCSaIqt6yfn3dpuMH50ktdnImMYZiwgCBXds8NeobzYVxASWWEECHc5vVYhwb5ertZzGwO5XT7oFb5T0fdKQENQ3vBsy64AWaQhdwjrXBWty6JJpEGCh5n4GEPya7pm4NrSlyzgI+lq1AZAxiWAPbBI//3RkXcOek7Dnl05HPjy5uTHeVwd7Ewio2P3t1IPzWi3LCwgupaxhvQ9VBoPFIbH1M6Sh6e6CQyMqMo5ZDnSOzNko3suqsq5NMyGE4Dbh6sK3nzP02E7Ezfi6Yc=
+    skip_cleanup: true
+    dry_run: false
+    on:
+      tags: true

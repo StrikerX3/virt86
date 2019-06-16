@@ -26,6 +26,8 @@ SOFTWARE.
 #include "kvm_vp.hpp"
 #include "kvm_vm.hpp"
 
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <malloc.h>

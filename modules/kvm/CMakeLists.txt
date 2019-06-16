@@ -67,7 +67,7 @@ target_include_directories(virt86-kvm
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-add_precompiled_header(virt86-kvm src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
+#add_precompiled_header(virt86-kvm src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 
 # Tell dependents that KVM is available via compiler definition
 target_compile_definitions(virt86-kvm PUBLIC VIRT86_KVM_AVAILABLE=1)
