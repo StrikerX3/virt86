@@ -67,6 +67,7 @@ script:
 - VIRT86_PACKAGE_NAME=virt86-${VIRT86_VERSION}-${VIRT86_COMPILER_NAME}-x64-${BUILD_CONFIGURATION}.tar.gz
 - tar -zcvf ${VIRT86_PACKAGE_NAME} ${VIRT86_ARTIFACT_PATH}
 - echo Created package ${VIRT86_PACKAGE_NAME}
+- cd ${TRAVIS_BUILD_DIR}
 
 deploy:
   provider: bintray
