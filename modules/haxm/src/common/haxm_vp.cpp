@@ -399,7 +399,9 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& val
     case Reg::DR3:    value.u64 = m_regs._dr3;    break;
     case Reg::DR6:    value.u64 = m_regs._dr6;    break;
     case Reg::DR7:    value.u64 = m_regs._dr7;    break;
-    case Reg::EFER:   value.u64 = m_regs._efer;   break;
+    //case Reg::EFER:   value.u64 = m_regs._efer;   break;
+	case Reg::EFER: GetMSR(0xC0000080, value.u64);break;
+
 
     case Reg::ST0: case Reg::ST1: case Reg::ST2: case Reg::ST3:
     case Reg::ST4: case Reg::ST5: case Reg::ST6: case Reg::ST7:
@@ -496,7 +498,8 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
     case Reg::R15D:   m_regs._r15 = value.u32;                 m_regsChanged = true;  break;
     case Reg::EIP:    m_regs._eip = value.u32;                 m_regsChanged = true;  break;
     case Reg::EFLAGS: m_regs._eflags = static_cast<uint32_t>(fixupFlags(value.u32)); m_regsChanged = true;  break;
-    case Reg::EFER:   m_regs._efer = value.u32;                m_regsChanged = true;  break;
+    //case Reg::EFER:   m_regs._efer = value.u32;                m_regsChanged = true;  break;
+	case Reg::EFER: SetMSR(0xC0000080, value.u64);                                    break;
 
     case Reg::RAX:    m_regs._rax = value.u64;                 m_regsChanged = true;  break;
     case Reg::RCX:    m_regs._rcx = value.u64;                 m_regsChanged = true;  break;
