@@ -282,7 +282,8 @@ void VirtualMachine::SubtractMemoryRange(const uint64_t baseAddress, const uint6
     // If the entire region was unmapped, remove it from the vector.
     // If only a portion of the region was unmapped, update the region and
     // possibly add a new region to reflect the change.
-    for (auto it = m_memoryRegions.begin(); it != m_memoryRegions.end(); it++) {
+    auto it = m_memoryRegions.begin();
+    while (it != m_memoryRegions.end()) {
         auto& memoryRegion = *it;
 
         // Compute inclusive final address of the memory region
@@ -291,7 +292,8 @@ void VirtualMachine::SubtractMemoryRange(const uint64_t baseAddress, const uint6
         // Case 1: unmapped range covers the entire memory region
         // -> Remove memory region from vector
         if (baseAddress <= memoryRegion.baseAddress && finalAddress >= finalRegionAddress) {
-            m_memoryRegions.erase(it);
+            it = m_memoryRegions.erase(it); // Make it point to the region after the erased one
+            continue; // We don't want to skip the next region
         }
         // Case 2: unmapped range covers final portion of the memory region
         // -> Update region size
@@ -314,8 +316,11 @@ void VirtualMachine::SubtractMemoryRange(const uint64_t baseAddress, const uint6
             const uint64_t secondBaseAddress = finalAddress + 1;
             const uint64_t secondSize = finalRegionAddress - finalAddress;
             void *pSecondHostMemory = static_cast<uint8_t*>(memoryRegion.hostMemory) + memoryRegion.size + size;
-            m_memoryRegions.insert(it, MemoryRegion{ secondBaseAddress, secondSize, pSecondHostMemory });
+            it = m_memoryRegions.insert(it, MemoryRegion{ secondBaseAddress, secondSize, pSecondHostMemory });
+            // Don't continue here, we want to skip the inserted region
         }
+
+        ++it;
     }
 }
 
