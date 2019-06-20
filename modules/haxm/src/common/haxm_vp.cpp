@@ -426,68 +426,76 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& val
     return VPOperationStatus::OK;
 }
 
+inline void SetLowByte(uint64_t& lhs, uint8_t rhs) noexcept {
+    lhs = (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
+}
+
+inline void SetLowWord(uint64_t& lhs, uint16_t rhs) noexcept {
+    lhs = (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
+}
+
 VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegValue& value) noexcept {
     switch (reg) {
-    case Reg::CS:   StoreSegment(value, &m_regs._cs);  m_regsChanged = true;  break;
-    case Reg::SS:   StoreSegment(value, &m_regs._ss);  m_regsChanged = true;  break;
-    case Reg::DS:   StoreSegment(value, &m_regs._ds);  m_regsChanged = true;  break;
-    case Reg::ES:   StoreSegment(value, &m_regs._es);  m_regsChanged = true;  break;
-    case Reg::FS:   StoreSegment(value, &m_regs._fs);  m_regsChanged = true;  break;
-    case Reg::GS:   StoreSegment(value, &m_regs._gs);  m_regsChanged = true;  break;
-    case Reg::LDTR: StoreSegment(value, &m_regs._ldt); m_regsChanged = true;  break;
-    case Reg::TR:   StoreSegment(value, &m_regs._tr);  m_regsChanged = true;  break;
+    case Reg::CS:   StoreSegment(value, &m_regs._cs);          m_regsChanged = true;  break;
+    case Reg::SS:   StoreSegment(value, &m_regs._ss);          m_regsChanged = true;  break;
+    case Reg::DS:   StoreSegment(value, &m_regs._ds);          m_regsChanged = true;  break;
+    case Reg::ES:   StoreSegment(value, &m_regs._es);          m_regsChanged = true;  break;
+    case Reg::FS:   StoreSegment(value, &m_regs._fs);          m_regsChanged = true;  break;
+    case Reg::GS:   StoreSegment(value, &m_regs._gs);          m_regsChanged = true;  break;
+    case Reg::LDTR: StoreSegment(value, &m_regs._ldt);         m_regsChanged = true;  break;
+    case Reg::TR:   StoreSegment(value, &m_regs._tr);          m_regsChanged = true;  break;
 
-    case Reg::GDTR: StoreTable(value, &m_regs._gdt); m_regsChanged = true;  break;
-    case Reg::IDTR: StoreTable(value, &m_regs._idt); m_regsChanged = true;  break;
+    case Reg::GDTR: StoreTable(value, &m_regs._gdt);           m_regsChanged = true;  break;
+    case Reg::IDTR: StoreTable(value, &m_regs._idt);           m_regsChanged = true;  break;
 
-    case Reg::AH:   m_regs._ah = value.u8;   m_regsChanged = true;  break;
-    case Reg::AL:   m_regs._al = value.u8;   m_regsChanged = true;  break;
-    case Reg::CH:   m_regs._ch = value.u8;   m_regsChanged = true;  break;
-    case Reg::CL:   m_regs._cl = value.u8;   m_regsChanged = true;  break;
-    case Reg::DH:   m_regs._dh = value.u8;   m_regsChanged = true;  break;
-    case Reg::DL:   m_regs._dl = value.u8;   m_regsChanged = true;  break;
-    case Reg::BH:   m_regs._bh = value.u8;   m_regsChanged = true;  break;
-    case Reg::BL:   m_regs._bl = value.u8;   m_regsChanged = true;  break;
-    case Reg::SPL:  m_regs._sp = value.u8;   m_regsChanged = true;  break;
-    case Reg::BPL:  m_regs._bp = value.u8;   m_regsChanged = true;  break;
-    case Reg::SIL:  m_regs._si = value.u8;   m_regsChanged = true;  break;
-    case Reg::DIL:  m_regs._di = value.u8;   m_regsChanged = true;  break;
-    case Reg::R8B:  m_regs._r8 = value.u8;   m_regsChanged = true;  break;
-    case Reg::R9B:  m_regs._r9 = value.u8;   m_regsChanged = true;  break;
-    case Reg::R10B: m_regs._r10 = value.u8;  m_regsChanged = true;  break;
-    case Reg::R11B: m_regs._r11 = value.u8;  m_regsChanged = true;  break;
-    case Reg::R12B: m_regs._r12 = value.u8;  m_regsChanged = true;  break;
-    case Reg::R13B: m_regs._r13 = value.u8;  m_regsChanged = true;  break;
-    case Reg::R14B: m_regs._r14 = value.u8;  m_regsChanged = true;  break;
-    case Reg::R15B: m_regs._r15 = value.u8;  m_regsChanged = true;  break;
+    case Reg::AH:   m_regs._ah = value.u8;                     m_regsChanged = true;  break;
+    case Reg::AL:   m_regs._al = value.u8;                     m_regsChanged = true;  break;
+    case Reg::CH:   m_regs._ch = value.u8;                     m_regsChanged = true;  break;
+    case Reg::CL:   m_regs._cl = value.u8;                     m_regsChanged = true;  break;
+    case Reg::DH:   m_regs._dh = value.u8;                     m_regsChanged = true;  break;
+    case Reg::DL:   m_regs._dl = value.u8;                     m_regsChanged = true;  break;
+    case Reg::BH:   m_regs._bh = value.u8;                     m_regsChanged = true;  break;
+    case Reg::BL:   m_regs._bl = value.u8;                     m_regsChanged = true;  break;
+    case Reg::SPL:  m_regs._sp = value.u8;                     m_regsChanged = true;  break;
+    case Reg::BPL:  m_regs._bp = value.u8;                     m_regsChanged = true;  break;
+    case Reg::SIL:  m_regs._si = value.u8;                     m_regsChanged = true;  break;
+    case Reg::DIL:  m_regs._di = value.u8;                     m_regsChanged = true;  break;
+    case Reg::R8B:  SetLowByte(m_regs._r8, value.u8);          m_regsChanged = true;  break;
+    case Reg::R9B:  SetLowByte(m_regs._r9, value.u8);          m_regsChanged = true;  break;
+    case Reg::R10B: SetLowByte(m_regs._r10, value.u8);         m_regsChanged = true;  break;
+    case Reg::R11B: SetLowByte(m_regs._r11, value.u8);         m_regsChanged = true;  break;
+    case Reg::R12B: SetLowByte(m_regs._r12, value.u8);         m_regsChanged = true;  break;
+    case Reg::R13B: SetLowByte(m_regs._r13, value.u8);         m_regsChanged = true;  break;
+    case Reg::R14B: SetLowByte(m_regs._r14, value.u8);         m_regsChanged = true;  break;
+    case Reg::R15B: SetLowByte(m_regs._r15, value.u8);         m_regsChanged = true;  break;
 
-    case Reg::AX:    m_regs._ax = value.u16;                  m_regsChanged = true;  break;
-    case Reg::CX:    m_regs._cx = value.u16;                  m_regsChanged = true;  break;
-    case Reg::DX:    m_regs._dx = value.u16;                  m_regsChanged = true;  break;
-    case Reg::BX:    m_regs._bx = value.u16;                  m_regsChanged = true;  break;
-    case Reg::SI:    m_regs._si = value.u16;                  m_regsChanged = true;  break;
-    case Reg::DI:    m_regs._di = value.u16;                  m_regsChanged = true;  break;
-    case Reg::SP:    m_regs._sp = value.u16;                  m_regsChanged = true;  break;
-    case Reg::BP:    m_regs._bp = value.u16;                  m_regsChanged = true;  break;
-    case Reg::R8W:   m_regs._r8 = value.u16;                  m_regsChanged = true;  break;
-    case Reg::R9W:   m_regs._r9 = value.u16;                  m_regsChanged = true;  break;
-    case Reg::R10W:  m_regs._r10 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::R11W:  m_regs._r11 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::R12W:  m_regs._r12 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::R13W:  m_regs._r13 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::R14W:  m_regs._r14 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::R15W:  m_regs._r15 = value.u16;                 m_regsChanged = true;  break;
-    case Reg::IP:    m_regs._eip = value.u16;                 m_regsChanged = true;  break;
+    case Reg::AX:    m_regs._ax = value.u16;                   m_regsChanged = true;  break;
+    case Reg::CX:    m_regs._cx = value.u16;                   m_regsChanged = true;  break;
+    case Reg::DX:    m_regs._dx = value.u16;                   m_regsChanged = true;  break;
+    case Reg::BX:    m_regs._bx = value.u16;                   m_regsChanged = true;  break;
+    case Reg::SI:    m_regs._si = value.u16;                   m_regsChanged = true;  break;
+    case Reg::DI:    m_regs._di = value.u16;                   m_regsChanged = true;  break;
+    case Reg::SP:    m_regs._sp = value.u16;                   m_regsChanged = true;  break;
+    case Reg::BP:    m_regs._bp = value.u16;                   m_regsChanged = true;  break;
+    case Reg::R8W:   SetLowWord(m_regs._r8, value.u16);        m_regsChanged = true;  break;
+    case Reg::R9W:   SetLowWord(m_regs._r9, value.u16);        m_regsChanged = true;  break;
+    case Reg::R10W:  SetLowWord(m_regs._r10, value.u16);       m_regsChanged = true;  break;
+    case Reg::R11W:  SetLowWord(m_regs._r11, value.u16);       m_regsChanged = true;  break;
+    case Reg::R12W:  SetLowWord(m_regs._r12, value.u16);       m_regsChanged = true;  break;
+    case Reg::R13W:  SetLowWord(m_regs._r13, value.u16);       m_regsChanged = true;  break;
+    case Reg::R14W:  SetLowWord(m_regs._r14, value.u16);       m_regsChanged = true;  break;
+    case Reg::R15W:  SetLowWord(m_regs._r15, value.u16);       m_regsChanged = true;  break;
+    case Reg::IP:    m_regs._eip = value.u16;                  m_regsChanged = true;  break;
     case Reg::FLAGS: m_regs._eflags = static_cast<uint32_t>(fixupFlags(value.u16)); m_regsChanged = true;  break;
 
-    case Reg::EAX:    m_regs._eax = value.u32;                 m_regsChanged = true;  break;
-    case Reg::ECX:    m_regs._ecx = value.u32;                 m_regsChanged = true;  break;
-    case Reg::EDX:    m_regs._edx = value.u32;                 m_regsChanged = true;  break;
-    case Reg::EBX:    m_regs._ebx = value.u32;                 m_regsChanged = true;  break;
-    case Reg::ESI:    m_regs._esi = value.u32;                 m_regsChanged = true;  break;
-    case Reg::EDI:    m_regs._edi = value.u32;                 m_regsChanged = true;  break;
-    case Reg::ESP:    m_regs._esp = value.u32;                 m_regsChanged = true;  break;
-    case Reg::EBP:    m_regs._ebp = value.u32;                 m_regsChanged = true;  break;
+    case Reg::EAX:    m_regs._rax = value.u32;                 m_regsChanged = true;  break;
+    case Reg::ECX:    m_regs._rcx = value.u32;                 m_regsChanged = true;  break;
+    case Reg::EDX:    m_regs._rdx = value.u32;                 m_regsChanged = true;  break;
+    case Reg::EBX:    m_regs._rbx = value.u32;                 m_regsChanged = true;  break;
+    case Reg::ESI:    m_regs._rsi = value.u32;                 m_regsChanged = true;  break;
+    case Reg::EDI:    m_regs._rdi = value.u32;                 m_regsChanged = true;  break;
+    case Reg::ESP:    m_regs._rsp = value.u32;                 m_regsChanged = true;  break;
+    case Reg::EBP:    m_regs._rbp = value.u32;                 m_regsChanged = true;  break;
     case Reg::R8D:    m_regs._r8 = value.u32;                  m_regsChanged = true;  break;
     case Reg::R9D:    m_regs._r9 = value.u32;                  m_regsChanged = true;  break;
     case Reg::R10D:   m_regs._r10 = value.u32;                 m_regsChanged = true;  break;
@@ -499,7 +507,7 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
     case Reg::EIP:    m_regs._eip = value.u32;                 m_regsChanged = true;  break;
     case Reg::EFLAGS: m_regs._eflags = static_cast<uint32_t>(fixupFlags(value.u32)); m_regsChanged = true;  break;
     //case Reg::EFER:   m_regs._efer = value.u32;                m_regsChanged = true;  break;
-	case Reg::EFER: SetMSR(0xC0000080, value.u64);                                    break;
+	case Reg::EFER:   SetMSR(0xC0000080, value.u64);                                  break;
 
     case Reg::RAX:    m_regs._rax = value.u64;                 m_regsChanged = true;  break;
     case Reg::RCX:    m_regs._rcx = value.u64;                 m_regsChanged = true;  break;
