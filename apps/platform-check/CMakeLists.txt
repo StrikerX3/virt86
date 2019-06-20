@@ -1,4 +1,4 @@
-project(virt86-platform-check VERSION 1.0.2 LANGUAGES CXX)
+project(virt86-platform-check VERSION 1.0.3 LANGUAGES CXX)
 
 ##############################
 # Source files

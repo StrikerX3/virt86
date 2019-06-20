@@ -11,10 +11,10 @@
     },
 
     "version": {
-        "name": "1.0.2",
-        "desc": "virt86 1.0.2",
+        "name": "1.0.3",
+        "desc": "virt86 1.0.3",
         "released": "2019-06-15",
-        "vcs_tag": "v1.0.2",
+        "vcs_tag": "v1.0.3",
         "attributes": [],
         "gpgSign": false
     },
