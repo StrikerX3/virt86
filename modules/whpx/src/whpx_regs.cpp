@@ -27,6 +27,8 @@ SOFTWARE.
 #include "whpx_regs.hpp"
 #include "whpx_defs.hpp"
 
+#include "virt86/util/bytemanip.hpp"
+
 namespace virt86::whpx {
 
 VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) noexcept {
@@ -222,21 +224,31 @@ void TranslateRegisterValue(const Reg reg, const RegValue& value, WHV_REGISTER_V
         output.Reg64 = value.u64;
         break;
 
-    case Reg::AL: case Reg::AH: case Reg::CL: case Reg::CH: case Reg::DL: case Reg::DH: case Reg::BL: case Reg::BH:
+    case Reg::AL: case Reg::CL: case Reg::DL: case Reg::BL:
     case Reg::SPL: case Reg::BPL: case Reg::SIL: case Reg::DIL:
     case Reg::R8B: case Reg::R9B: case Reg::R10B: case Reg::R11B: case Reg::R12B: case Reg::R13B: case Reg::R14B: case Reg::R15B:
+        SetLowByte(output.Reg64, value.u8);
+        break;
+
+    case Reg::AH: case Reg::CH: case Reg::DH: case Reg::BH:
+        SetHighByte(output.Reg64, value.u8);
+        break;
 
     case Reg::AX: case Reg::CX: case Reg::DX: case Reg::BX:
     case Reg::SP: case Reg::BP: case Reg::SI: case Reg::DI:
     case Reg::R8W: case Reg::R9W: case Reg::R10W: case Reg::R11W: case Reg::R12W: case Reg::R13W: case Reg::R14W: case Reg::R15W:
     case Reg::IP:
     case Reg::FLAGS:
+        SetLowWord(output.Reg64, value.u16);
+        break;
 
     case Reg::EAX: case Reg::ECX: case Reg::EDX: case Reg::EBX:
     case Reg::ESP: case Reg::EBP: case Reg::ESI: case Reg::EDI:
     case Reg::R8D: case Reg::R9D: case Reg::R10D: case Reg::R11D: case Reg::R12D: case Reg::R13D: case Reg::R14D: case Reg::R15D:
     case Reg::EIP:
     case Reg::EFLAGS:
+        output.Reg64 = value.u32;
+        break;
 
     case Reg::RAX: case Reg::RCX: case Reg::RDX: case Reg::RBX:
     case Reg::RSP: case Reg::RBP: case Reg::RSI: case Reg::RDI:

@@ -282,6 +282,13 @@ VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg regs[], const RegValu
         return VPOperationStatus::Failed;
     }
 
+    // Get current register values in order to preserve or zero-extend values
+    if (S_OK != m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals)) {
+        delete[] whvVals;
+        delete[] whvRegs;
+        return VPOperationStatus::Failed;
+    }
+
     for (int i = 0; i < numRegs; i++) {
         const auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
         if (xlatResult != VPOperationStatus::OK) {

@@ -35,6 +35,8 @@ SOFTWARE.
 #include <assert.h>
 #include <memory>
 
+#include "virt86/util/bytemanip.hpp"
+
 namespace virt86::kvm {
 
 KvmVirtualProcessor::KvmVirtualProcessor(KvmVirtualMachine& vm, uint32_t vcpuID)
@@ -490,18 +492,6 @@ VPOperationStatus KvmVirtualProcessor::KvmRegRead(const Reg reg, RegValue& value
     }
 
     return VPOperationStatus::OK;
-}
-
-inline void SetLowByte(__u64& lhs, uint8_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
-}
-
-inline void SetHighByte(__u64& lhs, uint8_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFF00FF) | ((uint64_t&)rhs << 8ull);
-}
-
-inline void SetLowWord(__u64& lhs, uint16_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
 }
 
 VPOperationStatus KvmVirtualProcessor::KvmRegWrite(const Reg reg, const RegValue& value) noexcept {

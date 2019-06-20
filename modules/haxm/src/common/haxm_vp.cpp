@@ -27,6 +27,8 @@ SOFTWARE.
 #include "haxm_vm.hpp"
 #include "haxm_helpers.hpp"
 
+#include "virt86/util/bytemanip.hpp"
+
 #include <cassert>
 
 namespace virt86::haxm {
@@ -450,14 +452,6 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& val
     }
 
     return VPOperationStatus::OK;
-}
-
-inline void SetLowByte(uint64_t& lhs, uint8_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
-}
-
-inline void SetLowWord(uint64_t& lhs, uint16_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
 }
 
 VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegValue& value) noexcept {
