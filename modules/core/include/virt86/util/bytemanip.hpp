@@ -29,16 +29,16 @@ SOFTWARE.
 
 namespace virt86 {
 
-inline void SetLowByte(uint64_t& lhs, uint8_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
+inline uint64_t SetLowByte(uint64_t lhs, uint8_t rhs) noexcept {
+    return (lhs & 0xFFFFFFFF'FFFFFF00) | rhs;
 }
 
-inline void SetHighByte(uint64_t& lhs, uint8_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFF00FF) | ((uint64_t)rhs << 8ull);
+inline uint64_t SetHighByte(uint64_t lhs, uint8_t rhs) noexcept {
+    return (lhs & 0xFFFFFFFF'FFFF00FF) | ((uint64_t)rhs << 8ull);
 }
 
-inline void SetLowWord(uint64_t& lhs, uint16_t rhs) noexcept {
-    lhs = (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
+inline uint64_t SetLowWord(uint64_t lhs, uint16_t rhs) noexcept {
+    return (lhs & 0xFFFFFFFF'FFFF0000) | rhs;
 }
 
 }

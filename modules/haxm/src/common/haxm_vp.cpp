@@ -480,14 +480,14 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
     case Reg::BPL:  m_regs._bp = value.u8;                     m_regsChanged = true;  break;
     case Reg::SIL:  m_regs._si = value.u8;                     m_regsChanged = true;  break;
     case Reg::DIL:  m_regs._di = value.u8;                     m_regsChanged = true;  break;
-    case Reg::R8B:  SetLowByte(m_regs._r8, value.u8);          m_regsChanged = true;  break;
-    case Reg::R9B:  SetLowByte(m_regs._r9, value.u8);          m_regsChanged = true;  break;
-    case Reg::R10B: SetLowByte(m_regs._r10, value.u8);         m_regsChanged = true;  break;
-    case Reg::R11B: SetLowByte(m_regs._r11, value.u8);         m_regsChanged = true;  break;
-    case Reg::R12B: SetLowByte(m_regs._r12, value.u8);         m_regsChanged = true;  break;
-    case Reg::R13B: SetLowByte(m_regs._r13, value.u8);         m_regsChanged = true;  break;
-    case Reg::R14B: SetLowByte(m_regs._r14, value.u8);         m_regsChanged = true;  break;
-    case Reg::R15B: SetLowByte(m_regs._r15, value.u8);         m_regsChanged = true;  break;
+    case Reg::R8B:  m_regs._r8 = SetLowByte(m_regs._r8, value.u8);   m_regsChanged = true;  break;
+    case Reg::R9B:  m_regs._r9 = SetLowByte(m_regs._r9, value.u8);   m_regsChanged = true;  break;
+    case Reg::R10B: m_regs._r10 = SetLowByte(m_regs._r10, value.u8); m_regsChanged = true;  break;
+    case Reg::R11B: m_regs._r11 = SetLowByte(m_regs._r11, value.u8); m_regsChanged = true;  break;
+    case Reg::R12B: m_regs._r12 = SetLowByte(m_regs._r12, value.u8); m_regsChanged = true;  break;
+    case Reg::R13B: m_regs._r13 = SetLowByte(m_regs._r13, value.u8); m_regsChanged = true;  break;
+    case Reg::R14B: m_regs._r14 = SetLowByte(m_regs._r14, value.u8); m_regsChanged = true;  break;
+    case Reg::R15B: m_regs._r15 = SetLowByte(m_regs._r15, value.u8); m_regsChanged = true;  break;
 
     case Reg::AX:    m_regs._ax = value.u16;                   m_regsChanged = true;  break;
     case Reg::CX:    m_regs._cx = value.u16;                   m_regsChanged = true;  break;
@@ -497,14 +497,14 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
     case Reg::DI:    m_regs._di = value.u16;                   m_regsChanged = true;  break;
     case Reg::SP:    m_regs._sp = value.u16;                   m_regsChanged = true;  break;
     case Reg::BP:    m_regs._bp = value.u16;                   m_regsChanged = true;  break;
-    case Reg::R8W:   SetLowWord(m_regs._r8, value.u16);        m_regsChanged = true;  break;
-    case Reg::R9W:   SetLowWord(m_regs._r9, value.u16);        m_regsChanged = true;  break;
-    case Reg::R10W:  SetLowWord(m_regs._r10, value.u16);       m_regsChanged = true;  break;
-    case Reg::R11W:  SetLowWord(m_regs._r11, value.u16);       m_regsChanged = true;  break;
-    case Reg::R12W:  SetLowWord(m_regs._r12, value.u16);       m_regsChanged = true;  break;
-    case Reg::R13W:  SetLowWord(m_regs._r13, value.u16);       m_regsChanged = true;  break;
-    case Reg::R14W:  SetLowWord(m_regs._r14, value.u16);       m_regsChanged = true;  break;
-    case Reg::R15W:  SetLowWord(m_regs._r15, value.u16);       m_regsChanged = true;  break;
+    case Reg::R8W:   m_regs._r8 = SetLowWord(m_regs._r8, value.u16);    m_regsChanged = true;  break;
+    case Reg::R9W:   m_regs._r9 = SetLowWord(m_regs._r9, value.u16);    m_regsChanged = true;  break;
+    case Reg::R10W:  m_regs._r10 = SetLowWord(m_regs._r10, value.u16);  m_regsChanged = true;  break;
+    case Reg::R11W:  m_regs._r11 = SetLowWord(m_regs._r11, value.u16);  m_regsChanged = true;  break;
+    case Reg::R12W:  m_regs._r12 = SetLowWord(m_regs._r12, value.u16);  m_regsChanged = true;  break;
+    case Reg::R13W:  m_regs._r13 = SetLowWord(m_regs._r13, value.u16);  m_regsChanged = true;  break;
+    case Reg::R14W:  m_regs._r14 = SetLowWord(m_regs._r14, value.u16);  m_regsChanged = true;  break;
+    case Reg::R15W:  m_regs._r15 = SetLowWord(m_regs._r15, value.u16);  m_regsChanged = true;  break;
     case Reg::IP:    m_regs._eip = value.u16;                  m_regsChanged = true;  break;
     case Reg::FLAGS: m_regs._eflags = static_cast<uint32_t>(fixupFlags(value.u16)); m_regsChanged = true;  break;
 
