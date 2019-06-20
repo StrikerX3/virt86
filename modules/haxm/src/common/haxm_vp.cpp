@@ -44,7 +44,27 @@ HaxmVirtualProcessor::HaxmVirtualProcessor(HaxmVirtualMachine& vm, HaxmVirtualMa
     , m_ioTunnel(nullptr)
     , m_debug({ 0 })
     , m_vcpuID(id)
+    , m_useEferMSR(true)
 {
+    // Check if we need to use the EFER MSR instead of the register state by
+    // enabling the LME bit and reading back. If the register value is changed,
+    // we can use the EFER register value from m_regs, otherwise we'll have to
+    // use the MSR. The register value is reverted after the test.
+    // TODO: find a less invasive method to check for this
+    if (m_sys->GetRegisters(&m_regs)) {
+        uint32_t oldEfer = m_regs._efer;
+        m_regs._efer ^= EFER_LME;
+        if (m_sys->SetRegisters(&m_regs)) {
+            if (m_sys->GetRegisters(&m_regs)) {
+                uint32_t newEfer = m_regs._efer;
+                if (oldEfer != newEfer) {
+                    m_useEferMSR = false;
+                }
+            }
+            m_regs._efer = oldEfer;
+            m_sys->SetRegisters(&m_regs);
+        }
+    }
 }
 
 HaxmVirtualProcessor::~HaxmVirtualProcessor() noexcept {
@@ -399,8 +419,14 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegRead(const Reg reg, RegValue& val
     case Reg::DR3:    value.u64 = m_regs._dr3;    break;
     case Reg::DR6:    value.u64 = m_regs._dr6;    break;
     case Reg::DR7:    value.u64 = m_regs._dr7;    break;
-    //case Reg::EFER:   value.u64 = m_regs._efer;   break;
-	case Reg::EFER: GetMSR(0xC0000080, value.u64);break;
+    case Reg::EFER:
+        if (m_useEferMSR) {
+            GetMSR(0xC0000080, value.u64);
+        }
+        else {
+            value.u64 = m_regs._efer;
+        }
+        break;
 
 
     case Reg::ST0: case Reg::ST1: case Reg::ST2: case Reg::ST3:
@@ -506,8 +532,15 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
     case Reg::R15D:   m_regs._r15 = value.u32;                 m_regsChanged = true;  break;
     case Reg::EIP:    m_regs._eip = value.u32;                 m_regsChanged = true;  break;
     case Reg::EFLAGS: m_regs._eflags = static_cast<uint32_t>(fixupFlags(value.u32)); m_regsChanged = true;  break;
-    //case Reg::EFER:   m_regs._efer = value.u32;                m_regsChanged = true;  break;
-	case Reg::EFER:   SetMSR(0xC0000080, value.u64);                                  break;
+    case Reg::EFER:
+        if (m_useEferMSR) {
+            SetMSR(0xC0000080, value.u64);
+        }
+        else {
+            m_regs._efer = value.u32;
+            m_regsChanged = true;
+        }
+	    break;
 
     case Reg::RAX:    m_regs._rax = value.u64;                 m_regsChanged = true;  break;
     case Reg::RCX:    m_regs._rcx = value.u64;                 m_regsChanged = true;  break;

@@ -101,6 +101,8 @@ private:
     bool m_regsChanged;      // Set to true when general registers are modified by the host
     bool m_fpuRegsChanged;   // Set to true when floating point registers are modified by the host
 
+    bool m_useEferMSR;       // Set to true if the EFER register needs to be accessed through the MSR
+
     hax_tunnel *m_tunnel;
     void *m_ioTunnel;
     hax_debug_t m_debug;
