@@ -252,12 +252,17 @@ VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg regs[], RegValue value
     for (int i = 0; i < numRegs; i++) {
         const auto xlatResult = TranslateRegisterName(regs[i], whvRegs[i]);
         if (xlatResult != VPOperationStatus::OK) {
+            delete[] whvRegs;
+            delete[] whvVals;
             return xlatResult;
         }
     }
 
-    const HRESULT hr = m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals);
-    const VPOperationStatus result = (S_OK == hr) ? VPOperationStatus::OK : VPOperationStatus::Failed;
+    if (S_OK != m_dispatch.WHvGetVirtualProcessorRegisters(m_vm.Handle(), m_id, whvRegs, numRegs, whvVals)) {
+        delete[] whvVals;
+        delete[] whvRegs;
+        return VPOperationStatus::Failed;
+    }
 
     for (int i = 0; i < numRegs; i++) {
         values[i] = TranslateRegisterValue(regs[i], whvVals[i]);
@@ -265,7 +270,7 @@ VPOperationStatus WhpxVirtualProcessor::RegRead(const Reg regs[], RegValue value
 
     delete[] whvVals;
     delete[] whvRegs;
-    return result;
+    return VPOperationStatus::OK;
 }
 
 VPOperationStatus WhpxVirtualProcessor::RegWrite(const Reg regs[], const RegValue values[], const size_t numRegs) noexcept {
