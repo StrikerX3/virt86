@@ -41,17 +41,21 @@ void GDTEntry::Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
 	this->data.flags = flags & 0xF;
 }
 
-uint32_t GDTEntry::GetBase() noexcept {
+uint32_t GDTEntry::GetBase() const noexcept {
     return ((data.baseLow) | (data.baseMid << 16) | (data.baseHigh << 24));
 }
 
-uint32_t GDTEntry::GetLimit() noexcept {
+uint32_t GDTEntry::GetLimit() const noexcept {
     uint32_t limit = ((data.limitLow) | (data.limitHigh << 16));
     // If we use 4 KB pages, extend the limit to reflect that
     if (data.flags & GDT_FL_GRANULARITY) {
         limit = (limit << 12) | 0xfff;
     }
     return limit;
+}
+
+uint16_t GDTEntry::GetAttributes() const noexcept {
+    return data.access.u8 | (data.flags << 12);
 }
 
 }

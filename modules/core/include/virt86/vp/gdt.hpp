@@ -27,9 +27,9 @@ SOFTWARE.
 
 #include <cstdint>
 
-#define GDT_FL_GRANULARITY  (1 << 3)
-#define GDT_FL_SIZE         (1 << 2)
-#define GDT_FL_LONG         (1 << 1)
+const uint8_t GDT_FL_GRANULARITY = (1 << 3);
+const uint8_t GDT_FL_SIZE        = (1 << 2);
+const uint8_t GDT_FL_LONG        = (1 << 1);
 
 namespace virt86 {
 
@@ -71,8 +71,9 @@ struct GDTEntry {
 
     void Set(uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) noexcept;
 
-    uint32_t GetBase() noexcept;
-    uint32_t GetLimit() noexcept;
+    uint32_t GetBase() const noexcept;
+    uint32_t GetLimit() const noexcept;
+    uint16_t GetAttributes() const noexcept;
 };
 
 using LDTEntry = GDTEntry;

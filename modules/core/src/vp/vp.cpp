@@ -546,6 +546,28 @@ VPOperationStatus VirtualProcessor::SetGDTEntry(const uint16_t selector, const G
     return VPOperationStatus::OK;
 }
 
+VPOperationStatus VirtualProcessor::ReadSegment(uint16_t selector, RegValue& value) noexcept {
+    // Get GDT entry from memory
+    virt86::RegValue gdt;
+    if (RegRead(virt86::Reg::GDTR, gdt) != virt86::VPOperationStatus::OK) {
+        return VPOperationStatus::Failed;
+    }
+
+    // Read GDT entry corresponding to the selector
+    virt86::GDTEntry gdtEntry;
+    if (!MemRead(gdt.table.base + (selector & 0xfff8), sizeof(virt86::GDTEntry), &gdtEntry)) {
+        return VPOperationStatus::InvalidSelector;
+    }
+
+    // Fill in segment info with data from the GDT entry
+    value.segment.selector = selector;
+    value.segment.base = gdtEntry.GetBase();
+    value.segment.limit = gdtEntry.GetLimit();
+    value.segment.attributes.u16 = gdtEntry.GetAttributes();
+
+    return VPOperationStatus::OK;
+}
+
 // ----- Interrupt Descriptor Table -------------------------------------------
 
 VPOperationStatus VirtualProcessor::GetIDTEntry(const uint8_t vector, IDTEntry& entry) noexcept {
