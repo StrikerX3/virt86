@@ -188,12 +188,12 @@ union RegValue {
     // Segment registers
     struct {
         uint16_t selector;
-        uint64_t base;        // read-only
-        uint32_t limit;       // read-only
+        uint64_t base;
+        uint32_t limit;
         union {
             struct {
                 uint16_t type : 4;
-                uint16_t codeDataSegment : 1;
+                uint16_t system : 1;
                 uint16_t privilegeLevel : 2;
                 uint16_t present : 1;
                 uint16_t : 4;
@@ -203,7 +203,7 @@ union RegValue {
                 uint16_t granularity : 1;
             };
             uint16_t u16;
-        } attributes;    // read-only
+        } attributes;
     } segment;
 
     // Table registers
@@ -296,6 +296,14 @@ constexpr uint64_t RFLAGS_AC      = (1u << 18);      // Alignment check
 constexpr uint64_t RFLAGS_VIF     = (1u << 19);      // Virtual Interrupt flag
 constexpr uint64_t RFLAGS_VIP     = (1u << 20);      // Virtual Interrupt pending
 constexpr uint64_t RFLAGS_ID      = (1u << 21);      // ID flag
+
+// Segment type bits
+constexpr uint8_t SEG_TYPE_ACCESSED   = (1 << 0);    // Accessed
+constexpr uint8_t SEG_TYPE_READABLE   = (1 << 1);    // Readable (code segments only)
+constexpr uint8_t SEG_TYPE_WRITABLE   = (1 << 1);    // Writable (data segments only)
+constexpr uint8_t SEG_TYPE_CONFORMING = (1 << 2);    // Expand-down (data segments only)
+constexpr uint8_t SEG_TYPE_EXPANDDOWN = (1 << 2);    // Conforming (code segments only)
+constexpr uint8_t SEG_TYPE_CODE       = (1 << 3);    // Code segment if set, data segment if clear
 
 // CR0 bits
 constexpr uint64_t CR0_PE         = (1u << 0);       // Protection Enable

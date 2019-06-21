@@ -290,11 +290,11 @@ public:
     VPOperationStatus GetGDTEntry(const uint16_t selector, GDTEntry& entry) noexcept;
 
     /**
-     * Modifies an entry from the Global Descriptor Table.
+     * Modifies an entry in the Global Descriptor Table.
      */
     VPOperationStatus SetGDTEntry(const uint16_t selector, const GDTEntry& entry) noexcept;
 
-    /**
+	/**
      * Reads segment information for the specified selector into the register
      * value based on this virtual processor's GDT setup.
      */
@@ -311,18 +311,6 @@ public:
      * Modifies an entry from the Interrupt Descriptor Table.
      */
     VPOperationStatus SetIDTEntry(const uint8_t vector, const IDTEntry& entry) noexcept;
-
-    // ----- Local Descriptor Table -------------------------------------------
-
-    /**
-     * Retrieves an entry from the Local Descriptor Table.
-     */
-    VPOperationStatus GetLDTEntry(const uint16_t selector, LDTEntry& entry) noexcept;
-
-    /**
-     * Modifies an entry from the Local Descriptor Table.
-     */
-    VPOperationStatus SetLDTEntry(const uint16_t selector, const LDTEntry& entry) noexcept;
 
     // ----- Breakpoints ------------------------------------------------------
 
@@ -466,6 +454,11 @@ private:
      * paging mode.
      */
     bool LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr) noexcept;
+
+	/**
+	 * Determines if the CPU is in IA-32e mode.
+	 */
+	bool IsIA32eMode() noexcept;
 };
 
 }
