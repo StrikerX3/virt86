@@ -25,6 +25,7 @@ SOFTWARE.
 */
 #include "virt86/vm/vm.hpp"
 #include "virt86/platform/platform.hpp"
+#include "virt86/util/host_info.hpp"
 
 namespace virt86 {
 
@@ -82,6 +83,11 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
     if ((size > 0xFFFFFFFFull) && !m_platform.GetFeatures().largeMemoryAllocation) {
         return MemoryMappingStatus::Unsupported;
     }
+
+	// GPA range must fit within the host's limits
+	if ((baseAddress & ~HostInfo.gpa.mask) || ((baseAddress + size - 1) & ~HostInfo.gpa.mask)) {
+		return MemoryMappingStatus::OutOfBounds;
+	}
 
     const auto status = MapGuestMemoryImpl(baseAddress, size, flags, memory);
     if (status == MemoryMappingStatus::OK) {

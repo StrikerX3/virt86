@@ -39,6 +39,8 @@ SOFTWARE.
 */
 #pragma once
 
+#include "virt86/util/host_info.hpp"
+
 #if defined(VIRT86_HAXM_AVAILABLE)
 #  include "virt86/haxm/haxm_platform.hpp"
 #endif

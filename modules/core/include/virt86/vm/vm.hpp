@@ -110,7 +110,10 @@ public:
      * on the underlying hypervisor's implementation.
      *
      * Some platforms do not allow mapping memory ranges larger than 4 GiB, in
-     * which case the method will return MemoryMappingStatus::Unsupoorted.
+     * which case the method will return MemoryMappingStatus::Unsupported.
+	 *
+	 * Attempting to map guest physical pages beyond the host's limit will
+	 * return MemoryMappingStatus::OutOfBounds.
      */
     MemoryMappingStatus MapGuestMemory(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory);
 
@@ -124,7 +127,7 @@ public:
      * Some platforms may allow unmapping portions of GPA ranges.
      *
      * Some platforms do not allow mapping memory ranges larger than 4 GiB, in
-     * which case the method will return MemoryMappingStatus::Unsupoorted.
+     * which case the method will return MemoryMappingStatus::Unsupported.
      */
     MemoryMappingStatus UnmapGuestMemory(const uint64_t baseAddress, const uint64_t size);
 

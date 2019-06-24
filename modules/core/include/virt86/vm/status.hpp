@@ -34,12 +34,13 @@ enum class MemoryMappingStatus {
     MisalignedHostMemory,      // The provided host memory block is misaligned
     MisalignedAddress,         // The provided memory region address is misaligned
     MisalignedSize,            // The provided memory region size is misaligned
-    EmptyRange,                // Cannot map an empty memory range (size = 0)
+	EmptyRange,                // Cannot map an empty memory range (size = 0)
     PartialUnmapUnsupported,   // Cannot unmap memory region because partial unmapping is not supported by the platform
     AlreadyAllocated,          // The host memory block has already been allocated
     InvalidFlags,              // Invalid flags were provided
     InvalidRange,              // An invalid (non-mapped or non-matching) memory range was provided
     Failed,                    // Failed to map or unmap the memory region
+	OutOfBounds,               // Attempted to allocate GPA range beyond the host's limit
 };
 
 enum class DirtyPageTrackingStatus {
