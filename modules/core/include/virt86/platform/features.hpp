@@ -125,6 +125,29 @@ struct PlatformFeatures {
     uint32_t maxProcessorsPerVM = 0;
 
     /**
+     * Guest physical address limits.
+     */
+    struct {
+        /**
+         * The number of bits in a valid guest physical address.
+         * Based on the host's capabilities and the platform's limits.
+         */
+        uint8_t maxBits;
+
+        /**
+         * The maximum guest physical address supported by the platform.
+         * Based on the host's capabilities and the platform's limits.
+         */
+        uint64_t maxAddress;
+
+        /**
+         * A precomputed mask for guest physical addresses.
+         * If any bit is set outside of the mask, the address is unsupported.
+         */
+        uint64_t mask;
+    } guestPhysicalAddress;
+
+    /**
      * Unrestricted guests are supported.
      */
     bool unrestrictedGuest = false;

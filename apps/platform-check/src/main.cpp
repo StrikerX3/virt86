@@ -82,7 +82,7 @@ int main() {
         const auto& features = platform.GetFeatures();
         printf("  Features:\n");
         printf("    Maximum number of VCPUs: %u per VM, %u global\n", features.maxProcessorsPerVM, features.maxProcessorsGlobal);
-		printf("    Maximum guest physical address: 0x%llx\n", HostInfo.gpa.maxAddress);
+		printf("    Maximum guest physical address: 0x%llx\n", features.guestPhysicalAddress.maxAddress);
         printf("    Unrestricted guest: %s\n", (features.unrestrictedGuest) ? "supported" : "unsuported");
         printf("    Extended Page Tables: %s\n", (features.extendedPageTables) ? "supported" : "unsuported");
         printf("    Guest debugging: %s\n", (features.guestDebugging) ? "available" : "unavailable");

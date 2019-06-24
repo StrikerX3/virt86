@@ -26,6 +26,8 @@ SOFTWARE.
 #include "virt86/hvf/hvf_platform.hpp"
 #include "hvf_vm.hpp"
 
+#include "virt86/util/host_info.hpp"
+
 namespace virt86::hvf {
 
 HvFPlatform& HvFPlatform::Instance() {
@@ -43,6 +45,9 @@ HvFPlatform::HvFPlatform()
     // TODO: Check and publish capabilities/features
     m_features.maxProcessorsPerVM = 1;
     m_features.maxProcessorsGlobal = 1;
+    m_features.guestPhysicalAddress.maxBits = HostInfo.gpa.maxBits;  // Adjust if platform imposes stricter limits
+    m_features.guestPhysicalAddress.maxAddress = HostInfo.gpa.maxAddress;  // Adjust according to the above if needed (= (1ull << bits))
+    m_features.guestPhysicalAddress.mask = HostInfo.gpa.mask;  // Adjust according to the above if needed (= maxAddress - 1)
     m_features.unrestrictedGuest = false;
     m_features.extendedPageTables = false;
     m_features.guestDebugging = false;  // Required for single stepping, software and hardware breakpoints

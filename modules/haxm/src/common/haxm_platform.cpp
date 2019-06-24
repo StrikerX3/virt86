@@ -27,6 +27,8 @@ SOFTWARE.
 #include "haxm_vm.hpp"
 #include "haxm_platform_impl.hpp"
 
+#include "virt86/util/host_info.hpp"
+
 namespace virt86::haxm {
 
 HaxmPlatform& HaxmPlatform::Instance() noexcept {
@@ -52,6 +54,13 @@ HaxmPlatform::HaxmPlatform() noexcept
         m_initStatus = PlatformInitStatus::OK;
         m_features.maxProcessorsPerVM = 64;
         m_features.maxProcessorsGlobal = 128;
+        m_features.guestPhysicalAddress.maxBits = HostInfo.gpa.maxBits;
+        // HAXM imposes a hard cap of 43 GPA bits (2^31 pages)
+        if (m_features.guestPhysicalAddress.maxBits > 43) {
+            m_features.guestPhysicalAddress.maxBits = 43;
+        }
+        m_features.guestPhysicalAddress.maxAddress = (1ull << m_features.guestPhysicalAddress.maxBits);
+        m_features.guestPhysicalAddress.mask = m_features.guestPhysicalAddress.maxAddress - 1;
         m_features.floatingPointExtensions = FloatingPointExtension::SSE2;
         m_features.unrestrictedGuest = (caps.winfo & HAX_CAP_UG) != 0;
         m_features.extendedPageTables = (caps.winfo & HAX_CAP_EPT) != 0;
