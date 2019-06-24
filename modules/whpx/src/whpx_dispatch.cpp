@@ -29,7 +29,7 @@ SOFTWARE.
 namespace virt86::whpx {
 
 #define LOAD_LIB(name) do { \
-    m_h##name = LoadLibrary(#name ".dll"); \
+    m_h##name = LoadLibraryA(#name ".dll"); \
     if (m_h##name == NULL) { \
         goto fail; \
     } \
