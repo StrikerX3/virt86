@@ -157,18 +157,18 @@ bool WhpxVirtualMachine::Initialize() {
     return true;
 }
 
-static inline WHV_MAP_GPA_RANGE_FLAGS ToWHVFlags(const MemoryFlags flags) noexcept {
+static inline WHV_MAP_GPA_RANGE_FLAGS ToWHVFlags(const MemoryFlags flags, const WhpxPlatform& platform) noexcept {
     WHV_MAP_GPA_RANGE_FLAGS whvFlags = WHvMapGpaRangeFlagNone;
     const auto bmFlags = BitmaskEnum(flags);
     if (bmFlags.AnyOf(MemoryFlags::Read)) whvFlags |= WHvMapGpaRangeFlagRead;
     if (bmFlags.AnyOf(MemoryFlags::Write)) whvFlags |= WHvMapGpaRangeFlagWrite;
     if (bmFlags.AnyOf(MemoryFlags::Execute)) whvFlags |= WHvMapGpaRangeFlagExecute;
-    if (bmFlags.AnyOf(MemoryFlags::DirtyPageTracking)) whvFlags |= WHvMapGpaRangeFlagTrackDirtyPages;
+    if (bmFlags.AnyOf(MemoryFlags::DirtyPageTracking) && platform.GetFeatures().dirtyPageTracking) whvFlags |= WHvMapGpaRangeFlagTrackDirtyPages;
     return whvFlags;
 }
 
 MemoryMappingStatus WhpxVirtualMachine::MapGuestMemoryImpl(const uint64_t baseAddress, const uint64_t size, const MemoryFlags flags, void *memory) noexcept {
-    const WHV_MAP_GPA_RANGE_FLAGS whvFlags = ToWHVFlags(flags);
+    const WHV_MAP_GPA_RANGE_FLAGS whvFlags = ToWHVFlags(flags, m_platform);
     if (whvFlags == WHvMapGpaRangeFlagNone) {
         return MemoryMappingStatus::InvalidFlags;
     }
