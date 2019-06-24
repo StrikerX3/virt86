@@ -41,6 +41,10 @@ namespace virt86::whpx {
         goto fail; \
     }
 
+
+#define LOAD_OPTIONAL_FUNC(returnType, name, parameters) \
+    name = (name##_t) GetProcAddress(hmodule, #name);
+
 bool WhpxDispatch::Load() noexcept {
     if (m_loaded) {
         return true;
@@ -51,7 +55,7 @@ bool WhpxDispatch::Load() noexcept {
 
     HMODULE hmodule;
 
-    hmodule = m_hWinHvPlatform; WHPX_PLATFORM_FUNCTIONS(LOAD_FUNC);
+	hmodule = m_hWinHvPlatform; WHPX_PLATFORM_FUNCTIONS(LOAD_FUNC); WHPX_OPTIONAL_PLATFORM_FUNCTIONS(LOAD_OPTIONAL_FUNC);
     hmodule = m_hWinHvEmulation; WHPX_EMULATION_FUNCTIONS(LOAD_FUNC);
 
     m_loaded = true;

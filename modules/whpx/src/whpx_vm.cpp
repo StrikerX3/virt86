@@ -191,6 +191,10 @@ MemoryMappingStatus WhpxVirtualMachine::UnmapGuestMemoryImpl(const uint64_t base
 }
 
 DirtyPageTrackingStatus WhpxVirtualMachine::QueryDirtyPagesImpl(const uint64_t baseAddress, const uint64_t size, uint64_t *bitmap, const size_t bitmapSize) noexcept {
+	if (m_dispatch.WHvQueryGpaRangeDirtyBitmap == nullptr) {
+		return DirtyPageTrackingStatus::Unsupported;
+	}
+
     // Bitmap buffer size must be a multiple of 8 bytes since WHPX uses UINT64
     if (bitmapSize & 0x7) {
         return DirtyPageTrackingStatus::MisalignedBitmap;

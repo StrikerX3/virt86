@@ -48,7 +48,9 @@ SOFTWARE.
     FUNC(HRESULT, WHvRunVirtualProcessor, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, VOID* ExitContext, UINT32 ExitContextSizeInBytes)) \
     FUNC(HRESULT, WHvCancelRunVirtualProcessor, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, UINT32 Flags)) \
     FUNC(HRESULT, WHvGetVirtualProcessorRegisters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, WHV_REGISTER_VALUE* RegisterValues)) \
-    FUNC(HRESULT, WHvSetVirtualProcessorRegisters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues)) \
+    FUNC(HRESULT, WHvSetVirtualProcessorRegisters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues))
+
+#define WHPX_OPTIONAL_PLATFORM_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvQueryGpaRangeDirtyBitmap, (WHV_PARTITION_HANDLE Partition, WHV_GUEST_PHYSICAL_ADDRESS GuestAddress, UINT64 RangeSizeInBytes, UINT64* Bitmap, UINT32 BitmapSizeInBytes))
 
 #define WHPX_EMULATION_FUNCTIONS(FUNC) \
@@ -64,6 +66,7 @@ SOFTWARE.
     name##_t name = nullptr; 
 
 WHPX_PLATFORM_FUNCTIONS(WHPX_TYPEDEF_FUNC);
+WHPX_OPTIONAL_PLATFORM_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 WHPX_EMULATION_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 
 namespace virt86::whpx {
@@ -75,10 +78,11 @@ struct WhpxDispatch {
     bool m_loaded = false;
 
     HMODULE m_hWinHvPlatform = NULL;
-    WHPX_PLATFORM_FUNCTIONS(WHPX_DEFINE_FUNC)
+	WHPX_PLATFORM_FUNCTIONS(WHPX_DEFINE_FUNC);
+	WHPX_OPTIONAL_PLATFORM_FUNCTIONS(WHPX_DEFINE_FUNC);
 
     HMODULE m_hWinHvEmulation = NULL;
-    WHPX_EMULATION_FUNCTIONS(WHPX_DEFINE_FUNC)
+	WHPX_EMULATION_FUNCTIONS(WHPX_DEFINE_FUNC);
 };
 
 }
