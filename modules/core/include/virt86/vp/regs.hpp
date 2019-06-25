@@ -162,7 +162,7 @@ enum class Reg {
 
 template<class T>
 inline T RegOffset(Reg base, Reg reg) noexcept {
-    return static_cast<T>(base) - static_cast<T>(base);
+    return static_cast<T>(reg) - static_cast<T>(base);
 }
 
 template<class T>
