@@ -534,7 +534,7 @@ VPOperationStatus HaxmVirtualProcessor::HaxmRegWrite(const Reg reg, const RegVal
             m_regs._efer = value.u32;
             m_regsChanged = true;
         }
-	    break;
+        break;
 
     case Reg::RAX:    m_regs._rax = value.u64;                 m_regsChanged = true;  break;
     case Reg::RCX:    m_regs._rcx = value.u64;                 m_regsChanged = true;  break;

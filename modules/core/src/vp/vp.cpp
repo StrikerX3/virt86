@@ -527,15 +527,15 @@ VPOperationStatus VirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_
 // ----- Utility methods for segment and table registers ----------------------
 
 bool VirtualProcessor::IsIA32eMode() noexcept {
-	Reg regs[3] = { Reg::CR0, Reg::RFLAGS, Reg::EFER };
-	RegValue vals[3];
-	if (RegRead(regs, vals, std::size(regs)) != VPOperationStatus::OK) return false;
+    Reg regs[3] = { Reg::CR0, Reg::RFLAGS, Reg::EFER };
+    RegValue vals[3];
+    if (RegRead(regs, vals, std::size(regs)) != VPOperationStatus::OK) return false;
 
-	bool cr0_pe = (vals[0].u64 & CR0_PE) != 0;
-	bool rflags_vm = (vals[1].u64 & RFLAGS_VM) != 0;
-	bool efer_lma = (vals[2].u64 & EFER_LMA) != 0;
+    bool cr0_pe = (vals[0].u64 & CR0_PE) != 0;
+    bool rflags_vm = (vals[1].u64 & RFLAGS_VM) != 0;
+    bool efer_lma = (vals[2].u64 & EFER_LMA) != 0;
 
-	return cr0_pe && rflags_vm && efer_lma;
+    return cr0_pe && rflags_vm && efer_lma;
 }
 
 // ----- Global Descriptor Table ----------------------------------------------
@@ -546,39 +546,39 @@ VPOperationStatus VirtualProcessor::GetGDTEntry(const uint16_t selector, GDTEntr
     if (selector + sizeof(GenericGDTDescriptor) > gdt.table.limit) {
         return VPOperationStatus::InvalidSelector;
     }
-	
-	// Check GDT entry type
+    
+    // Check GDT entry type
     CHECK_RESULT_MEM(MemRead(gdt.table.base + selector, sizeof(GenericGDTDescriptor), &entry));
-	if (entry.generic.data.system) {
-		// GDT code or data descriptor; nothing to do here
-		return VPOperationStatus::OK;
-	}
-	
-	// At this point we have a system descriptor: LDT, TSS or any gate
-	
-	// In IA-32e mode, some of these descriptors are extended to 16 bytes.
-	if (IsIA32eMode()) {
-		switch (entry.generic.data.type) {
-		case 0b0010: // LDT
-		case 0b1001: case 0b1011: // TSS
-		case 0b1100: case 0b1110: case 0b1111: // Call Gate, Interrupt Gate, Trap Gate
-			if (selector + sizeof(GDTEntry) > gdt.table.limit) {
-				return VPOperationStatus::InvalidSelector;
-			}
-			CHECK_RESULT_MEM(MemRead(gdt.table.base + selector, sizeof(GDTEntry), &entry));
-			break;
-		default: // Reserved
-			return VPOperationStatus::InvalidSelector;
-		}
-	}
-	else {
-		// No descriptors need to be extended; just return an error if the
-		// entry type is reserved
-		switch (entry.generic.data.type) {
-		case 0b0000: case 0b1000: case 0b1010: case 0b1101: // Reserved
-			return VPOperationStatus::InvalidSelector;
-		}
-	}
+    if (entry.generic.data.system) {
+        // GDT code or data descriptor; nothing to do here
+        return VPOperationStatus::OK;
+    }
+    
+    // At this point we have a system descriptor: LDT, TSS or any gate
+    
+    // In IA-32e mode, some of these descriptors are extended to 16 bytes.
+    if (IsIA32eMode()) {
+        switch (entry.generic.data.type) {
+        case 0b0010: // LDT
+        case 0b1001: case 0b1011: // TSS
+        case 0b1100: case 0b1110: case 0b1111: // Call Gate, Interrupt Gate, Trap Gate
+            if (selector + sizeof(GDTEntry) > gdt.table.limit) {
+                return VPOperationStatus::InvalidSelector;
+            }
+            CHECK_RESULT_MEM(MemRead(gdt.table.base + selector, sizeof(GDTEntry), &entry));
+            break;
+        default: // Reserved
+            return VPOperationStatus::InvalidSelector;
+        }
+    }
+    else {
+        // No descriptors need to be extended; just return an error if the
+        // entry type is reserved
+        switch (entry.generic.data.type) {
+        case 0b0000: case 0b1000: case 0b1010: case 0b1101: // Reserved
+            return VPOperationStatus::InvalidSelector;
+        }
+    }
 
     return VPOperationStatus::OK;
 }
@@ -590,119 +590,119 @@ VPOperationStatus VirtualProcessor::SetGDTEntry(const uint16_t selector, const G
         return VPOperationStatus::InvalidSelector;
     }
 
-	// Check GDT entry type
-	CHECK_RESULT_MEM(MemWrite(gdt.table.base + selector, sizeof(GenericGDTDescriptor), &entry));
-	if (entry.generic.data.system) {
-		// GDT code or data descriptor; nothing to do here
-		return VPOperationStatus::OK;
-	}
-	
-	// In IA-32e mode, some of these descriptors are extended to 16 bytes.
-	if (IsIA32eMode()) {
-		switch (entry.generic.data.type) {
-		case 0b0010: // LDT
-		case 0b1001: case 0b1011: // TSS
-		case 0b1100: case 0b1110: case 0b1111: // Call Gate, Interrupt Gate, Trap Gate
-			if (selector + sizeof(GDTEntry) > gdt.table.limit) {
-				return VPOperationStatus::InvalidSelector;
-			}
-			CHECK_RESULT_MEM(MemWrite(gdt.table.base + selector, sizeof(GDTEntry), &entry));
-			break;
-		default: // Reserved
-			return VPOperationStatus::InvalidSelector;
-		}
-	}
-	else {
-		// No descriptors need to be extended; just return an error if the
-		// entry type is reserved
-		switch (entry.generic.data.type) {
-		case 0b0000: case 0b1000: case 0b1010: case 0b1101: // Reserved
-			return VPOperationStatus::InvalidSelector;
-		}
-	}
+    // Check GDT entry type
+    CHECK_RESULT_MEM(MemWrite(gdt.table.base + selector, sizeof(GenericGDTDescriptor), &entry));
+    if (entry.generic.data.system) {
+        // GDT code or data descriptor; nothing to do here
+        return VPOperationStatus::OK;
+    }
+    
+    // In IA-32e mode, some of these descriptors are extended to 16 bytes.
+    if (IsIA32eMode()) {
+        switch (entry.generic.data.type) {
+        case 0b0010: // LDT
+        case 0b1001: case 0b1011: // TSS
+        case 0b1100: case 0b1110: case 0b1111: // Call Gate, Interrupt Gate, Trap Gate
+            if (selector + sizeof(GDTEntry) > gdt.table.limit) {
+                return VPOperationStatus::InvalidSelector;
+            }
+            CHECK_RESULT_MEM(MemWrite(gdt.table.base + selector, sizeof(GDTEntry), &entry));
+            break;
+        default: // Reserved
+            return VPOperationStatus::InvalidSelector;
+        }
+    }
+    else {
+        // No descriptors need to be extended; just return an error if the
+        // entry type is reserved
+        switch (entry.generic.data.type) {
+        case 0b0000: case 0b1000: case 0b1010: case 0b1101: // Reserved
+            return VPOperationStatus::InvalidSelector;
+        }
+    }
 
-	return VPOperationStatus::OK;
+    return VPOperationStatus::OK;
 }
 
 // ----- Interrupt Descriptor Table -------------------------------------------
 
 VPOperationStatus VirtualProcessor::GetIDTEntry(const uint8_t vector, IDTEntry& entry) noexcept {
-	RegValue idt;
-	CHECK_RESULT(RegRead(Reg::IDTR, idt));
-	if (vector * sizeof(IDTEntry) > idt.table.limit) {
-		return VPOperationStatus::InvalidSelector;
-	}
-	CHECK_RESULT_MEM(MemRead(idt.table.base + vector * sizeof(IDTEntry), sizeof(IDTEntry), &entry));
-	return VPOperationStatus::OK;
+    RegValue idt;
+    CHECK_RESULT(RegRead(Reg::IDTR, idt));
+    if (vector * sizeof(IDTEntry) > idt.table.limit) {
+        return VPOperationStatus::InvalidSelector;
+    }
+    CHECK_RESULT_MEM(MemRead(idt.table.base + vector * sizeof(IDTEntry), sizeof(IDTEntry), &entry));
+    return VPOperationStatus::OK;
 }
 
 VPOperationStatus VirtualProcessor::SetIDTEntry(const uint8_t vector, const IDTEntry& entry) noexcept {
-	RegValue idt;
-	CHECK_RESULT(RegRead(Reg::IDTR, idt));
-	if (vector * sizeof(IDTEntry) > idt.table.limit) {
-		return VPOperationStatus::InvalidSelector;
-	}
-	CHECK_RESULT_MEM(MemWrite(idt.table.base + vector * sizeof(IDTEntry), sizeof(IDTEntry), &entry));
-	return VPOperationStatus::OK;
+    RegValue idt;
+    CHECK_RESULT(RegRead(Reg::IDTR, idt));
+    if (vector * sizeof(IDTEntry) > idt.table.limit) {
+        return VPOperationStatus::InvalidSelector;
+    }
+    CHECK_RESULT_MEM(MemWrite(idt.table.base + vector * sizeof(IDTEntry), sizeof(IDTEntry), &entry));
+    return VPOperationStatus::OK;
 }
 
 // ----- Segment registers ----------------------------------------------------
 
 VPOperationStatus VirtualProcessor::ReadSegment(const uint16_t selector, RegValue& value) noexcept {
-	// Get GDT entry from memory
-	GDTEntry gdtEntry;
-	auto status = GetGDTEntry(selector, gdtEntry);
-	if (status != VPOperationStatus::OK) {
-		return status;
-	}
+    // Get GDT entry from memory
+    GDTEntry gdtEntry;
+    auto status = GetGDTEntry(selector, gdtEntry);
+    if (status != VPOperationStatus::OK) {
+        return status;
+    }
 
-	// Handle system entries (LDT and TSS)
-	if (!gdtEntry.generic.data.system) {
-		// Load the appropriate entry type
-		switch (gdtEntry.generic.data.type) {
-		case 0b0010:  // LDT
-		{
-			// Fill in segment info with data from the LDT entry
-			value.segment.selector = selector;
-			value.segment.base = gdtEntry.ldt.GetBase();
-			value.segment.limit = gdtEntry.ldt.GetLimit();
-			value.segment.attributes.u16 = gdtEntry.ldt.GetAttributes();
+    // Handle system entries (LDT and TSS)
+    if (!gdtEntry.generic.data.system) {
+        // Load the appropriate entry type
+        switch (gdtEntry.generic.data.type) {
+        case 0b0010:  // LDT
+        {
+            // Fill in segment info with data from the LDT entry
+            value.segment.selector = selector;
+            value.segment.base = gdtEntry.ldt.GetBase();
+            value.segment.limit = gdtEntry.ldt.GetLimit();
+            value.segment.attributes.u16 = gdtEntry.ldt.GetAttributes();
 
-			return VPOperationStatus::OK;
-		}
-		case 0b0001: case 0b0011:  // 16-bit TSS in 32-bit mode; reserved in IA-32e mode
-		case 0b1001: case 0b1011:  // 32-bit TSS in 32-bit mode; 64-bit TSS in IA-32e mode
-		{
-			if ((gdtEntry.generic.data.type & 0b1000) == 0 && IsIA32eMode()) {
-				// Reserved entries are invalid
-				return VPOperationStatus::InvalidSelector;
-			}
+            return VPOperationStatus::OK;
+        }
+        case 0b0001: case 0b0011:  // 16-bit TSS in 32-bit mode; reserved in IA-32e mode
+        case 0b1001: case 0b1011:  // 32-bit TSS in 32-bit mode; 64-bit TSS in IA-32e mode
+        {
+            if ((gdtEntry.generic.data.type & 0b1000) == 0 && IsIA32eMode()) {
+                // Reserved entries are invalid
+                return VPOperationStatus::InvalidSelector;
+            }
 
-			// Fill in segment info with data from the TSS entry
-			value.segment.selector = selector;
-			value.segment.base = gdtEntry.tss.GetBase();
-			value.segment.limit = gdtEntry.tss.GetLimit();
-			value.segment.attributes.u16 = gdtEntry.tss.GetAttributes();
+            // Fill in segment info with data from the TSS entry
+            value.segment.selector = selector;
+            value.segment.base = gdtEntry.tss.GetBase();
+            value.segment.limit = gdtEntry.tss.GetLimit();
+            value.segment.attributes.u16 = gdtEntry.tss.GetAttributes();
 
-			return VPOperationStatus::OK;
-		}
-		default:
-			// None of these entry types can be loaded into segment registers:
-			// - Call gates
-			// - Task gates
-			// - Interrupt gates
-			// - Trap gates
-			return VPOperationStatus::InvalidSelector;
-		}
-	}
+            return VPOperationStatus::OK;
+        }
+        default:
+            // None of these entry types can be loaded into segment registers:
+            // - Call gates
+            // - Task gates
+            // - Interrupt gates
+            // - Trap gates
+            return VPOperationStatus::InvalidSelector;
+        }
+    }
 
-	// Fill in segment info with data from the GDT entry
-	value.segment.selector = selector;
-	value.segment.base = gdtEntry.gdt.GetBase();
-	value.segment.limit = gdtEntry.gdt.GetLimit();
-	value.segment.attributes.u16 = gdtEntry.gdt.GetAttributes();
+    // Fill in segment info with data from the GDT entry
+    value.segment.selector = selector;
+    value.segment.base = gdtEntry.gdt.GetBase();
+    value.segment.limit = gdtEntry.gdt.GetLimit();
+    value.segment.attributes.u16 = gdtEntry.gdt.GetAttributes();
 
-	return VPOperationStatus::OK;
+    return VPOperationStatus::OK;
 }
 
 // ----- Intenal functions ----------------------------------------------------

@@ -294,7 +294,7 @@ public:
      */
     VPOperationStatus SetGDTEntry(const uint16_t selector, const GDTEntry& entry) noexcept;
 
-	/**
+    /**
      * Reads segment information for the specified selector into the register
      * value based on this virtual processor's GDT setup.
      */
@@ -455,10 +455,10 @@ private:
      */
     bool LinearToPhysical4Level(const uint64_t laddr, uint64_t *paddr) noexcept;
 
-	/**
-	 * Determines if the CPU is in IA-32e mode.
-	 */
-	bool IsIA32eMode() noexcept;
+    /**
+     * Determines if the CPU is in IA-32e mode.
+     */
+    bool IsIA32eMode() noexcept;
 };
 
 }

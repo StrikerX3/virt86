@@ -84,10 +84,10 @@ MemoryMappingStatus VirtualMachine::MapGuestMemory(const uint64_t baseAddress, c
         return MemoryMappingStatus::Unsupported;
     }
 
-	// GPA range must fit within the host's limits
-	if ((baseAddress & ~HostInfo.gpa.mask) || ((baseAddress + size - 1) & ~HostInfo.gpa.mask)) {
-		return MemoryMappingStatus::OutOfBounds;
-	}
+    // GPA range must fit within the host's limits
+    if ((baseAddress & ~HostInfo.gpa.mask) || ((baseAddress + size - 1) & ~HostInfo.gpa.mask)) {
+        return MemoryMappingStatus::OutOfBounds;
+    }
 
     const auto status = MapGuestMemoryImpl(baseAddress, size, flags, memory);
     if (status == MemoryMappingStatus::OK) {

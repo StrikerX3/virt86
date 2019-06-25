@@ -35,20 +35,20 @@ namespace virt86 {
  * Information about the host environment.
  */
 struct HostInfo {
-	/**
-	 * Maximum extent of Guest Physical Addresses supported by the host.
-	 */
-	struct GPA {
-		const uint8_t maxBits;
-		const uint64_t maxAddress;
-		const uint64_t mask;
-	
-		GPA() noexcept;
-	} gpa;
+    /**
+     * Maximum extent of Guest Physical Addresses supported by the host.
+     */
+    struct GPA {
+        const uint8_t maxBits;
+        const uint64_t maxAddress;
+        const uint64_t mask;
+    
+        GPA() noexcept;
+    } gpa;
 
-	const FloatingPointExtension floatingPointExtensions;
+    const FloatingPointExtension floatingPointExtensions;
 
-	HostInfo() noexcept;
+    HostInfo() noexcept;
 };
 
 /**

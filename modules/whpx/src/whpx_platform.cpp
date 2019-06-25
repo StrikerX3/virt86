@@ -73,7 +73,7 @@ WhpxPlatform::WhpxPlatform() noexcept
     }
 
     const WhpxDefs::WHV_CAPABILITY_FEATURES features = cap.Features;
-	m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;
+    m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;
     m_features.extendedControlRegisters = ExtendedControlRegister::XCR0 | ExtendedControlRegister::CR8 | ExtendedControlRegister::MXCSRMask;
     m_features.maxProcessorsPerVM = 64; // TODO: check value
     m_features.maxProcessorsGlobal = 128; // TODO: check value

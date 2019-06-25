@@ -37,24 +37,24 @@ enum class IDTType : uint8_t {
 };
 
 struct IDTEntry {
-	union {
-		struct {
-			uint16_t offsetLow : 16;
-			uint16_t selector: 16;
-			uint8_t zero : 8;
-			uint8_t type : 4;
-			uint8_t storageSegment : 1;
-			uint8_t privilegeLevel : 2;
-			uint8_t present : 1;
-			uint16_t offsetHigh : 16;
-		} data;
-		uint64_t descriptor;
-	};
+    union {
+        struct {
+            uint16_t offsetLow : 16;
+            uint16_t selector: 16;
+            uint8_t zero : 8;
+            uint8_t type : 4;
+            uint8_t storageSegment : 1;
+            uint8_t privilegeLevel : 2;
+            uint8_t present : 1;
+            uint16_t offsetHigh : 16;
+        } data;
+        uint64_t descriptor;
+    };
 
-	void Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) noexcept;
+    void Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) noexcept;
 
-	uint32_t GetOffset() noexcept;
-	void SetOffset(uint32_t offset) noexcept;
+    uint32_t GetOffset() noexcept;
+    void SetOffset(uint32_t offset) noexcept;
 };
 
 }

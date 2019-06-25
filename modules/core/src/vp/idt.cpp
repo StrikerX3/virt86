@@ -28,26 +28,26 @@ SOFTWARE.
 namespace virt86 {
 
 void IDTEntry::Set(uint32_t offset, uint16_t selector, IDTType type, uint8_t attributes) noexcept {
-	this->descriptor = 0ULL;
+    this->descriptor = 0ULL;
 
-	this->data.offsetLow = offset & 0xFFFF;
-	this->data.offsetHigh = (offset >> 16);
+    this->data.offsetLow = offset & 0xFFFF;
+    this->data.offsetHigh = (offset >> 16);
 
-	this->data.selector = selector;
-	
-	this->data.type = static_cast<uint8_t>(type) & 0xF;
-	this->data.storageSegment = attributes & 0x1;
-	this->data.privilegeLevel = (attributes >> 1) & 0x3;
-	this->data.present = (attributes >> 3) & 0x1;
+    this->data.selector = selector;
+    
+    this->data.type = static_cast<uint8_t>(type) & 0xF;
+    this->data.storageSegment = attributes & 0x1;
+    this->data.privilegeLevel = (attributes >> 1) & 0x3;
+    this->data.present = (attributes >> 3) & 0x1;
 }
 
 uint32_t IDTEntry::GetOffset() noexcept {
-	return static_cast<uint32_t>(data.offsetLow) | (static_cast<uint32_t>(data.offsetHigh) << 16);
+    return static_cast<uint32_t>(data.offsetLow) | (static_cast<uint32_t>(data.offsetHigh) << 16);
 }
 
 void IDTEntry::SetOffset(uint32_t offset) noexcept {
-	this->data.offsetLow = offset & 0xFFFF;
-	this->data.offsetHigh = (offset >> 16);
+    this->data.offsetLow = offset & 0xFFFF;
+    this->data.offsetHigh = (offset >> 16);
 }
 
 }
