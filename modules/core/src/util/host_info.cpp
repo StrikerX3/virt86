@@ -53,7 +53,7 @@ static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
 	if (ebx == nullptr) ebx = &dummy;
 	if (ecx == nullptr) ecx = &dummy;
 	if (edx == nullptr) edx = &dummy;
-	__get_cpuid(leaf, eax, ebx, ecx, edx)
+	__get_cpuid(leaf, eax, ebx, ecx, edx);
 }
 
 #endif
