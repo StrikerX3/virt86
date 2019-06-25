@@ -34,7 +34,7 @@ SOFTWARE.
 namespace virt86 {
 
 /**
- * Floating point extensions supported by the hypervisor.
+ * Floating point extensions supported by the hypervisor and the host CPU.
  */
 enum class FloatingPointExtension {
     /**
@@ -43,49 +43,154 @@ enum class FloatingPointExtension {
      */
     None = 0,
 
-    /**
-     * Supports SSE2 extensions, which includes the following set of registers:
-     * - XMM0 to XMM7
-     */
-    SSE2 = (1 << 0),
+	/**
+	 * Supports MMX extensions, which includes the following set of registers:
+	 * - MM0 to MM7
+	 */
+	MMX = (1 << 0),
 
-    /**
-     * Supports AVX extensions, which includes the following set of registers:
-     * - YMM0 to YMM7
-     */
-    AVX = (1 << 1),
-    
-    /**
-     * Supports AVX-512 extensions, which includes the following set of
-     * registers:
-     * - ZMM0 to ZMM7
-     */
-    AVX512 = (1 << 2),
+	/**
+	 * Supports SSE extensions, which includes the following set of registers:
+	 * - XMM0 to XMM7
+	 */
+	SSE = (1 << 1),
 
-    /**
-     * Supports VEX vector extensions, which includes the following sets of
-     * registers:
-     * - XMM8 to XMM15
-     * - YMM8 to YMM15
-     * - ZMM8 to ZMM15
-     */
-    VEX = (1 << 3),
+	/**
+	 * Supports SSE2 extensions, which adds the following set of registers:
+	 * - XMM0 to XMM15 (in IA-32e mode)
+	 */
+	SSE2 = (1 << 2),
 
-    /**
-     * Supports MVEX vector extensions, which includes the following set of
-     * registers:
-     * - ZMM16 to ZMM31
-     */
-    MVEX = (1 << 4),
+	/**
+	 * Supports SSE3 extensions.
+	 */
+	SSE3 = (1 << 3),
 
-    /**
-     * Supports EVEX vector extensions, which includes the following sets of
-     * registers:
-     * - XMM16 to XMM31
-     * - YMM16 to YMM31
-     * - ZMM16 to ZMM31
+	/**
+	 * Supports SSSE3 extensions.
+	 */
+	SSSE3 = (1 << 4),
+
+	/**
+	 * Supports SSE4.1 extensions.
+	 */
+	SSE4_1 = (1 << 5),
+
+	/**
+	 * Supports SSE4.2 extensions.
+	 */
+	SSE4_2 = (1 << 6),
+
+	/**
+     * Supports AVX extensions, which adds the following set of registers:
+	 * - YMM0 to YMM7
+	 * - YMM0 to YMM15 (in IA-32e mode)
+	 * AVX also adds support for the VEX prefix, allowing SSE instructions to
+	 * access YMM registers and use a third operand for parity with AVX.
      */
-    EVEX = (1 << 5),
+    AVX = (1 << 7),
+
+	/**
+	 * Supports FMA extensions.
+	 */
+	FMA = (1 << 8),
+
+	/**
+	 * Supports AVX2 extensions.
+	 */
+	AVX2 = (1 << 9),
+
+	/**
+	 * Supports AVX-512 foundation extensions, which adds the following set of
+	 * registers:
+	 * - ZMM0 to ZMM7
+	 * - XMM0 to XMM31 (in IA-32e mode)
+	 * - YMM0 to YMM31 (in IA-32e mode)
+	 * - ZMM0 to ZMM31 (in IA-32e mode)
+	 * AVX-512 also adds support for the EVEX prefix, allowing SSE and AVX
+	 * instructions to access ZMM registers.
+	 */
+	AVX512F = (1 << 10),
+
+	/**
+	 * Supports AVX-512 Double and Quadword instructions.
+	 */
+	AVX512DQ = (1 << 11),
+
+	/**
+	 * Supports AVX-512 Integer Fused Multiply-Add instructions.
+	 */
+	AVX512IFMA = (1 << 12),
+
+	/**
+	 * Supports AVX-512 Prefetch instructions.
+	 */
+	AVX512PF = (1 << 13),
+
+	/**
+	 * Supports AVX-512 Exponential and Reciprocal instructions.
+	 */
+	AVX512ER = (1 << 14),
+
+	/**
+	 * Supports AVX-512 Conflict Detection instructions.
+	 */
+	AVX512CD = (1 << 15),
+
+	/**
+	 * Supports AVX-512 Byte and Word instructions.
+	 */
+	AVX512BW = (1 << 16),
+
+	/**
+	 * Supports AVX-512 Vector Length extensions.
+	 */
+	AVX512VL = (1 << 17),
+
+	/**
+	 * Supports AVX-512 Vector Bit Manipulation instructions.
+	 */
+	AVX512VBMI = (1 << 18),
+
+	/**
+	 * Supports AVX-512 Vector Bit Manipulation instructions, version 2.
+	 */
+	AVX512VBMI2 = (1 << 19),
+
+	/**
+	 * Supports AVX-512 Galois Field New Instructions.
+	 */
+	AVX512GFNI = (1 << 20),
+
+	/**
+	 * Supports AVX-512 Vector AES instructions.
+	 */
+	AVX512VAES = (1 << 21),
+
+	/**
+	 * Supports AVX-512 Vector Neural Network instructions.
+	 */
+	AVX512VNNI = (1 << 22),
+
+	/**
+	 * Supports AVX-512 Bit Algorithms.
+	 */
+	AVX512BITALG = (1 << 23),
+
+	/**
+	 * Supports AVX-512 Vector Population Count Doubleword and Quadword instructions.
+	 */
+	AVX512VPOPCNTDQ = (1 << 24),
+
+	/**
+	 * Supports AVX-512 Vector Neural Network Instructions Word Variable Precision instructions.
+	 */
+	AVX512QVNNIW = (1 << 25),
+
+	/**
+	 * Supports AVX-512 Fused Multiply Accumulation Packed Single Precision instructions.
+	 */
+	AVX512QFMA = (1 << 26),
 };
 
 /**

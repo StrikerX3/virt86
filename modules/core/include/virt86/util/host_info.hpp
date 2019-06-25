@@ -27,6 +27,8 @@ SOFTWARE.
 
 #include <cstdint>
 
+#include "virt86/platform/features.hpp"
+
 namespace virt86 {
 
 /**
@@ -43,6 +45,8 @@ struct HostInfo {
 	
 		GPA() noexcept;
 	} gpa;
+
+	const FloatingPointExtension floatingPointExtensions;
 
 	HostInfo() noexcept;
 };

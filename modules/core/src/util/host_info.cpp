@@ -35,31 +35,80 @@ namespace virt86 {
 #if defined(_MSC_VER)
 #  include <intrin.h>
 
-static uint8_t getMaxGPABits() {
-	int result[4];
-	__cpuid(result, 0x80000008);
-	uint32_t eax = result[0];
-
-	uint8_t maxGPABits = (uint8_t)(eax >> 16);
-	if (maxGPABits != 0) return maxGPABits;
-	return (uint8_t)(eax);
+static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
+	int output[4];
+	__cpuid(output, leaf);
+	if (eax != nullptr) *eax = output[0];
+	if (ebx != nullptr) *ebx = output[1];
+	if (ecx != nullptr) *ecx = output[2];
+	if (edx != nullptr) *edx = output[3];
 }
 
 #else
 #  include <cpuid.h>
 
-static uint8_t getMaxGPABits() {
-	uint32_t eax, ebx, ecx, edx;
-	__get_cpuid(0x80000008, &eax, &ebx, &ecx, &edx);
-
-	uint8_t maxGPABits = (uint8_t)(eax >> 16);
-	if (maxGPABits != 0) return maxGPABits;
-	return (uint8_t)(eax);
+static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
+	int dummy;
+	if (eax == nullptr) eax = &dummy;
+	if (ebx == nullptr) ebx = &dummy;
+	if (ecx == nullptr) ecx = &dummy;
+	if (edx == nullptr) edx = &dummy;
+	__get_cpuid(leaf, eax, ebx, ecx, edx)
 }
 
 #endif
 
-HostInfo::HostInfo() noexcept {
+static uint8_t getMaxGPABits() {
+	int eax;
+	cpuid(0x80000008, &eax, nullptr, nullptr, nullptr);
+
+	uint32_t ueax = (uint32_t)eax;
+	uint8_t maxGPABits = (uint8_t)(ueax >> 16);
+	if (maxGPABits != 0) return maxGPABits;
+	return (uint8_t)(ueax);
+}
+
+static FloatingPointExtension getFPExts() {
+	FloatingPointExtension result = FloatingPointExtension::None;
+
+	int ecx1, edx1;
+	cpuid(0x1, nullptr, nullptr, &ecx1, &edx1);
+	int ebx7, ecx7, edx7;
+	cpuid(0x7, nullptr, &ebx7, &ecx7, &edx7);
+
+	if (edx1 & (1 << 23)) result |= FloatingPointExtension::MMX;
+	if (edx1 & (1 << 25)) result |= FloatingPointExtension::SSE;
+	if (edx1 & (1 << 26)) result |= FloatingPointExtension::SSE2;
+	if (ecx1 & (1 << 0)) result |= FloatingPointExtension::SSE3;
+	if (ecx1 & (1 << 9)) result |= FloatingPointExtension::SSSE3;
+	if (ecx1 & (1 << 19)) result |= FloatingPointExtension::SSE4_1;
+	if (ecx1 & (1 << 20)) result |= FloatingPointExtension::SSE4_2;
+	if (ecx1 & (1 << 28)) result |= FloatingPointExtension::AVX;
+	if (ecx1 & (1 << 12)) result |= FloatingPointExtension::FMA;
+	if (ebx7 & (1 << 5)) result |= FloatingPointExtension::AVX2;
+	if (ebx7 & (1 << 16)) result |= FloatingPointExtension::AVX512F;
+	if (ebx7 & (1 << 17)) result |= FloatingPointExtension::AVX512DQ;
+	if (ebx7 & (1 << 21)) result |= FloatingPointExtension::AVX512IFMA;
+	if (ebx7 & (1 << 26)) result |= FloatingPointExtension::AVX512PF;
+	if (ebx7 & (1 << 27)) result |= FloatingPointExtension::AVX512ER;
+	if (ebx7 & (1 << 28)) result |= FloatingPointExtension::AVX512CD;
+	if (ebx7 & (1 << 30)) result |= FloatingPointExtension::AVX512BW;
+	if (ebx7 & (1 << 31)) result |= FloatingPointExtension::AVX512VL;
+	if (ecx7 & (1 << 1)) result |= FloatingPointExtension::AVX512VBMI;
+	if (ecx7 & (1 << 6)) result |= FloatingPointExtension::AVX512VBMI2;
+	if (ecx7 & (1 << 8)) result |= FloatingPointExtension::AVX512GFNI;
+	if (ecx7 & (1 << 9)) result |= FloatingPointExtension::AVX512VAES;
+	if (ecx7 & (1 << 11)) result |= FloatingPointExtension::AVX512VNNI;
+	if (ecx7 & (1 << 12)) result |= FloatingPointExtension::AVX512BITALG;
+	if (ecx7 & (1 << 14)) result |= FloatingPointExtension::AVX512VPOPCNTDQ;
+	if (edx7 & (1 << 2)) result |= FloatingPointExtension::AVX512QVNNIW;
+	if (edx7 & (1 << 3)) result |= FloatingPointExtension::AVX512QFMA;
+
+	return result;
+}
+
+HostInfo::HostInfo() noexcept
+	: floatingPointExtensions(getFPExts()) {
 }
 
 HostInfo::GPA::GPA() noexcept

@@ -107,7 +107,7 @@ KvmPlatform::KvmPlatform() noexcept
     m_features.memoryAliasing = true;
     m_features.memoryUnmapping = false;
     m_features.partialMMIOInstructions = false;
-    m_features.floatingPointExtensions = FloatingPointExtension::SSE2;
+    m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;
     m_features.extendedControlRegisters = ExtendedControlRegister::CR8 | ExtendedControlRegister::XCR0;
     m_features.extendedVMExits = ExtendedVMExit::Exception;
     m_features.exceptionExits = ExceptionCode::All;

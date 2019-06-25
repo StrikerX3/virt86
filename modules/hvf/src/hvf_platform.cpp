@@ -57,7 +57,7 @@ HvFPlatform::HvFPlatform()
     m_features.partialUnmapping = false;  // Enables UnmapGuestMemory with subranges of mapped ranges
     m_features.memoryUnmapping = false;  // Enables UnmapGuestMemory operations
     m_features.partialMMIOInstructions = false;  // Complex MMIO instructions need multiple executions of the virtual processor to complete
-    m_features.floatingPointExtensions = FloatingPointExtension::SSE2;   // Hypervisor provides access to additional XMM/YMM/ZMM registers; see the enum class for more details
+    m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;   // Hypervisors may or may not support all of the host's floating point extensions; see the enum class for more details
     m_features.extendedControlRegisters = ExtendedControlRegister::None;  // Hypervisor provides access to extended control registers
     m_features.extendedVMExits = ExtendedVMExit::None;   // Additional VM exits supported by the hypervisor; must be provided to the VMSpecifications to enable them (if supported)
     m_features.exceptionExits = ExceptionCode::None;  // Exception codes supported by the hypervisor that will cause VM exits if ExtendedVMExit::Exception is supported and enabled
