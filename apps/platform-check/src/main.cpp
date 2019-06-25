@@ -39,6 +39,7 @@ SOFTWARE.
 #endif
 
 #include <cstdio>
+#include <cinttypes>
 
 using namespace virt86;
 
