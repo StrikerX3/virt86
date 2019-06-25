@@ -35,20 +35,20 @@ namespace virt86 {
 #if defined(_MSC_VER)
 #  include <intrin.h>
 
-static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
+static void cpuid(int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx) {
 	int output[4];
 	__cpuid(output, leaf);
-	if (eax != nullptr) *eax = output[0];
-	if (ebx != nullptr) *ebx = output[1];
-	if (ecx != nullptr) *ecx = output[2];
-	if (edx != nullptr) *edx = output[3];
+	if (eax != nullptr) *eax = (unsigned int)output[0];
+	if (ebx != nullptr) *ebx = (unsigned int)output[1];
+	if (ecx != nullptr) *ecx = (unsigned int)output[2];
+	if (edx != nullptr) *edx = (unsigned int)output[3];
 }
 
 #else
 #  include <cpuid.h>
 
-static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
-	int dummy;
+static void cpuid(int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx) {
+	unsigned int dummy;
 	if (eax == nullptr) eax = &dummy;
 	if (ebx == nullptr) ebx = &dummy;
 	if (ecx == nullptr) ecx = &dummy;
@@ -59,21 +59,20 @@ static void cpuid(int leaf, int *eax, int *ebx, int *ecx, int *edx) {
 #endif
 
 static uint8_t getMaxGPABits() {
-	int eax;
+	uint32_t eax;
 	cpuid(0x80000008, &eax, nullptr, nullptr, nullptr);
 
-	uint32_t ueax = (uint32_t)eax;
-	uint8_t maxGPABits = (uint8_t)(ueax >> 16);
+	uint8_t maxGPABits = (uint8_t)(eax >> 16);
 	if (maxGPABits != 0) return maxGPABits;
-	return (uint8_t)(ueax);
+	return (uint8_t)(eax);
 }
 
 static FloatingPointExtension getFPExts() {
 	FloatingPointExtension result = FloatingPointExtension::None;
 
-	int ecx1, edx1;
+	uint32_t ecx1, edx1;
 	cpuid(0x1, nullptr, nullptr, &ecx1, &edx1);
-	int ebx7, ecx7, edx7;
+	uint32_t ebx7, ecx7, edx7;
 	cpuid(0x7, nullptr, &ebx7, &ecx7, &edx7);
 
 	if (edx1 & (1 << 23)) result |= FloatingPointExtension::MMX;
