@@ -83,13 +83,13 @@ VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) 
     case Reg::DR7: name = WHvX64RegisterDr7; break;
 
     case Reg::ST0: case Reg::MM0: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST1: case Reg::MM1: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST2: case Reg::MM2: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST3: case Reg::MM3: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST4: case Reg::MM4: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST5: case Reg::MM5: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST6: case Reg::MM6: name = WHvX64RegisterFpMmx0; break;
-    case Reg::ST7: case Reg::MM7: name = WHvX64RegisterFpMmx0; break;
+    case Reg::ST1: case Reg::MM1: name = WHvX64RegisterFpMmx1; break;
+    case Reg::ST2: case Reg::MM2: name = WHvX64RegisterFpMmx2; break;
+    case Reg::ST3: case Reg::MM3: name = WHvX64RegisterFpMmx3; break;
+    case Reg::ST4: case Reg::MM4: name = WHvX64RegisterFpMmx4; break;
+    case Reg::ST5: case Reg::MM5: name = WHvX64RegisterFpMmx5; break;
+    case Reg::ST6: case Reg::MM6: name = WHvX64RegisterFpMmx6; break;
+    case Reg::ST7: case Reg::MM7: name = WHvX64RegisterFpMmx7; break;
 
     case Reg::XMM0: name = WHvX64RegisterXmm0; break;
     case Reg::XMM1: name = WHvX64RegisterXmm1; break;
