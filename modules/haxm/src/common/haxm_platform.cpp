@@ -65,7 +65,8 @@ HaxmPlatform::HaxmPlatform() noexcept
         // As of HAXM 7.5.1, AVX and above are not supported
         m_features.floatingPointExtensions &= FloatingPointExtension::MMX | FloatingPointExtension::SSE
             | FloatingPointExtension::SSE2 | FloatingPointExtension::SSE3 | FloatingPointExtension::SSSE3
-            | FloatingPointExtension::SSE4_1 | FloatingPointExtension::SSE4_2 | FloatingPointExtension::F16C;
+            | FloatingPointExtension::SSE4_1 | FloatingPointExtension::SSE4_2 | FloatingPointExtension::F16C
+            | FloatingPointExtension::FXSAVE;
 
         m_features.unrestrictedGuest = (caps.winfo & HAX_CAP_UG) != 0;
         m_features.extendedPageTables = (caps.winfo & HAX_CAP_EPT) != 0;

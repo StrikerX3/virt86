@@ -36,7 +36,7 @@ namespace virt86 {
 /**
  * Floating point extensions supported by the hypervisor and the host CPU.
  */
-enum class FloatingPointExtension {
+enum class FloatingPointExtension : int64_t {
     /**
      * No floating point extension supported.
      * XMM/YMM/ZMM registers are unavailable.
@@ -213,6 +213,16 @@ enum class FloatingPointExtension {
      * Supports AVX-512 Fused Multiply Accumulation Packed Single Precision instructions.
      */
     AVX512QFMA = (1 << 30),
+     
+    /**
+     * Supports the FXSAVE and FXRSTOR instructions.
+     */
+    FXSAVE = (1 << 31),
+   
+    /**
+     * Supports the XSAVE and XRSTOR instructions.
+     */
+    XSAVE = (1ull << 32),
 };
 
 /**

@@ -108,6 +108,8 @@ static FloatingPointExtension getFPExts() {
     if (ecx7 & (1 << 14)) result |= FloatingPointExtension::AVX512VPOPCNTDQ;
     if (edx7 & (1 << 2)) result |= FloatingPointExtension::AVX512QVNNIW;
     if (edx7 & (1 << 3)) result |= FloatingPointExtension::AVX512QFMA;
+    if (edx1 & (1 << 24)) result |= FloatingPointExtension::FXSAVE;
+    if (ecx1 & (1 << 26)) result |= FloatingPointExtension::XSAVE;
 
     return result;
 }
