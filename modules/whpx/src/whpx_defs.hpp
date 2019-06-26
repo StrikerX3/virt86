@@ -6,6 +6,7 @@ The following Windows 10 SDK versions support WHPX:
 - 10.0.17134.0: Introduced the Windows Hypervisor Platform API
 - 10.0.17763.0: Expanded the API with five new features and access to three new
   registers.
+- 10.0.18362.0: WHVSuspendPartitionTime and WHvResumePartitionTime functions
 
 This header ensures users of older versions of the SDK can use the features of
 the latest version of the SDK.
@@ -40,8 +41,25 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
+// Supported versions of WHPX. Detected at runtime.
+enum class WhpxVersion : uint8_t {
+    None,
+    _10_0_17134_0,
+    _10_0_17763_0,
+    _10_0_18362_0,
+};
+
+#define WHPX_MIN_VERSION(ver) (g_whpxVersion >= WhpxVersion::_##ver)
+#define WHPX_MAX_VERSION(ver) (g_whpxVersion <= WhpxVersion::_##ver)
+
+// In sdkddkver.h:
+//   NTDDI_WIN10_19H1 = 10.0.18362.0
+//   NTDDI_WIN10_RS5  = 10.0.17763.0
+//   NTDDI_WIN10_RS4  = 10.0.17134.0
+
 // Handle data structure differences between SDK versions
 struct WhpxDefs {
+
 #ifdef NTDDI_WIN10_RS5
     using WHV_CAPABILITY_FEATURES = ::WHV_CAPABILITY_FEATURES;
 #else

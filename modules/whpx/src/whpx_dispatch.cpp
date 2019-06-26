@@ -28,6 +28,9 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
+// The version of WHPX present in the system.
+WhpxVersion g_whpxVersion = WhpxVersion::None;
+
 #define LOAD_LIB(name) do { \
     m_h##name = LoadLibraryA(#name ".dll"); \
     if (m_h##name == NULL) { \
@@ -57,6 +60,17 @@ bool WhpxDispatch::Load() noexcept {
 
     hmodule = m_hWinHvPlatform; WHPX_PLATFORM_FUNCTIONS(LOAD_FUNC); WHPX_OPTIONAL_PLATFORM_FUNCTIONS(LOAD_OPTIONAL_FUNC);
     hmodule = m_hWinHvEmulation; WHPX_EMULATION_FUNCTIONS(LOAD_FUNC);
+
+    // Determine WHPX version based on what optional functions were loaded
+    if (WHvSuspendPartitionTime != nullptr) {
+        g_whpxVersion = WhpxVersion::_10_0_18362_0;
+    }
+    else if (WHvQueryGpaRangeDirtyBitmap != nullptr) {
+        g_whpxVersion = WhpxVersion::_10_0_17763_0;
+    }
+    else {
+        g_whpxVersion = WhpxVersion::_10_0_17134_0;
+    }
 
     m_loaded = true;
     return true;

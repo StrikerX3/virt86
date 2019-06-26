@@ -33,6 +33,8 @@ SOFTWARE.
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+#include "whpx_defs.hpp"
+
 #define WHPX_PLATFORM_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvGetCapability, (WHV_CAPABILITY_CODE CapabilityCode, VOID* CapabilityBuffer, UINT32 CapabilityBufferSizeInBytes, UINT32* WrittenSizeInBytes)) \
     FUNC(HRESULT, WHvCreatePartition, (WHV_PARTITION_HANDLE* Partition)) \
@@ -51,7 +53,9 @@ SOFTWARE.
     FUNC(HRESULT, WHvSetVirtualProcessorRegisters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues))
 
 #define WHPX_OPTIONAL_PLATFORM_FUNCTIONS(FUNC) \
-    FUNC(HRESULT, WHvQueryGpaRangeDirtyBitmap, (WHV_PARTITION_HANDLE Partition, WHV_GUEST_PHYSICAL_ADDRESS GuestAddress, UINT64 RangeSizeInBytes, UINT64* Bitmap, UINT32 BitmapSizeInBytes))
+    FUNC(HRESULT, WHvQueryGpaRangeDirtyBitmap, (WHV_PARTITION_HANDLE Partition, WHV_GUEST_PHYSICAL_ADDRESS GuestAddress, UINT64 RangeSizeInBytes, UINT64* Bitmap, UINT32 BitmapSizeInBytes)) \
+    FUNC(HRESULT, WHvSuspendPartitionTime, (WHV_PARTITION_HANDLE Partition)) \
+    FUNC(HRESULT, WHvResumePartitionTime, (WHV_PARTITION_HANDLE Partition))
 
 #define WHPX_EMULATION_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvEmulatorCreateEmulator, (const WHV_EMULATOR_CALLBACKS* Callbacks, WHV_EMULATOR_HANDLE* Emulator)) \
@@ -70,6 +74,9 @@ WHPX_OPTIONAL_PLATFORM_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 WHPX_EMULATION_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 
 namespace virt86::whpx {
+
+// The version of WHPX present in the system.
+extern WhpxVersion g_whpxVersion;
 
 struct WhpxDispatch {
     WhpxDispatch() = default;
