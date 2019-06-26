@@ -82,23 +82,45 @@ enum class FloatingPointExtension {
     SSE4_2 = (1 << 6),
 
     /**
+     * Supports SSE4a extensions. AMD CPUs only.
+     */
+    SSE4a = (1 << 7),
+
+    /**
+     * Supports XOP (extended operations). AMD CPUs only.
+     */
+    XOP = (1 << 8),
+
+    /**
+     * Supports 16-bit Floating-Point conversion instructions.
+     * Also known as CVT16.
+     */
+    F16C = (1 << 9),
+
+    /**
+     * Supports 4-operand fused multiply-add instructions.
+     * AMD CPUs only (so far).
+     */
+    FMA4 = (1 << 10),
+
+    /**
      * Supports AVX extensions, which adds the following set of registers:
      * - YMM0 to YMM7
      * - YMM0 to YMM15 (in IA-32e mode)
      * AVX also adds support for the VEX prefix, allowing SSE instructions to
      * access YMM registers and use a third operand for parity with AVX.
      */
-    AVX = (1 << 7),
+    AVX = (1 << 11),
 
     /**
-     * Supports FMA extensions.
+     * Supports 3-operand fused multiply-add instructions.
      */
-    FMA = (1 << 8),
+    FMA3 = (1 << 12),
 
     /**
      * Supports AVX2 extensions.
      */
-    AVX2 = (1 << 9),
+    AVX2 = (1 << 13),
 
     /**
      * Supports AVX-512 foundation extensions, which adds the following set of
@@ -110,87 +132,87 @@ enum class FloatingPointExtension {
      * AVX-512 also adds support for the EVEX prefix, allowing SSE and AVX
      * instructions to access ZMM registers.
      */
-    AVX512F = (1 << 10),
+    AVX512F = (1 << 14),
 
     /**
      * Supports AVX-512 Double and Quadword instructions.
      */
-    AVX512DQ = (1 << 11),
+    AVX512DQ = (1 << 15),
 
     /**
      * Supports AVX-512 Integer Fused Multiply-Add instructions.
      */
-    AVX512IFMA = (1 << 12),
+    AVX512IFMA = (1 << 16),
 
     /**
      * Supports AVX-512 Prefetch instructions.
      */
-    AVX512PF = (1 << 13),
+    AVX512PF = (1 << 17),
 
     /**
      * Supports AVX-512 Exponential and Reciprocal instructions.
      */
-    AVX512ER = (1 << 14),
+    AVX512ER = (1 << 18),
 
     /**
      * Supports AVX-512 Conflict Detection instructions.
      */
-    AVX512CD = (1 << 15),
+    AVX512CD = (1 << 19),
 
     /**
      * Supports AVX-512 Byte and Word instructions.
      */
-    AVX512BW = (1 << 16),
+    AVX512BW = (1 << 20),
 
     /**
      * Supports AVX-512 Vector Length extensions.
      */
-    AVX512VL = (1 << 17),
+    AVX512VL = (1 << 21),
 
     /**
      * Supports AVX-512 Vector Bit Manipulation instructions.
      */
-    AVX512VBMI = (1 << 18),
+    AVX512VBMI = (1 << 22),
 
     /**
      * Supports AVX-512 Vector Bit Manipulation instructions, version 2.
      */
-    AVX512VBMI2 = (1 << 19),
+    AVX512VBMI2 = (1 << 23),
 
     /**
      * Supports AVX-512 Galois Field New Instructions.
      */
-    AVX512GFNI = (1 << 20),
+    AVX512GFNI = (1 << 24),
 
     /**
      * Supports AVX-512 Vector AES instructions.
      */
-    AVX512VAES = (1 << 21),
+    AVX512VAES = (1 << 25),
 
     /**
      * Supports AVX-512 Vector Neural Network instructions.
      */
-    AVX512VNNI = (1 << 22),
+    AVX512VNNI = (1 << 26),
 
     /**
      * Supports AVX-512 Bit Algorithms.
      */
-    AVX512BITALG = (1 << 23),
+    AVX512BITALG = (1 << 27),
 
     /**
      * Supports AVX-512 Vector Population Count Doubleword and Quadword instructions.
      */
-    AVX512VPOPCNTDQ = (1 << 24),
+    AVX512VPOPCNTDQ = (1 << 28),
 
     /**
      * Supports AVX-512 Vector Neural Network Instructions Word Variable Precision instructions.
      */
-    AVX512QVNNIW = (1 << 25),
+    AVX512QVNNIW = (1 << 29),
 
     /**
      * Supports AVX-512 Fused Multiply Accumulation Packed Single Precision instructions.
      */
-    AVX512QFMA = (1 << 26),
+    AVX512QFMA = (1 << 30),
 };
 
 /**

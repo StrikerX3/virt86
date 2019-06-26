@@ -59,8 +59,12 @@ void printFPExts(FloatingPointExtension fpExts) {
         if (bmFpExts.AnyOf(FloatingPointExtension::SSSE3)) printf(" SSSE3");
         if (bmFpExts.AnyOf(FloatingPointExtension::SSE4_1)) printf(" SSE4.1");
         if (bmFpExts.AnyOf(FloatingPointExtension::SSE4_2)) printf(" SSE4.2");
+        if (bmFpExts.AnyOf(FloatingPointExtension::SSE4a)) printf(" SSE4a");
+        if (bmFpExts.AnyOf(FloatingPointExtension::XOP)) printf(" XOP");
+        if (bmFpExts.AnyOf(FloatingPointExtension::F16C)) printf(" F16C");
+        if (bmFpExts.AnyOf(FloatingPointExtension::FMA4)) printf(" FMA4");
         if (bmFpExts.AnyOf(FloatingPointExtension::AVX)) printf(" AVX");
-        if (bmFpExts.AnyOf(FloatingPointExtension::FMA)) printf(" FMA");
+        if (bmFpExts.AnyOf(FloatingPointExtension::FMA3)) printf(" FMA3");
         if (bmFpExts.AnyOf(FloatingPointExtension::AVX2)) printf(" AVX2");
         if (bmFpExts.AnyOf(FloatingPointExtension::AVX512F)) {
             printf(" AVX-512[F");

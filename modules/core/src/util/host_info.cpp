@@ -74,6 +74,8 @@ static FloatingPointExtension getFPExts() {
     cpuid(0x1, nullptr, nullptr, &ecx1, &edx1);
     uint32_t ebx7, ecx7, edx7;
     cpuid(0x7, nullptr, &ebx7, &ecx7, &edx7);
+    uint32_t ecx81;
+    cpuid(0x80000001, nullptr, nullptr, &ecx81, nullptr);
 
     if (edx1 & (1 << 23)) result |= FloatingPointExtension::MMX;
     if (edx1 & (1 << 25)) result |= FloatingPointExtension::SSE;
@@ -82,8 +84,12 @@ static FloatingPointExtension getFPExts() {
     if (ecx1 & (1 << 9)) result |= FloatingPointExtension::SSSE3;
     if (ecx1 & (1 << 19)) result |= FloatingPointExtension::SSE4_1;
     if (ecx1 & (1 << 20)) result |= FloatingPointExtension::SSE4_2;
+    if (ecx81 & (1 << 6)) result |= FloatingPointExtension::SSE4a;
+    if (ecx81 & (1 << 11)) result |= FloatingPointExtension::XOP;
+    if (ecx1 & (1 << 29)) result |= FloatingPointExtension::F16C;
+    if (ecx81 & (1 << 16)) result |= FloatingPointExtension::FMA4;
     if (ecx1 & (1 << 28)) result |= FloatingPointExtension::AVX;
-    if (ecx1 & (1 << 12)) result |= FloatingPointExtension::FMA;
+    if (ecx1 & (1 << 12)) result |= FloatingPointExtension::FMA3;
     if (ebx7 & (1 << 5)) result |= FloatingPointExtension::AVX2;
     if (ebx7 & (1 << 16)) result |= FloatingPointExtension::AVX512F;
     if (ebx7 & (1 << 17)) result |= FloatingPointExtension::AVX512DQ;
