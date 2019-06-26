@@ -84,6 +84,7 @@ fail:
         FreeLibrary(m_hWinHvEmulation);
         m_hWinHvEmulation = NULL;
     }
+    g_whpxVersion = WhpxVersion::None;
 
     return false;
 }
