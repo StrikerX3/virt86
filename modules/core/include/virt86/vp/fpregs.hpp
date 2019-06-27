@@ -84,12 +84,13 @@ union MXCSR {
 };
 
 // ST(#) register value
+#pragma pack(push, 1)
 struct FPValue {
     uint64_t significand;
     uint16_t exponentSign;
-    uint16_t /*padding*/ : 16;
 };
-static_assert(sizeof(FPValue) == 16);
+#pragma pack(pop)
+static_assert(sizeof(FPValue) == 10);
 
 // XMM# register value
 union XMMValue {
@@ -190,12 +191,15 @@ struct FXSAVEArea {
     };
     MXCSR mxcsr;
     MXCSR mxcsr_mask;
-    FPValue st_mm[8];
+    struct {
+        FPValue value;
+        uint8_t _padding[6];
+    } st_mm[8];
+    
     XMMValue xmm[16];
     uint8_t _reserved[48];
     uint8_t _unused[48];
 };
-constexpr auto s = sizeof(FXSAVEArea);
 static_assert(sizeof(FXSAVEArea) == 512, "FXSAVEArea struct is not 512 bytes long");
 
 // XSAVE area contents
