@@ -85,12 +85,20 @@ union MXCSR {
 
 // ST(#) register value
 #pragma pack(push, 1)
-struct FPValue {
+struct STValue {
     uint64_t significand;
     uint16_t exponentSign;
 };
 #pragma pack(pop)
-static_assert(sizeof(FPValue) == 10);
+static_assert(sizeof(STValue) == 10);
+
+union MMValue {
+    int64_t i64[1];
+    int32_t i32[2];
+    int16_t i16[4];
+    int8_t i8[8];
+};
+static_assert(sizeof(MMValue) == 8);
 
 // XMM# register value
 union XMMValue {
@@ -191,9 +199,10 @@ struct FXSAVEArea {
     };
     MXCSR mxcsr;
     MXCSR mxcsr_mask;
-    struct {
-        FPValue value;
-        uint8_t _padding[6];
+    union {
+        STValue st;
+        MMValue mm;
+        uint8_t _padding[16];
     } st_mm[8];
     
     XMMValue xmm[16];
