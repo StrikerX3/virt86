@@ -38,6 +38,10 @@ SOFTWARE.
 
 #include "virt86/util/bytemanip.hpp"
 
+#ifndef BIT
+#define BIT(n) (1 << (n))
+#endif
+
 namespace virt86::kvm {
 
 KvmVirtualProcessor::KvmVirtualProcessor(KvmVirtualMachine& vm, uint32_t vcpuID)
