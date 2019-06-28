@@ -98,29 +98,50 @@ bool KvmVirtualProcessor::Initialize() noexcept {
         cpuid->nent = static_cast<__u32>(count);
 
         // Build unordered map from custom CPUID entries
-        std::unordered_map<uint32_t, CPUIDResult> custom_cpuids;
+        std::unordered_map<uint64_t, CPUIDResult> custom_cpuids;
         auto& cpuids = m_vm.GetSpecifications().CPUIDResults;
+        uint64_t leaf_index = 0;
+        uint32_t last_func = 0xFFFFFFFF;
         for (auto it = cpuids.cbegin(); it != cpuids.cend(); it++) {
-            custom_cpuids[it->function] = *it;
+            if (it->function == last_func) {
+                leaf_index++;
+            }
+            else {
+                leaf_index = 0;
+                last_func = it->function;
+            }
+            custom_cpuids[(it->function) | (leaf_index << 32ull)] = *it;
         }
 
         // Build list of CPUID responses based on default and custom values
+        leaf_index = 0;
+        last_func = 0xFFFFFFFF;
         for (size_t i = 0; i < count; i++) {
             const auto &entry = cpuid_defaults[i];
-            if (custom_cpuids.count(entry.function)) {
-                const auto& custom_entry = custom_cpuids[entry.function];
-                cpuid->entries[i].function = entry.function;
-                cpuid->entries[i].index = static_cast<__u32>(i);
-                cpuid->entries[i].flags = 0;
-                cpuid->entries[i].eax = entry.eax;
-                cpuid->entries[i].ebx = entry.ebx;
-                cpuid->entries[i].ecx = entry.ecx;
-                cpuid->entries[i].edx = entry.edx;
+            if (entry.function == last_func) {
+                leaf_index++;
             }
             else {
-                cpuid->entries[i].function = entry.function;
-                cpuid->entries[i].index = static_cast<__u32>(i);
-                cpuid->entries[i].flags = 0;
+                leaf_index = 0;
+                last_func = entry.function;
+            }
+
+            cpuid->entries[i].function = entry.function;
+            cpuid->entries[i].index = leaf_index;
+            cpuid->entries[i].flags = 0;
+            if (entry.function == 0x4 || entry.function == 0x7 || entry.function == 0xb || entry.function == 0xd) {
+                cpuid->entries[i].flags |= KVM_CPUID_FLAG_SIGNIFCANT_INDEX;
+            }
+
+            uint64_t custom_key = (entry.function) | (leaf_index << 32ull);
+            if (custom_cpuids.count(custom_key)) {
+                const auto& custom_entry = custom_cpuids[custom_key];
+                cpuid->entries[i].eax = custom_entry.eax;
+                cpuid->entries[i].ebx = custom_entry.ebx;
+                cpuid->entries[i].ecx = custom_entry.ecx;
+                cpuid->entries[i].edx = custom_entry.edx;
+            }
+            else {
                 cpuid->entries[i].eax = entry.eax;
                 cpuid->entries[i].ebx = entry.ebx;
                 cpuid->entries[i].ecx = entry.ecx;
