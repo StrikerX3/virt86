@@ -35,11 +35,12 @@ void LoadSegment(RegValue& value, const struct kvm_segment *segment) noexcept {
     value.segment.selector = segment->selector;
     value.segment.base = segment->base;
     value.segment.limit = segment->limit;
+    value.segment.attributes.u16 = 0;
     value.segment.attributes.type = segment->type;
     value.segment.attributes.present = segment->present;
     value.segment.attributes.privilegeLevel = segment->dpl;
-    value.segment.attributes.system = segment->db;
-    value.segment.attributes.defaultSize = segment->s;
+    value.segment.attributes.system = segment->s;
+    value.segment.attributes.defaultSize = segment->db;
     value.segment.attributes.longMode = segment->l;
     value.segment.attributes.granularity = segment->g;
     value.segment.attributes.available = segment->avl;
@@ -52,8 +53,8 @@ void StoreSegment(const RegValue& value, struct kvm_segment *segment) noexcept {
     segment->type = value.segment.attributes.type;
     segment->present = value.segment.attributes.present;
     segment->dpl = value.segment.attributes.privilegeLevel;
-    segment->db = value.segment.attributes.system;
-    segment->s = value.segment.attributes.defaultSize;
+    segment->db = value.segment.attributes.defaultSize;
+    segment->s = value.segment.attributes.system;
     segment->l = value.segment.attributes.longMode;
     segment->g = value.segment.attributes.granularity;
     segment->avl = value.segment.attributes.available;

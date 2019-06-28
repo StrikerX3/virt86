@@ -34,6 +34,7 @@ SOFTWARE.
 #include <linux/kvm.h>
 #include <assert.h>
 #include <memory>
+#include <unordered_map>
 
 #include "virt86/util/bytemanip.hpp"
 
@@ -90,13 +91,24 @@ bool KvmVirtualProcessor::Initialize() noexcept {
 
     // Configure the custom CPUIDs if supported
     if (m_vm.GetPlatform().GetFeatures().customCPUIDs) {
+        // Allocate memory for CPUID responses
+        auto& cpuid_defaults = m_vm.GetPlatform().GetFeatures().supportedCustomCPUIDs;
+        size_t count = cpuid_defaults.size();
+        auto cpuid = allocVarEntry<kvm_cpuid2, kvm_cpuid_entry2>(count);
+        cpuid->nent = static_cast<__u32>(count);
+
+        // Build unordered map from custom CPUID entries
+        std::unordered_map<uint32_t, CPUIDResult> custom_cpuids;
         auto& cpuids = m_vm.GetSpecifications().CPUIDResults;
-        if (!cpuids.empty()) {
-            size_t count = cpuids.size();
-            auto cpuid = allocVarEntry<kvm_cpuid2, kvm_cpuid_entry2>(count);
-            cpuid->nent = static_cast<__u32>(count);
-            for (size_t i = 0; i < count; i++) {
-                auto &entry = cpuids[i];
+        for (auto it = cpuids.cbegin(); it != cpuids.cend(); it++) {
+            custom_cpuids[it->function] = *it;
+        }
+
+        // Build list of CPUID responses based on default and custom values
+        for (size_t i = 0; i < count; i++) {
+            const auto &entry = cpuid_defaults[i];
+            if (custom_cpuids.count(entry.function)) {
+                const auto& custom_entry = custom_cpuids[entry.function];
                 cpuid->entries[i].function = entry.function;
                 cpuid->entries[i].index = static_cast<__u32>(i);
                 cpuid->entries[i].flags = 0;
@@ -105,16 +117,26 @@ bool KvmVirtualProcessor::Initialize() noexcept {
                 cpuid->entries[i].ecx = entry.ecx;
                 cpuid->entries[i].edx = entry.edx;
             }
-
-            int result = ioctl(m_fd, KVM_SET_CPUID2, cpuid);
-            if (result < 0) {
-                close(m_fd);
-                m_fd = -1;
-                free(cpuid);
-                return false;
+            else {
+                cpuid->entries[i].function = entry.function;
+                cpuid->entries[i].index = static_cast<__u32>(i);
+                cpuid->entries[i].flags = 0;
+                cpuid->entries[i].eax = entry.eax;
+                cpuid->entries[i].ebx = entry.ebx;
+                cpuid->entries[i].ecx = entry.ecx;
+                cpuid->entries[i].edx = entry.edx;
             }
-            free(cpuid);
         }
+
+        // Apply changes
+        int result = ioctl(m_fd, KVM_SET_CPUID2, cpuid);
+        if (result < 0) {
+            close(m_fd);
+            m_fd = -1;
+            free(cpuid);
+            return false;
+        }
+        free(cpuid);
     }
 
     return true;
