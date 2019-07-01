@@ -25,7 +25,7 @@
 # CMake 3.12 is required for target_link_libraries with OBJECT libraries
 cmake_minimum_required(VERSION 3.12)
 
-project(virt86 VERSION 1.1.0)
+project(virt86 VERSION 1.1.1)
 
 # Differentiate between Linux and macOS
 if(UNIX AND NOT APPLE)

@@ -1,4 +1,4 @@
-version: '1.1.0-b{build}'
+version: '1.1.1-b{build}'
 
 branches:
   only:
@@ -83,7 +83,7 @@ deploy:
   subject: strikerx3
   repo: virt86
   package: virt86
-  version: 1.1.0
+  version: 1.1.1
   publish: true
   override: true
   explode: false

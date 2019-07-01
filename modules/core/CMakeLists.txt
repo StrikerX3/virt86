@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-project(virt86-core VERSION 1.1.0 LANGUAGES CXX)
+project(virt86-core VERSION 1.1.1 LANGUAGES CXX)
 
 # Debug Information Format:
 # * https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format
