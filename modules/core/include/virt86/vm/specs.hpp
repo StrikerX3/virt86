@@ -67,7 +67,12 @@ struct VMSpecifications {
     std::vector<CPUIDResult> CPUIDResults;
 
     /**
-     * KVM-specific parameters.
+     * Guest TSC frequency to use. A value of zero means no adjustment.
+     */
+    uint64_t guestTSCFrequency;
+
+    /**
+     * KVM-specific parameters. Ignored by all other platforms.
      */
     struct {
         /**

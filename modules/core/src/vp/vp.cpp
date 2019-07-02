@@ -524,6 +524,16 @@ VPOperationStatus VirtualProcessor::SetMSRs(const uint64_t msrs[], const uint64_
     return VPOperationStatus::OK;
 }
 
+// ----- Model specific registers ---------------------------------------------
+
+VPOperationStatus VirtualProcessor::GetVirtualTSCOffset(uint64_t & offset) noexcept {
+    return VPOperationStatus::Unsupported;
+}
+
+VPOperationStatus VirtualProcessor::SetVirtualTSCOffset(const uint64_t offset) noexcept {
+    return VPOperationStatus::Unsupported;
+}
+
 // ----- Utility methods for segment and table registers ----------------------
 
 bool VirtualProcessor::IsIA32eMode() noexcept {

@@ -245,6 +245,7 @@ enum class ExtendedVMExit {
     CPUID = (1 << 0),         // Supports VM exit due to the CPUID instruction
     MSRAccess = (1 << 1),     // Supports VM exit on MSR access
     Exception = (1 << 2),     // Supports VM exit on CPU exception
+    TSCAccess = (1 << 3),     // Supports VM exit on TSC access (RDTSC, RDTSCP, RDMSR, WRMSR)
 };
 
 /**
@@ -374,6 +375,11 @@ struct PlatformFeatures {
      * CPUIDs are supported. Not all platforms fill this list.
      */
     std::vector<CPUIDResult> supportedCustomCPUIDs;
+
+    /**
+     * Guest TSC scaling and virtual TSC offset is supported.
+     */
+    bool guestTSCScaling = false;
 };
 
 }

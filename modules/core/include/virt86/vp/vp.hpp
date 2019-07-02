@@ -281,6 +281,18 @@ public:
      * expose one of the requested MSRs.
      */
     virtual VPOperationStatus SetMSRs(const uint64_t msrs[], const uint64_t values[], const size_t numRegs) noexcept;
+  
+    // ----- Virtual TSC offset -----------------------------------------------
+
+    /**
+     * Retrieves the current virtual TSC offset.
+     */
+    virtual VPOperationStatus GetVirtualTSCOffset(uint64_t& offset) noexcept;
+
+    /**
+     * Modifies the virtual TSC offset.
+     */
+    virtual VPOperationStatus SetVirtualTSCOffset(const uint64_t offset) noexcept;
 
     // ----- Global Descriptor Table ------------------------------------------
 

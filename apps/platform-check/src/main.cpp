@@ -144,6 +144,7 @@ int main() {
         printf("    Memory unmapping: %s\n", (features.memoryUnmapping) ? "supported" : "unsuported");
         printf("    Partial unmapping: %s\n", (features.partialUnmapping) ? "supported" : "unsuported");
         printf("    Partial MMIO instructions: %s\n", (features.partialMMIOInstructions) ? "yes" : "no");
+        printf("    Guest TSC scaling: %s\n", (features.guestTSCScaling) ? "supported" : "unsupported");
         printf("    Custom CPUID results: %s\n", (features.customCPUIDs) ? "supported" : "unsupported");
         if (features.customCPUIDs && features.supportedCustomCPUIDs.size() > 0) {
             printf("       Function        EAX         EBX         ECX         EDX\n");
@@ -170,6 +171,7 @@ int main() {
             if (extVMExits.AnyOf(ExtendedVMExit::CPUID)) printf(" CPUID");
             if (extVMExits.AnyOf(ExtendedVMExit::MSRAccess)) printf(" MSRAccess");
             if (extVMExits.AnyOf(ExtendedVMExit::Exception)) printf(" Exception");
+            if (extVMExits.AnyOf(ExtendedVMExit::TSCAccess)) printf(" TSCAccess");
         }
         printf("\n");
         printf("    Exception exits:");
