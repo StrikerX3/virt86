@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-project(virt86-core VERSION 1.1.1 LANGUAGES CXX)
+project(virt86-core VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
 
 # Debug Information Format:
 # * https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format
@@ -110,7 +110,7 @@ else()
 endif()
 
 # Define version string as a compiler macro
-target_compile_definitions(virt86-core PUBLIC VIRT86_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(virt86-core PUBLIC VIRT86_VERSION="${CMAKE_PROJECT_VERSION}")
 
 ##############################
 # Installation

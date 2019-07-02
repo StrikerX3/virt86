@@ -1,4 +1,4 @@
-project(virt86-platform-check VERSION 1.1.1 LANGUAGES CXX)
+project(virt86-platform-check VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
 
 ##############################
 # Source files
@@ -21,6 +21,8 @@ file(GLOB_RECURSE public_headers
 # Project structure
 #
 add_executable(virt86-platform-check ${sources} ${private_headers} ${public_headers})
+
+set_target_properties(virt86-platform-check PROPERTIES DEBUG_POSTFIX "-debug")
 
 target_include_directories(virt86-platform-check
     PUBLIC
