@@ -1,5 +1,5 @@
 /*
-HAXM system-based platform implementation for Mac OS X.
+HAXM system-based platform implementation for macOS.
 -------------------------------------------------------------------------------
 MIT License
 

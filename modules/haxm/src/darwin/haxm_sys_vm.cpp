@@ -1,5 +1,5 @@
 /*
-HAXM system-based virtual machine implementation for Mac OS X.
+HAXM system-based virtual machine implementation for macOS.
 -------------------------------------------------------------------------------
 MIT License
 

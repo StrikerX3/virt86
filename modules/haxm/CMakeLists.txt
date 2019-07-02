@@ -1,6 +1,6 @@
 # HAXM platform adapter.
 #
-# Supported by all major operating systems: Windows, Mac OS X and Linux.
+# Supported by all major operating systems: Windows, macOS and Linux.
 # Uses Intel VT-x only, therefore it is only supported by Intel processors.
 # -------------------------------------------------------------------------------
 # MIT License

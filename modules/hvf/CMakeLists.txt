@@ -1,6 +1,6 @@
 # Hypervisor.Framework platform adapter.
 #
-# Supports Mac OS X only.
+# Supports macOS only.
 # Supports Intel VT-x only, since there are no AMD-based Macs.
 # -------------------------------------------------------------------------------
 # MIT License

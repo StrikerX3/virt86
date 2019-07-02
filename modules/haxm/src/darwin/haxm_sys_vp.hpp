@@ -1,5 +1,5 @@
 /*
-HAXM system-based virtual processor implementation for Mac OS X.
+HAXM system-based virtual processor implementation for macOS.
 -------------------------------------------------------------------------------
 MIT License
 

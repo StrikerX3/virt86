@@ -1,7 +1,7 @@
 # virt86
 
-| Windows | Linux and Mac OS X | Downloads |
-|:-------:|:------------------:|:---------:|
+| Windows | Linux and macOS | Downloads |
+|:-------:|:---------------:|:---------:|
 | [![AppVeyor build status](https://img.shields.io/appveyor/ci/strikerx3/virt86/master.svg?label=AppVeyor%20build&logo=appveyor&style=flat)](https://ci.appveyor.com/project/StrikerX3/virt86/branch/master) | [![Travis CI build status](https://img.shields.io/travis/com/strikerx3/virt86/master.svg?label=Travis%20CI%20build&logo=travis&style=flat)](https://travis-ci.com/StrikerX3/virt86) | [![Bintray downloads](https://img.shields.io/bintray/v/strikerx3/virt86/virt86.svg?style=flat)](https://bintray.com/strikerx3/virt86/virt86/_latestVersion) |
 
 virt86 interfaces with the major x86 hardware-assisted virtualization engines
@@ -27,7 +27,7 @@ The project has been successfully compiled with the following toolchains:
 * Microsoft Visual C++ 19.16.27027.1 (Visual Studio 2017 v15.9.7) on Windows 10, 32- and 64-bit, using Windows 10 SDKs 10.0.17134.0 and 10.0.17763.0
 * GCC 7.3.0 on Ubuntu 18.04.0, 64-bit
 * GCC 8.2.0 on Ubuntu 18.04.0 (`gcc-8` package), 64-bit
-* Apple LLVM 10.0.0 on Mac OS X Mojave 10.14.3, 64-bit
+* Apple LLVM 10.0.0 on macOS Mojave 10.14.3, 64-bit
 
 ### Building on Windows with Visual Studio 2017
 
@@ -67,7 +67,7 @@ make
 
 To install the library, run `sudo make install` from the `build` directory.
 
-### Building on Mac OS X
+### Building on macOS
 
 Install [brew](https://brew.sh/) if you haven't already. The default installation is sufficient. Xcode is not needed to compile the library -- virt86 can be compiled with the Xcode command line tools included with brew.
 
@@ -94,7 +94,7 @@ If you installed the library to a non-standard location by specifying `CMAKE_INS
 
 ### Linking against a downloaded release
 
-Extract the file to your preferred location for libraries. Add `<virt86-path>/include` to your project's includes and `<virt86-path>/lib` to your project's library directories. Link against `virt86.lib` on Windows or `libvirt86.a` on Linux and Mac OS X. For debug libraries, use `virt86-debug.lib` or `libvirt86-debug.a`.
+Extract the file to your preferred location for libraries. Add `<virt86-path>/include` to your project's includes and `<virt86-path>/lib` to your project's library directories. Link against `virt86.lib` on Windows or `libvirt86.a` on Linux and macOS. For debug libraries, use `virt86-debug.lib` or `libvirt86-debug.a`.
 
 ### Using the library
 
