@@ -109,6 +109,9 @@ else()
     #add_precompiled_header(virt86-core src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 endif()
 
+# Define version string as a compiler macro
+target_compile_definitions(virt86-core PUBLIC VIRT86_VERSION="${PROJECT_VERSION}")
+
 ##############################
 # Installation
 #

@@ -92,7 +92,7 @@ void printFPExts(FloatingPointExtension fpExts) {
 }
 
 int main() {
-    printf("virt86 Platform Checker 1.1.1\n");  // TODO: externalize version string
+    printf("virt86 Platform Checker " VIRT86_VERSION "\n");
     printf("Copyright (c) 2019 Ivan Roberto de Oliveira\n");
     printf("\n");
 
