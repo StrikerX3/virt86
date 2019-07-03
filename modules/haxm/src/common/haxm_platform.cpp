@@ -47,6 +47,9 @@ HaxmPlatform::HaxmPlatform() noexcept
         m_initStatus = initResult;
         return;
     }
+
+    // Get version string
+    m_version = impl.GetVersion();
     
     // Publish capabilities
     const auto& caps = impl.m_haxCaps;

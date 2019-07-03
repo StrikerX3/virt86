@@ -42,6 +42,10 @@ PlatformInitStatus HaxmPlatformImpl::Initialize() noexcept {
     return m_sys->Initialize(&m_haxVer, &m_haxCaps);
 }
 
+std::string HaxmPlatformImpl::GetVersion() noexcept {
+    return m_sys->GetVersion();
+}
+
 bool HaxmPlatformImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     return m_sys->SetGlobalMemoryLimit(enabled, limitMB);
 }

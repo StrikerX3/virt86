@@ -30,6 +30,8 @@ SOFTWARE.
 #include <memory>
 #include <cstdint>
 #include <cassert>
+#include <string>
+#include <sstream>
 
 #ifdef _WIN32
 #  include <Windows.h>

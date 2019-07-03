@@ -29,6 +29,7 @@ SOFTWARE.
 #include "interface/hax_interface.hpp"
 
 #include <memory>
+#include <string>
 
 namespace virt86::haxm {
 
@@ -52,6 +53,7 @@ public:
 
     PlatformInitStatus Initialize() noexcept;
 
+    std::string GetVersion() noexcept;
     bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     hax_module_version m_haxVer;
