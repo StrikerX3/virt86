@@ -69,6 +69,11 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     return PlatformInitStatus::OK;
 }
 
+HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
+    // TODO: implement
+    return { 0, 0, 0 };
+}
+
 bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     hax_set_memlimit memlimit;
     memlimit.enable_memlimit = enabled;

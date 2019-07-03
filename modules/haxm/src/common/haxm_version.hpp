@@ -1,5 +1,5 @@
 /*
-Declares the Platform internal implementation class for HAXM.
+Declares the HAXM version type.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -25,48 +25,40 @@ SOFTWARE.
 */
 #pragma once
 
-#include "virt86/haxm/haxm_platform.hpp"
-#include "interface/hax_interface.hpp"
-#include "haxm_version.hpp"
-
-#include <memory>
-
 namespace virt86::haxm {
 
+// Undefine system-defined macros from <sys/sysmacros.h> / <sys/types.h> in Linux
+#ifdef major
+#undef major
+#endif
+
+#ifdef minor
+#undef minor
+#endif
+
+union HaxmVersion {
+    struct {
+        uint16_t major, minor, build;
+    };
+    uint64_t u64;
+
+    HaxmVersion() : u64(0) {}
+
+    HaxmVersion(uint16_t major, uint16_t minor, uint16_t build)
+        : major(major)
+        , minor(minor)
+        , build(build) {
+    }
+
+    bool operator==(const HaxmVersion& version) { return u64 == version.u64; }
+    bool operator!=(const HaxmVersion& version) { return u64 != version.u64; }
+    bool operator>=(const HaxmVersion& version) { return u64 >= version.u64; }
+    bool operator<=(const HaxmVersion& version) { return u64 <= version.u64; }
+    bool operator>(const HaxmVersion& version) { return u64 > version.u64; }
+    bool operator<(const HaxmVersion& version) { return u64 < version.u64; }
+};
+
+// Global instance of the HAXM version loaded in the system.
 extern HaxmVersion g_haxmVersion;
-
-class HaxmPlatformSysImpl;
-
-class HaxmPlatformImpl {
-public:
-    HaxmPlatformImpl() noexcept;
-    ~HaxmPlatformImpl() noexcept;
-
-    // Prevent copy construction and copy assignment
-    HaxmPlatformImpl(const HaxmPlatformImpl&) = delete;
-    HaxmPlatformImpl& operator=(const HaxmPlatformImpl&) = delete;
-
-    // Prevent move construction and move assignment
-    HaxmPlatformImpl(HaxmPlatformImpl&&) = delete;
-    HaxmPlatformImpl&& operator=(HaxmPlatformImpl&&) = delete;
-
-    // Disallow taking the address
-    HaxmPlatformImpl *operator&() = delete;
-
-    PlatformInitStatus Initialize() noexcept;
-
-    HaxmVersion GetVersion() noexcept;
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
-
-    hax_module_version m_haxVer;
-    hax_capabilityinfo m_haxCaps;
-
-    // OS-specific implementation
-    std::unique_ptr<HaxmPlatformSysImpl> m_sys;
-};
-
-struct HaxmPlatform::Delegate {
-    HaxmPlatformImpl impl;
-};
 
 }

@@ -29,6 +29,7 @@ SOFTWARE.
 #include "virt86/sys/windows/version_info.hpp"
 
 #include "interface/hax_interface.hpp"
+#include "haxm_version.hpp"
 
 #include <Windows.h>
 
