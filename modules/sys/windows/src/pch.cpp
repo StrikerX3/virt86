@@ -1,5 +1,5 @@
 /*
-Precompiled header for the Windows Hypervisor Platform adapter.
+This file is required by Visual Studio in order to compile pch.hpp.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -23,21 +23,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <Windows.h>
-#include <WinHvPlatform.h>
-#include <WinHvEmulation.h>
-
-#include <string>
-#include <sstream>
-
-#include "virt86/platform/platform.hpp"
-#include "virt86/vm/vm.hpp"
-#include "virt86/vp/vp.hpp"
-
-#include "virt86/whpx/whpx_platform.hpp"
-#include "whpx_vm.hpp"
-#include "whpx_vp.hpp"
-
-#include "whpx_dispatch.hpp"
-#include "whpx_regs.hpp"
-#include "whpx_defs.hpp"
+#include "pch.hpp"

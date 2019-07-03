@@ -1,4 +1,4 @@
-# Includes all virt86 modules.
+# Template for CMake Config module.
 # -------------------------------------------------------------------------------
 # MIT License
 # 
@@ -21,21 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+@PACKAGE_INIT@
 
-# Add modules
-add_subdirectory(core)
-
-if(WIN32)
-    add_subdirectory(sys/windows)
-    add_subdirectory(haxm)
-    add_subdirectory(whpx)
-elseif(LINUX)
-    add_subdirectory(haxm)
-    add_subdirectory(kvm)
-elseif(APPLE)
-    add_subdirectory(haxm)
-    # TODO: Add support for Hypervisor.Framework
-    #add_subdirectory(hvf)
-endif()
-
-add_subdirectory(virt86)
+include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
+check_required_components("@PROJECT_NAME@")

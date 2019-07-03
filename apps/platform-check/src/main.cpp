@@ -130,6 +130,7 @@ int main() {
         }
 
         const auto& features = platform.GetFeatures();
+        printf("  Version: %s\n", platform.GetVersion().c_str());
         printf("  Features:\n");
         printf("    Maximum number of VCPUs: %u per VM, %u global\n", features.maxProcessorsPerVM, features.maxProcessorsGlobal);
         printf("    Maximum guest physical address: 0x%llx\n", features.guestPhysicalAddress.maxAddress);
