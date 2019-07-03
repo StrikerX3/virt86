@@ -28,6 +28,8 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
+HaxmVersion g_haxmVersion;
+
 HaxmPlatformImpl::HaxmPlatformImpl() noexcept
     : m_haxVer({ 0 })
     , m_haxCaps({ 0 })
@@ -42,7 +44,7 @@ PlatformInitStatus HaxmPlatformImpl::Initialize() noexcept {
     return m_sys->Initialize(&m_haxVer, &m_haxCaps);
 }
 
-std::string HaxmPlatformImpl::GetVersion() noexcept {
+HaxmVersion HaxmPlatformImpl::GetVersion() noexcept {
     return m_sys->GetVersion();
 }
 

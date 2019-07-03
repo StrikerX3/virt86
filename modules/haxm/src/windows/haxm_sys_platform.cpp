@@ -25,9 +25,6 @@ SOFTWARE.
 */
 #include "haxm_sys_platform.hpp"
 
-#include <string>
-#include <sstream>
-
 namespace virt86::haxm {
 
 HaxmPlatformSysImpl::HaxmPlatformSysImpl() noexcept
@@ -81,16 +78,14 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     return PlatformInitStatus::OK;
 }
 
-std::string HaxmPlatformSysImpl::GetVersion() noexcept {
+HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
     auto opt_ver = sys::windows::getDriverVersion(L"IntelHaxm.sys");
     if (!opt_ver) {
-        return "";
+        return { 0, 0, 0 };
     }
 
     auto ver = *opt_ver;
-    std::stringstream ssVersion;
-    ssVersion << ver.major << "." << ver.minor << "." << ver.build;
-    return ssVersion.str();
+    return { ver.major, ver.minor, ver.build };
 }
 
 bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {

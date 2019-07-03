@@ -33,6 +33,30 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
+union HaxmVersion {
+    struct {
+        uint16_t major, minor, build;
+    };
+    uint64_t u64;
+
+    HaxmVersion() : u64(0) {}
+
+    HaxmVersion(uint16_t major, uint16_t minor, uint16_t build)
+        : major(major)
+        , minor(minor)
+        , build(build) {
+    }
+
+    bool operator==(const HaxmVersion& version) { return u64 == version.u64; }
+    bool operator!=(const HaxmVersion& version) { return u64 != version.u64; }
+    bool operator>=(const HaxmVersion& version) { return u64 >= version.u64; }
+    bool operator<=(const HaxmVersion& version) { return u64 <= version.u64; }
+    bool operator>(const HaxmVersion& version) { return u64 > version.u64; }
+    bool operator<(const HaxmVersion& version) { return u64 < version.u64; }
+};
+
+extern HaxmVersion g_haxmVersion;
+
 class HaxmPlatformSysImpl;
 
 class HaxmPlatformImpl {
@@ -53,7 +77,7 @@ public:
 
     PlatformInitStatus Initialize() noexcept;
 
-    std::string GetVersion() noexcept;
+    HaxmVersion GetVersion() noexcept;
     bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     hax_module_version m_haxVer;
