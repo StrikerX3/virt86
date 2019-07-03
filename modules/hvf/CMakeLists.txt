@@ -48,16 +48,15 @@ file(GLOB_RECURSE public_headers
 #
 add_library(virt86-hvf OBJECT ${sources} ${private_headers} ${public_headers})
 
+# Include core
 if(TARGET virt86-core)
     add_library(virt86::virt86-core ALIAS virt86-core)
 else()
     find_package(virt86-core CONFIG REQUIRED)
 endif()
-
 target_link_libraries(virt86-hvf PUBLIC virt86::virt86-core)
 
-set_target_properties(virt86-hvf PROPERTIES DEBUG_POSTFIX "-debug")
-
+# Add include directories
 target_include_directories(virt86-hvf
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -66,6 +65,7 @@ target_include_directories(virt86-hvf
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# Configure precompiled header
 #add_precompiled_header(virt86-hvf src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 
 # Tell dependents that HvF is available via compiler definition

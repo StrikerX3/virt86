@@ -26,41 +26,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 project(virt86-core VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
-
-# Debug Information Format:
-# * https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format
-#
-# Notes:
-#
-# * /Z7 still produce PDB file for DLL and without the PDB file installed
-#   you can't debug DLL
-#
-# * /Z7 for static library doesn't produce PDB. It's the best option if you
-#   want debug library without changing internal CMake code.
-#   Toolchain example: https://github.com/ruslo/polly/blob/master/vs-15-2017-win64-z7.cmake
-#
-# * /Zi option is default (produce separate PDB files)
-#
-# * TARGET_PDB_FILE generator expression doesn't support static libraries.
-#   See https://gitlab.kitware.com/cmake/cmake/issues/16932
-#   (that's why it's not used here)
-#
-# * This code can be implemented as a 'PDB DESTINATION' feature.
-#   See https://gitlab.kitware.com/cmake/cmake/issues/16935#note_275180
-#
-# * By default only Debug/RelWithDebInfo produce debug information,
-#   Release/MinSizeRel do not.
-#
-# * Generated PDB for static libraries doesn't respect CMAKE_<CONFIG>_POSTFIX
-#   variable. It means if you specify Debug and RelWithDebInfo then generated
-#   PDB files for both will be "md5.pdb". When PDB files installed one will
-#   overwrite another making it unusable. Release + Debug configurations will
-#   work fine because Release doesn't produce PDB files.
-#
-# * All PDB files will be installed, including PDB for targets that will not
-#   be installed themselves.
 
 ##############################
 # Source files
@@ -85,6 +51,7 @@ file(GLOB_RECURSE public_headers
 
 add_library(virt86-core OBJECT ${sources} ${private_headers} ${public_headers})
 
+# Add include directories
 target_include_directories(virt86-core
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -93,8 +60,7 @@ target_include_directories(virt86-core
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-set_target_properties(virt86-core PROPERTIES DEBUG_POSTFIX "-debug")
-
+# Configure MSVC and precompiled header
 if(MSVC)
     add_precompiled_header(virt86-core pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 

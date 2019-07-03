@@ -64,16 +64,15 @@ file(GLOB_RECURSE public_headers
 
 add_library(virt86-haxm OBJECT ${sources} ${private_headers} ${public_headers})
 
+# Include core
 if(TARGET virt86-core)
     add_library(virt86::virt86-core ALIAS virt86-core)
 else()
     find_package(virt86-core CONFIG REQUIRED)
 endif()
-
 target_link_libraries(virt86-haxm PUBLIC virt86::virt86-core)
 
-set_target_properties(virt86-haxm PROPERTIES DEBUG_POSTFIX "-debug")
-
+# Add include directories
 target_include_directories(virt86-haxm
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -83,6 +82,7 @@ target_include_directories(virt86-haxm
         ${CMAKE_CURRENT_SOURCE_DIR}/src/${platform_path}
 )
 
+# Configure MSVC and precompiled header
 if(MSVC)
     add_precompiled_header(virt86-haxm pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
 
