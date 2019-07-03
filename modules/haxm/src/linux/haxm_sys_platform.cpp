@@ -70,7 +70,10 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
 }
 
 HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
-    // TODO: implement
+    // TODO: delegate to virt86-sys-linux
+    // - implement based on modinfo.c
+    // - HAXM has a "version" parameter
+    // - For KVM, we'll need to grab the "srcversion" parameter -- a hash
     return { 0, 0, 0 };
 }
 
