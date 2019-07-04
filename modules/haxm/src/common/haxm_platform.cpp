@@ -85,7 +85,7 @@ HaxmPlatform::HaxmPlatform() noexcept
         m_features.memoryAliasing = true;
         m_features.memoryUnmapping = true;
         m_features.partialUnmapping = true;  // TODO: since when?
-        m_features.partialMMIOInstructions = g_haxmVersion >= HaxmVersion(7, 5, 1);
+        m_features.partialMMIOInstructions = g_haxmVersion < HaxmVersion(7, 5, 1);
         m_features.extendedControlRegisters = ExtendedControlRegister::MXCSRMask;
     }
     else {
