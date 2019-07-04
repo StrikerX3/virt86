@@ -32,6 +32,7 @@ SOFTWARE.
 #include <fcntl.h>
 #include <linux/kvm.h>
 #include <sys/ioctl.h>
+#include <sys/utsname.h>
 #include <unistd.h>
 #include <memory>
 
@@ -80,6 +81,10 @@ KvmPlatform::KvmPlatform() noexcept
         return;
     }
 
+    // Set version string to the current kernel version as KVM is part of it
+    struct utsname uts;
+    uname(&uts);
+    m_version = uts.release;
 
     // If we've got this far, we're all good
     m_initStatus = PlatformInitStatus::OK;

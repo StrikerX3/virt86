@@ -1,7 +1,4 @@
-# HAXM platform adapter.
-#
-# Supported by all major operating systems: Windows, macOS and Linux.
-# Uses Intel VT-x only, therefore it is only supported by Intel processors.
+# Common code for Linux systems.
 # -------------------------------------------------------------------------------
 # MIT License
 # 
@@ -24,33 +21,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-project(virt86-haxm VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
+project(virt86-sys-linux VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
 
 ##############################
 # Source files
 #
-if(WIN32)
-    set(platform_path windows)
-elseif(LINUX)
-    set(platform_path linux)
-elseif(APPLE)
-    set(platform_path darwin)
-else()
-    message(FATAL_ERROR "Unsupported platform")
-endif()
-
 file(GLOB_RECURSE sources
-    src/common/*.cpp
-    src/${platform_path}/*.cpp
-    src/pch.cpp
+    src/*.cpp
 )
 
 file(GLOB_RECURSE private_headers
-    src/common/*.hpp
-    src/common/*.h
-    src/${platform_path}/*.hpp
-    src/${platform_path}/*.h
-    src/pch.hpp
+    src/*.hpp
+    src/*.h
 )
 
 file(GLOB_RECURSE public_headers
@@ -62,68 +44,19 @@ file(GLOB_RECURSE public_headers
 # Project structure
 #
 
-add_library(virt86-haxm OBJECT ${sources} ${private_headers} ${public_headers})
-
-# Include core
-if(TARGET virt86-core)
-    add_library(virt86::virt86-core ALIAS virt86-core)
-else()
-    find_package(virt86-core CONFIG REQUIRED)
-endif()
-target_link_libraries(virt86-haxm PUBLIC virt86::virt86-core)
-
-# Include appropriate system module
-if(WIN32)
-    if(TARGET virt86-sys-windows)
-        add_library(virt86::virt86-sys-windows ALIAS virt86-sys-windows)
-    else()
-        find_package(virt86-sys-windows CONFIG REQUIRED)
-    endif()
-    target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-windows)
-elseif(LINUX)
-    if(TARGET virt86-sys-linux)
-        add_library(virt86::virt86-sys-linux ALIAS virt86-sys-linux)
-    else()
-        find_package(virt86-sys-linux CONFIG REQUIRED)
-    endif()
-    target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-linux)
-elseif(APPLE)
-    # TODO
-    #if(TARGET virt86-sys-darwin)
-    #    add_library(virt86::virt86-sys-darwin ALIAS virt86-sys-darwin)
-    #else()
-    #    find_package(virt86-sys-darwin CONFIG REQUIRED)
-    #endif()
-    #target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-darwin)
-endif()
+add_library(virt86-sys-linux OBJECT ${sources} ${private_headers} ${public_headers})
 
 # Add include directories
-target_include_directories(virt86-haxm
+target_include_directories(virt86-sys-linux
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/common
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/${platform_path}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Configure MSVC and precompiled header
-if(MSVC)
-    add_precompiled_header(virt86-haxm pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
-
-    vs_set_filters(BASE_DIR src FILTER_ROOT "Sources" SOURCES ${sources})
-    vs_set_filters(BASE_DIR src FILTER_ROOT "Private Headers" SOURCES ${private_headers})
-    vs_set_filters(BASE_DIR include FILTER_ROOT "Public Headers" SOURCES ${public_headers})
-
-    vs_use_edit_and_continue()
-
-    set_target_properties(virt86-haxm PROPERTIES FOLDER Libraries)
-else()
-    #add_precompiled_header(virt86-haxm src/common/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/common/pch.cpp" FORCEINCLUDE)
-endif()
-
-# Tell dependents that HAXM is available via compiler definition
-target_compile_definitions(virt86-haxm PUBLIC VIRT86_HAXM_AVAILABLE=1)
+# Configure precompiled header
+#add_precompiled_header(virt86-sys-linux src/pch.hpp PCH_PATH pch.hpp SOURCE_CXX "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.cpp" FORCEINCLUDE)
 
 ##############################
 # Installation
@@ -158,7 +91,7 @@ configure_package_config_file(
 )
 
 # Install target library
-install(TARGETS virt86-haxm
+install(TARGETS virt86-sys-linux
     EXPORT "${TARGETS_EXPORT_NAME}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
