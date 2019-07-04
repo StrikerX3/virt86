@@ -109,8 +109,8 @@ int main() {
 
     printf("Virtualization platforms available on this system:\n");
     printf("\n");
-    for (size_t i = 0; i < array_size(PlatformFactories); i++) {
-        const auto& platform = PlatformFactories[i]();
+    for (auto& platformFactory : PlatformFactories) {
+        const auto& platform = platformFactory();
 
         printf("%s - ", platform.GetName().c_str());
 
@@ -133,7 +133,7 @@ int main() {
         printf("  Version: %s\n", platform.GetVersion().c_str());
         printf("  Features:\n");
         printf("    Maximum number of VCPUs: %u per VM, %u global\n", features.maxProcessorsPerVM, features.maxProcessorsGlobal);
-        printf("    Maximum guest physical address: 0x%llx\n", features.guestPhysicalAddress.maxAddress);
+        printf("    Maximum guest physical address: 0x%" PRIx64 "\n", features.guestPhysicalAddress.maxAddress);
         printf("    Unrestricted guest: %s\n", (features.unrestrictedGuest) ? "supported" : "unsuported");
         printf("    Extended Page Tables: %s\n", (features.extendedPageTables) ? "supported" : "unsuported");
         printf("    Guest debugging: %s\n", (features.guestDebugging) ? "available" : "unavailable");
