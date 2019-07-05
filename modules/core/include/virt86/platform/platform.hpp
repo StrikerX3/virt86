@@ -94,6 +94,12 @@ public:
     std::string GetName() const { return m_name; }
 
     /**
+     * If initialized successfully, returns the platform's version as detected
+     * in the system, otherwise returns an empty string.
+     */
+    std::string GetVersion() const noexcept { return m_version; }
+
+    /**
      * Retrieves the platform's initialization status.
      */
     const PlatformInitStatus GetInitStatus() const noexcept { return m_initStatus; }
@@ -139,6 +145,12 @@ protected:
      * The platform's name.
      */
     const char *m_name;
+
+    /**
+     * The platform's version if available in the system, or an empty string
+     * if the platform was not initialized.
+     */
+    std::string m_version;
 
     /**
      * The platform's initialization status.

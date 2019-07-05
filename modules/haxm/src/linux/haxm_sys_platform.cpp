@@ -25,8 +25,12 @@ SOFTWARE.
 */
 #include "haxm_sys_platform.hpp"
 
+#include "virt86/sys/linux/Elf.h"
+#include "virt86/sys/linux/util.h"
+
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 
 namespace virt86::haxm {
@@ -67,6 +71,45 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     }
 
     return PlatformInitStatus::OK;
+}
+
+HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
+    HaxmVersion version = {0, 0, 0};
+
+    // Read HAXM kernel module file
+    size_t kmSize;
+    char *kmFile = mmapKernelModuleFile("haxm", &kmSize);
+    Elf *elf = Elf::Load(kmFile, kmSize);
+    if (elf == nullptr) {
+        munmap(kmFile, kmSize);
+        return version;
+    }
+
+    // Locate modinfo section
+    size_t modinfoSize;
+    char *modinfo = (char *) elf->GetSectionData(".modinfo", &modinfoSize);
+    if (modinfo == nullptr) {
+        munmap(kmFile, kmSize);
+        return version;
+    }
+
+    // Locate version string
+    char *ver = getModInfoParam(modinfo, modinfoSize, "version");
+    if (ver == nullptr) {
+        munmap(kmFile, kmSize);
+        return version;
+    }
+
+    // Parse version string
+    char *vNext;
+    version.major = strtol(ver, &vNext, 10);
+    version.minor = strtol(vNext + 1, &vNext, 10);
+    version.build = strtol(vNext + 1, &vNext, 10);
+
+    // Release resources
+    free(ver);
+    munmap(kmFile, kmSize);
+    return version;
 }
 
 bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {

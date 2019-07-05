@@ -73,7 +73,7 @@ VPOperationStatus TranslateRegisterName(const Reg reg, WHV_REGISTER_NAME& name) 
     case Reg::CR8: name = WHvX64RegisterCr8; break;
 
     case Reg::EFER: name = WHvX64RegisterEfer; break;
-    case Reg::XCR0: if (WHPX_MIN_VERSION(10_0_17763_0)) { name = WHvX64RegisterXCr0; break; } return VPOperationStatus::Unsupported;
+    case Reg::XCR0: if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) { name = WHvX64RegisterXCr0; break; } return VPOperationStatus::Unsupported;
 
     case Reg::DR0: name = WHvX64RegisterDr0; break;
     case Reg::DR1: name = WHvX64RegisterDr1; break;
@@ -443,8 +443,8 @@ bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) noexcept {
     case 0x0000026F: reg = WHvX64RegisterMsrMtrrFix4kF8000; break;
 
     case 0xC0000103: reg = WHvX64RegisterTscAux; break;
-    case 0x00000048: if (WHPX_MIN_VERSION(10_0_17763_0)) { reg = WHvX64RegisterSpecCtrl; break; } return false;
-    case 0x00000049: if (WHPX_MIN_VERSION(10_0_17763_0)) { reg = WHvX64RegisterPredCmd; break; } return false;
+    case 0x00000048: if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) { reg = WHvX64RegisterSpecCtrl; break; } return false;
+    case 0x00000049: if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) { reg = WHvX64RegisterPredCmd; break; } return false;
     default: return false;
     }
 

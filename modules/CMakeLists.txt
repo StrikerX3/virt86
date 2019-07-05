@@ -26,12 +26,15 @@
 add_subdirectory(core)
 
 if(WIN32)
+    add_subdirectory(sys/windows)
     add_subdirectory(haxm)
     add_subdirectory(whpx)
 elseif(LINUX)
+    add_subdirectory(sys/linux)
     add_subdirectory(haxm)
     add_subdirectory(kvm)
 elseif(APPLE)
+    add_subdirectory(sys/darwin)
     add_subdirectory(haxm)
     # TODO: Add support for Hypervisor.Framework
     #add_subdirectory(hvf)

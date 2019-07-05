@@ -27,6 +27,9 @@ SOFTWARE.
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+#include <string>
+#include <sstream>
+
 #include "virt86/platform/platform.hpp"
 #include "virt86/vm/vm.hpp"
 #include "virt86/vp/vp.hpp"

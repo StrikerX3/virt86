@@ -28,6 +28,7 @@ SOFTWARE.
 #include "virt86/platform/platform.hpp"
 
 #include "interface/hax_interface.hpp"
+#include "haxm_version.hpp"
 
 namespace virt86::haxm {
 
@@ -49,6 +50,7 @@ public:
 
     PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept;
 
+    HaxmVersion GetVersion() noexcept;
     bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     const int FileDescriptor() const noexcept { return m_fd; }

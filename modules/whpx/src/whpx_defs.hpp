@@ -41,17 +41,6 @@ SOFTWARE.
 
 namespace virt86::whpx {
 
-// Supported versions of WHPX. Detected at runtime.
-enum class WhpxVersion : uint8_t {
-    None,
-    _10_0_17134_0,
-    _10_0_17763_0,
-    _10_0_18362_0,
-};
-
-#define WHPX_MIN_VERSION(ver) (g_whpxVersion >= WhpxVersion::_##ver)
-#define WHPX_MAX_VERSION(ver) (g_whpxVersion <= WhpxVersion::_##ver)
-
 // In sdkddkver.h:
 //   NTDDI_WIN10_19H1 = 10.0.18362.0
 //   NTDDI_WIN10_RS5  = 10.0.17763.0

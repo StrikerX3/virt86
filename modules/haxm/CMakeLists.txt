@@ -72,6 +72,30 @@ else()
 endif()
 target_link_libraries(virt86-haxm PUBLIC virt86::virt86-core)
 
+# Include appropriate system module
+if(WIN32)
+    if(TARGET virt86-sys-windows)
+        add_library(virt86::virt86-sys-windows ALIAS virt86-sys-windows)
+    else()
+        find_package(virt86-sys-windows CONFIG REQUIRED)
+    endif()
+    target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-windows)
+elseif(LINUX)
+    if(TARGET virt86-sys-linux)
+        add_library(virt86::virt86-sys-linux ALIAS virt86-sys-linux)
+    else()
+        find_package(virt86-sys-linux CONFIG REQUIRED)
+    endif()
+    target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-linux)
+elseif(APPLE)
+    if(TARGET virt86-sys-darwin)
+        add_library(virt86::virt86-sys-darwin ALIAS virt86-sys-darwin)
+    else()
+        find_package(virt86-sys-darwin CONFIG REQUIRED)
+    endif()
+    target_link_libraries(virt86-haxm PUBLIC virt86::virt86-sys-darwin)
+endif()
+
 # Add include directories
 target_include_directories(virt86-haxm
     PUBLIC

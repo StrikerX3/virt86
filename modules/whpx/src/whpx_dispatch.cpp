@@ -29,7 +29,7 @@ SOFTWARE.
 namespace virt86::whpx {
 
 // The version of WHPX present in the system.
-WhpxVersion g_whpxVersion = WhpxVersion::None;
+VersionInfo g_whpxVersion;
 
 #define LOAD_LIB(name) do { \
     m_h##name = LoadLibraryA(#name ".dll"); \
@@ -48,6 +48,13 @@ WhpxVersion g_whpxVersion = WhpxVersion::None;
 #define LOAD_OPTIONAL_FUNC(returnType, name, parameters) \
     name = (name##_t) GetProcAddress(hmodule, #name);
 
+void setVersion(HMODULE hWinHvPlatform) noexcept {
+    auto opt_ver = getModuleVersion(hWinHvPlatform);
+    if (opt_ver) {
+        g_whpxVersion = *opt_ver;
+    }
+}
+
 bool WhpxDispatch::Load() noexcept {
     if (m_loaded) {
         return true;
@@ -56,21 +63,13 @@ bool WhpxDispatch::Load() noexcept {
     LOAD_LIB(WinHvPlatform);
     LOAD_LIB(WinHvEmulation);
 
+    // Determine WHPX version based on the loaded module
+    setVersion(m_hWinHvPlatform);
+
     HMODULE hmodule;
 
     hmodule = m_hWinHvPlatform; WHPX_PLATFORM_FUNCTIONS(LOAD_FUNC); WHPX_OPTIONAL_PLATFORM_FUNCTIONS(LOAD_OPTIONAL_FUNC);
     hmodule = m_hWinHvEmulation; WHPX_EMULATION_FUNCTIONS(LOAD_FUNC);
-
-    // Determine WHPX version based on what optional functions were loaded
-    if (WHvSuspendPartitionTime != nullptr) {
-        g_whpxVersion = WhpxVersion::_10_0_18362_0;
-    }
-    else if (WHvQueryGpaRangeDirtyBitmap != nullptr) {
-        g_whpxVersion = WhpxVersion::_10_0_17763_0;
-    }
-    else {
-        g_whpxVersion = WhpxVersion::_10_0_17134_0;
-    }
 
     m_loaded = true;
     return true;
@@ -84,7 +83,7 @@ fail:
         FreeLibrary(m_hWinHvEmulation);
         m_hWinHvEmulation = NULL;
     }
-    g_whpxVersion = WhpxVersion::None;
+    g_whpxVersion.ver = 0;
 
     return false;
 }

@@ -26,8 +26,10 @@ SOFTWARE.
 #pragma once
 
 #include "virt86/platform/platform.hpp"
+#include "virt86/sys/windows/version_info.hpp"
 
 #include "interface/hax_interface.hpp"
+#include "haxm_version.hpp"
 
 #include <Windows.h>
 
@@ -51,6 +53,7 @@ public:
 
     PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept;
 
+    HaxmVersion GetVersion() noexcept;
     bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     const HANDLE Handle() const noexcept { return m_handle; }

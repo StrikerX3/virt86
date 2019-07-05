@@ -28,6 +28,8 @@ SOFTWARE.
 
 namespace virt86::haxm {
 
+HaxmVersion g_haxmVersion;
+
 HaxmPlatformImpl::HaxmPlatformImpl() noexcept
     : m_haxVer({ 0 })
     , m_haxCaps({ 0 })
@@ -40,6 +42,10 @@ HaxmPlatformImpl::~HaxmPlatformImpl() noexcept {
 
 PlatformInitStatus HaxmPlatformImpl::Initialize() noexcept {
     return m_sys->Initialize(&m_haxVer, &m_haxCaps);
+}
+
+HaxmVersion HaxmPlatformImpl::GetVersion() noexcept {
+    return m_sys->GetVersion();
 }
 
 bool HaxmPlatformImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {

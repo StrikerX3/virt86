@@ -31,6 +31,9 @@ SOFTWARE.
 
 #include "virt86/util/host_info.hpp"
 
+#include <string>
+#include <sstream>
+
 namespace virt86::whpx {
 
 WhpxDispatch *WhpxPlatform::s_dispatch = new(std::nothrow) WhpxDispatch();
@@ -52,6 +55,11 @@ WhpxPlatform::WhpxPlatform() noexcept
         m_initStatus = PlatformInitStatus::Unavailable;
         return;
     }
+
+    // Build version string
+    std::stringstream ssVersion;
+    ssVersion << g_whpxVersion.major << "." << g_whpxVersion.minor << "." << g_whpxVersion.build << "." << g_whpxVersion.revision;
+    m_version = ssVersion.str();
 
     WHV_CAPABILITY cap;
 
@@ -75,7 +83,7 @@ WhpxPlatform::WhpxPlatform() noexcept
     const WhpxDefs::WHV_CAPABILITY_FEATURES features = cap.Features;
     m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;
     m_features.extendedControlRegisters = ExtendedControlRegister::CR8 | ExtendedControlRegister::MXCSRMask;
-    if (WHPX_MIN_VERSION(10_0_17763_0)) {
+    if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) {
         m_features.extendedControlRegisters |= ExtendedControlRegister::XCR0;
     }
     m_features.maxProcessorsPerVM = 64; // TODO: check value

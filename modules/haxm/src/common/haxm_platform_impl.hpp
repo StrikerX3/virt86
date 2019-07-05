@@ -27,10 +27,13 @@ SOFTWARE.
 
 #include "virt86/haxm/haxm_platform.hpp"
 #include "interface/hax_interface.hpp"
+#include "haxm_version.hpp"
 
 #include <memory>
 
 namespace virt86::haxm {
+
+extern HaxmVersion g_haxmVersion;
 
 class HaxmPlatformSysImpl;
 
@@ -52,6 +55,7 @@ public:
 
     PlatformInitStatus Initialize() noexcept;
 
+    HaxmVersion GetVersion() noexcept;
     bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
 
     hax_module_version m_haxVer;

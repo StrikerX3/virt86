@@ -25,9 +25,13 @@ SOFTWARE.
 */
 #include "haxm_sys_platform.hpp"
 
+#include "virt86/sys/darwin/kext.hpp"
+
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+
+using namespace virt86::sys::darwin;
 
 namespace virt86::haxm {
 
@@ -67,6 +71,26 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     }
 
     return PlatformInitStatus::OK;
+}
+
+HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
+    HaxmVersion version = {0, 0, 0};
+
+    // Get version string from kextstat
+    char *ver = getKextVersion("com.intel.kext.intelhaxm");
+    if (ver == nullptr) {
+        return version;
+    }
+
+    // Parse version string
+    char *vNext;
+    version.major = strtol(ver, &vNext, 10);
+    version.minor = strtol(vNext + 1, &vNext, 10);
+    version.build = strtol(vNext + 1, &vNext, 10);
+
+    // Release resources
+    free(ver);
+    return version;
 }
 
 bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {

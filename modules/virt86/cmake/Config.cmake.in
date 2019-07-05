@@ -26,10 +26,13 @@
 find_package(virt86-core CONFIG REQUIRED)
 find_package(virt86-haxm CONFIG REQUIRED)
 if(WIN32)
+    find_package(virt86-sys-windows CONFIG QUIET)
     find_package(virt86-whpx CONFIG QUIET)
 elseif(LINUX)
+    find_package(virt86-sys-linux CONFIG QUIET)
     find_package(virt86-kvm CONFIG QUIET)
 elseif(APPLE)
+    find_package(virt86-sys-darwin CONFIG QUIET)
     find_package(virt86-hvf CONFIG QUIET)
 endif()
 

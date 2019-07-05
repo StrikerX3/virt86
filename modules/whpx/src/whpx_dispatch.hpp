@@ -34,6 +34,9 @@ SOFTWARE.
 #include <WinHvEmulation.h>
 
 #include "whpx_defs.hpp"
+#include "virt86/sys/windows/version_info.hpp"
+
+using namespace virt86::sys::windows;
 
 #define WHPX_PLATFORM_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvGetCapability, (WHV_CAPABILITY_CODE CapabilityCode, VOID* CapabilityBuffer, UINT32 CapabilityBufferSizeInBytes, UINT32* WrittenSizeInBytes)) \
@@ -76,7 +79,7 @@ WHPX_EMULATION_FUNCTIONS(WHPX_TYPEDEF_FUNC);
 namespace virt86::whpx {
 
 // The version of WHPX present in the system.
-extern WhpxVersion g_whpxVersion;
+extern VersionInfo g_whpxVersion;
 
 struct WhpxDispatch {
     WhpxDispatch() = default;

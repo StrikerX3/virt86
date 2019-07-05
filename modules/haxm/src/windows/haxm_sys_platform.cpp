@@ -78,6 +78,16 @@ PlatformInitStatus HaxmPlatformSysImpl::Initialize(hax_module_version *haxVer, h
     return PlatformInitStatus::OK;
 }
 
+HaxmVersion HaxmPlatformSysImpl::GetVersion() noexcept {
+    auto opt_ver = sys::windows::getDriverVersion(L"IntelHaxm.sys");
+    if (!opt_ver) {
+        return { 0, 0, 0 };
+    }
+
+    auto ver = *opt_ver;
+    return { ver.major, ver.minor, ver.build };
+}
+
 bool HaxmPlatformSysImpl::SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept {
     DWORD returnSize;
 
