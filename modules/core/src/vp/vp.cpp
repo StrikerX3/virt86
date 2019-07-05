@@ -60,6 +60,62 @@ bool VirtualProcessor::EnqueueInterrupt(uint8_t vector) {
     return PrepareInterrupt(vector);
 }
 
+// ----- CPU modes ------------------------------------------------------------
+
+CPUExecutionMode VirtualProcessor::GetExecutionMode() noexcept {
+    Reg regs[3] = { Reg::CR0, Reg::RFLAGS, Reg::EFER };
+    RegValue vals[3];
+    auto regStatus = RegRead(regs, vals, std::size(regs));
+    if (regStatus != VPOperationStatus::OK) {
+        return CPUExecutionMode::Unknown;
+    }
+
+    bool cr0_pe = (vals[0].u64 & CR0_PE) != 0;
+    bool rflags_vm = (vals[1].u64 & RFLAGS_VM) != 0;
+    bool efer_lma = (vals[2].u64 & EFER_LMA) != 0;
+
+    if (!cr0_pe) {
+        return CPUExecutionMode::RealAddress;
+    }
+    if (rflags_vm) {
+        return CPUExecutionMode::Virtual8086;
+    }
+    if (efer_lma) {
+        return CPUExecutionMode::IA32e;
+    }
+    return CPUExecutionMode::Protected;
+}
+
+CPUPagingMode VirtualProcessor::GetPagingMode() noexcept {
+    Reg regs[3] = { Reg::CR0, Reg::CR4, Reg::EFER };
+    RegValue vals[3];
+    auto regStatus = RegRead(regs, vals, std::size(regs));
+    if (regStatus != VPOperationStatus::OK) {
+        return CPUPagingMode::Unknown;
+    }
+
+    bool cr0_pg = (vals[0].u64 & CR0_PG) != 0;
+    bool cr4_pae = (vals[1].u64 & CR4_PAE) != 0;
+    bool efer_lme = (vals[2].u64 & EFER_LME) != 0;
+
+    uint8_t pagingModeBits = 0
+        | (cr0_pg ? (1 << 2) : 0)
+        | (cr4_pae ? (1 << 1) : 0)
+        | (efer_lme ? (1 << 0) : 0);
+
+    switch (pagingModeBits) {
+    case 0b000: return CPUPagingMode::None;
+    case 0b001: return CPUPagingMode::NoneLME;
+    case 0b010: return CPUPagingMode::NonePAE;
+    case 0b011: return CPUPagingMode::NonePAEandLME;
+    case 0b100: return CPUPagingMode::ThirtyTwoBit;
+    case 0b101: return CPUPagingMode::Invalid;
+    case 0b110: return CPUPagingMode::PAE;
+    case 0b111: return CPUPagingMode::FourLevel;
+    default: return CPUPagingMode::Unknown;
+    }
+}
+
 // ----- Physical memory ------------------------------------------------------
 
 bool VirtualProcessor::MemRead(const uint64_t paddr, const uint64_t size, void *value) const noexcept {
@@ -537,15 +593,13 @@ VPOperationStatus VirtualProcessor::SetVirtualTSCOffset(const uint64_t offset) n
 // ----- Utility methods for segment and table registers ----------------------
 
 bool VirtualProcessor::IsIA32eMode() noexcept {
-    Reg regs[3] = { Reg::CR0, Reg::RFLAGS, Reg::EFER };
-    RegValue vals[3];
-    if (RegRead(regs, vals, std::size(regs)) != VPOperationStatus::OK) return false;
+    return GetExecutionMode() == CPUExecutionMode::IA32e;
+}
 
-    bool cr0_pe = (vals[0].u64 & CR0_PE) != 0;
-    bool rflags_vm = (vals[1].u64 & RFLAGS_VM) != 0;
-    bool efer_lma = (vals[2].u64 & EFER_LMA) != 0;
-
-    return cr0_pe && rflags_vm && efer_lma;
+SegmentSize VirtualProcessor::ComputeSegmentSize(RegValue& value) {
+    return (IsIA32eMode() && value.segment.attributes.longMode) ? SegmentSize::_64
+        : (value.segment.attributes.defaultSize) ? SegmentSize::_32
+        : SegmentSize::_16;
 }
 
 // ----- Global Descriptor Table ----------------------------------------------
@@ -712,6 +766,37 @@ VPOperationStatus VirtualProcessor::ReadSegment(const uint16_t selector, RegValu
     value.segment.limit = gdtEntry.gdt.GetLimit();
     value.segment.attributes.u16 = gdtEntry.gdt.GetAttributes();
 
+    return VPOperationStatus::OK;
+}
+
+VPOperationStatus VirtualProcessor::GetSegmentSize(const uint16_t selector, SegmentSize& size) noexcept {
+    // Read segment value from selector
+    RegValue value;
+    auto status = ReadSegment(selector, value);
+    if (status != VPOperationStatus::OK) {
+        return status;
+    }
+
+    // Determine bit width
+    size = ComputeSegmentSize(value);
+    return VPOperationStatus::OK;
+}
+
+VPOperationStatus VirtualProcessor::GetSegmentSize(const Reg& segmentReg, SegmentSize& size) noexcept {
+    // Check that we have a segment register
+    if (!RegBetween(segmentReg, Reg::CS, Reg::TR)) {
+        return VPOperationStatus::InvalidRegister;
+    }
+
+    // Read segment register
+    RegValue value;
+    auto regStatus = RegRead(segmentReg, value);
+    if (regStatus != VPOperationStatus::OK) {
+        return regStatus;
+    }
+
+    // Determine bit width
+    size = ComputeSegmentSize(value);
     return VPOperationStatus::OK;
 }
 

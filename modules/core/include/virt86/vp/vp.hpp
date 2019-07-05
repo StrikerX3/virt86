@@ -70,6 +70,7 @@ SOFTWARE.
 #include "hwbp.hpp"
 #include "paging.hpp"
 #include "status.hpp"
+#include "mode.hpp"
 #include "../vm/io.hpp"
 
 #include <cstdint>
@@ -132,6 +133,20 @@ public:
      * opened by the underlying virtualization platform.
      */
     bool EnqueueInterrupt(uint8_t vector);
+
+    // ----- CPU modes --------------------------------------------------------
+
+    /**
+     * Retrieves the current CPU execution mode based on the state of CR0.PE,
+     * RFLAGS.VM and EFER.LMA.
+     */
+    CPUExecutionMode GetExecutionMode() noexcept;
+
+    /**
+     * Retrieves the current CPU paging mode based on the state of CR0.PG,
+     * CR4.PAE and EFER.LME.
+     */
+    CPUPagingMode GetPagingMode() noexcept;
 
     // ----- Physical memory --------------------------------------------------
 
@@ -312,6 +327,16 @@ public:
      */
     VPOperationStatus ReadSegment(const uint16_t selector, RegValue& value) noexcept;
 
+    /**
+     * Determines the bit width of the segment at the specified selector.
+     */
+    VPOperationStatus GetSegmentSize(const uint16_t selector, SegmentSize& size) noexcept;
+
+    /**
+     * Determines the bit width of the segment used by the specified register.
+     */
+    VPOperationStatus GetSegmentSize(const Reg& segmentReg, SegmentSize& size) noexcept;
+
     // ----- Interrupt Descriptor Table ---------------------------------------
 
     /**
@@ -471,6 +496,11 @@ private:
      * Determines if the CPU is in IA-32e mode.
      */
     bool IsIA32eMode() noexcept;
+
+    /**
+     * Computes the size of a segment value.
+     */
+    SegmentSize ComputeSegmentSize(RegValue& value);
 };
 
 }

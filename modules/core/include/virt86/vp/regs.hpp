@@ -170,6 +170,13 @@ inline Reg RegAdd(Reg base, T offset) noexcept {
     return static_cast<Reg>(static_cast<T>(base) + offset);
 }
 
+inline bool RegBetween(Reg reg, Reg first, Reg last) noexcept {
+    size_t iReg = static_cast<size_t>(reg);
+    size_t iFirst = static_cast<size_t>(first);
+    size_t iLast = static_cast<size_t>(last);
+    return iReg >= iFirst && iReg <= iLast;
+}
+
 // ----- Register values ------------------------------------------------------
 
 union RegValue {
@@ -273,6 +280,16 @@ union RegValue {
     RegValue(const int16_t& i16) noexcept : u64(i16) {}
     RegValue(const int32_t& i32) noexcept : u64(i32) {}
     RegValue(const int64_t& i64) noexcept : u64(i64) {}
+};
+
+// ----- Segment size ---------------------------------------------------------
+
+enum class SegmentSize {
+    Invalid,
+
+    _16,
+    _32,
+    _64,
 };
 
 // ----- Register bits and masks ----------------------------------------------
