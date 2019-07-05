@@ -1,5 +1,5 @@
 /*
-HAXM system-based platform implementation for macOS.
+Basic macOS kext handling functions.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -23,40 +23,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#include "virt86/sys/darwin/kext.hpp"
 
-#include "virt86/platform/platform.hpp"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-#include "interface/hax_interface.hpp"
-#include "haxm_version.hpp"
+namespace virt86::sys::darwin {
 
-namespace virt86::haxm {
+char *getKextVersion(const char *kextName) {
+    // Cheaty version: run kextstat command and look for the desired kext
+    char *cmd;
+    asprintf(&cmd, "/usr/sbin/kextstat | /usr/bin/grep -F %s", kextName);
+    FILE *fp = popen(cmd, "r");
+    free(cmd);
 
-class HaxmPlatformSysImpl {
-public:
-    HaxmPlatformSysImpl() noexcept;
-    ~HaxmPlatformSysImpl() noexcept;
+    // Read command output
+    char result[256];
+    fread(result, sizeof(result), 1, fp);
+    pclose(fp);
 
-    // Prevent copy construction and copy assignment
-    HaxmPlatformSysImpl(const HaxmPlatformSysImpl&) = delete;
-    HaxmPlatformSysImpl& operator=(const HaxmPlatformSysImpl&) = delete;
+    // Find kext name in the line
+    char *p = strstr(result, kextName);
+    if (p == NULL) {
+        return NULL;
+    }
 
-    // Prevent move construction and move assignment
-    HaxmPlatformSysImpl(HaxmPlatformSysImpl&&) = delete;
-    HaxmPlatformSysImpl&& operator=(HaxmPlatformSysImpl&&) = delete;
+    // Extract version, which comes after the kext name in parenthesis
+    p = strchr(p, '(');
+    if (p == NULL) {
+        return NULL;
+    }
+    p++;
 
-    // Disallow taking the address
-    HaxmPlatformSysImpl *operator&() = delete;
+    char *end = strchr(p, ')');
+    size_t verLen = end - p;
+    
+    // Allocate new string with a copy of the version
+    char *ver = (char *)malloc(verLen + 1);
+    strncpy(ver, p, verLen);
+    ver[verLen] = '\0';
 
-    PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept;
-
-    HaxmVersion GetVersion() noexcept;
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
-
-    const int FileDescriptor() const noexcept { return m_fd; }
-
-private:
-    int m_fd;
-};
+    return ver;
+}
 
 }

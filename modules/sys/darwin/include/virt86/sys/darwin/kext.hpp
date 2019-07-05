@@ -1,5 +1,5 @@
 /*
-HAXM system-based platform implementation for macOS.
+Basic macOS kext handling functions.
 -------------------------------------------------------------------------------
 MIT License
 
@@ -25,38 +25,8 @@ SOFTWARE.
 */
 #pragma once
 
-#include "virt86/platform/platform.hpp"
+namespace virt86::sys::darwin {
 
-#include "interface/hax_interface.hpp"
-#include "haxm_version.hpp"
-
-namespace virt86::haxm {
-
-class HaxmPlatformSysImpl {
-public:
-    HaxmPlatformSysImpl() noexcept;
-    ~HaxmPlatformSysImpl() noexcept;
-
-    // Prevent copy construction and copy assignment
-    HaxmPlatformSysImpl(const HaxmPlatformSysImpl&) = delete;
-    HaxmPlatformSysImpl& operator=(const HaxmPlatformSysImpl&) = delete;
-
-    // Prevent move construction and move assignment
-    HaxmPlatformSysImpl(HaxmPlatformSysImpl&&) = delete;
-    HaxmPlatformSysImpl&& operator=(HaxmPlatformSysImpl&&) = delete;
-
-    // Disallow taking the address
-    HaxmPlatformSysImpl *operator&() = delete;
-
-    PlatformInitStatus Initialize(hax_module_version *haxVer, hax_capabilityinfo *haxCaps) noexcept;
-
-    HaxmVersion GetVersion() noexcept;
-    bool SetGlobalMemoryLimit(bool enabled, uint64_t limitMB) noexcept;
-
-    const int FileDescriptor() const noexcept { return m_fd; }
-
-private:
-    int m_fd;
-};
+char *getKextVersion(const char *kextName);
 
 }

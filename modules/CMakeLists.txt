@@ -34,7 +34,7 @@ elseif(LINUX)
     add_subdirectory(haxm)
     add_subdirectory(kvm)
 elseif(APPLE)
-    #add_subdirectory(sys/darwin)
+    add_subdirectory(sys/darwin)
     add_subdirectory(haxm)
     # TODO: Add support for Hypervisor.Framework
     #add_subdirectory(hvf)
