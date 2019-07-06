@@ -171,9 +171,9 @@ inline Reg RegAdd(Reg base, T offset) noexcept {
 }
 
 inline bool RegBetween(Reg reg, Reg first, Reg last) noexcept {
-    size_t iReg = static_cast<size_t>(reg);
-    size_t iFirst = static_cast<size_t>(first);
-    size_t iLast = static_cast<size_t>(last);
+    std::size_t iReg = static_cast<std::size_t>(reg);
+    std::size_t iFirst = static_cast<std::size_t>(first);
+    std::size_t iLast = static_cast<std::size_t>(last);
     return iReg >= iFirst && iReg <= iLast;
 }
 
