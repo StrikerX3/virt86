@@ -67,7 +67,8 @@ struct VMSpecifications {
     std::vector<CPUIDResult> CPUIDResults;
 
     /**
-     * Guest TSC frequency to use. A value of zero means no adjustment.
+     * Guest TSC frequency to use (in Hz). A value of zero causes the guest to
+     * use the default frequency supplied by the host CPU.
      */
     uint64_t guestTSCFrequency;
 

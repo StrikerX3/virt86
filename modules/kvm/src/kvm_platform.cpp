@@ -117,6 +117,7 @@ KvmPlatform::KvmPlatform() noexcept
     m_features.extendedVMExits = ExtendedVMExit::Exception;
     m_features.exceptionExits = ExceptionCode::All;
     m_features.customCPUIDs = ioctl(m_fd, KVM_CHECK_EXTENSION, KVM_CAP_EXT_CPUID) != 0;
+    m_features.guestTSCScaling = ioctl(m_fd, KVM_CHECK_EXTENSION, KVM_CAP_TSC_CONTROL) != 0;
 
     // Get list of supported CPUIDs
     if (m_features.customCPUIDs) {

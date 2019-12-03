@@ -74,6 +74,16 @@ bool KvmVirtualMachine::Initialize() {
         return false;
     }
 
+    // Setup TSC scaling if requested and available
+    if (m_platform.GetFeatures().guestTSCScaling && m_specifications.guestTSCFrequency != 0) {
+        uint32_t guestFreqKHz = m_specifications.guestTSCFrequency / 1000;
+        if (ioctl(m_fd, KVM_SET_TSC_KHZ, &guestFreqKHz) < 0) {
+            close(m_fd);
+            m_fd = -1;
+            return false;
+        }
+    }
+
     // Create virtual processors
     for (uint32_t id = 0; id < m_specifications.numProcessors; id++) {
         auto vp = std::make_unique<KvmVirtualProcessor>(*this, id);
