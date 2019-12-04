@@ -27,10 +27,7 @@ SOFTWARE.
 #pragma once
 
 #include "virt86/vp/vp.hpp"
-
-#include <Windows.h>
-#include <WinHvPlatform.h>
-#include <WinHvEmulation.h>
+#include "whpx_defs.hpp"
 
 namespace virt86::whpx {
 
@@ -105,6 +102,7 @@ private:
     VPExecutionStatus HandleIO() noexcept;
     VPExecutionStatus HandleMMIO() noexcept;
     void HandleMSRAccess() noexcept;
+    void HandleTSCAccess() noexcept;
     void HandleCPUIDAccess() noexcept;
 };
 

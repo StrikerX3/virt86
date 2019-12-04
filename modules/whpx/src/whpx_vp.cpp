@@ -118,6 +118,7 @@ VPExecutionStatus WhpxVirtualProcessor::RunImpl() noexcept {
     switch (m_exitContext.ExitReason) {
     case WHvRunVpExitReasonX64Halt:                  m_exitInfo.reason = VMExitReason::HLT;       break;  // HLT instruction
     case WHvRunVpExitReasonX64MsrAccess:             HandleMSRAccess();                           break;  // MSR access
+    case WHvRunVpExitReasonX64Rdtsc:                 HandleTSCAccess();                           break;  // TSC access
     case WHvRunVpExitReasonX64Cpuid:                 HandleCPUIDAccess();                         break;  // CPUID instruction
     case WHvRunVpExitReasonX64IoPortAccess:          return HandleIO();                                   // I/O (IN / OUT instructions)
     case WHvRunVpExitReasonMemoryAccess:             return HandleMMIO();                                 // MMIO
@@ -172,6 +173,13 @@ void WhpxVirtualProcessor::HandleMSRAccess() noexcept {
     m_exitInfo.msr.msrNumber = m_exitContext.MsrAccess.MsrNumber;
     m_exitInfo.msr.rax = m_exitContext.MsrAccess.Rax;
     m_exitInfo.msr.rdx = m_exitContext.MsrAccess.Rdx;
+}
+
+void WhpxVirtualProcessor::HandleTSCAccess() noexcept {
+    m_exitInfo.reason = VMExitReason::TSCAccess;
+    m_exitInfo.tsc.type = m_exitContext.ReadTsc.RdtscInfo.IsRdtscp ? TSCAccessType::RDTSCP : TSCAccessType::RDTSC;
+    m_exitInfo.tsc.tscAux = m_exitContext.ReadTsc.TscAux;
+    m_exitInfo.tsc.virtualOffset = m_exitContext.ReadTsc.VirtualOffset;
 }
 
 void WhpxVirtualProcessor::HandleCPUIDAccess() noexcept {

@@ -378,6 +378,7 @@ bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) noexcept {
     //  C000_0103   WHvX64RegisterTscAux
     //  0000_0048   WHvX64RegisterSpecCtrl
     //  0000_0049   WHvX64RegisterPredCmd
+    //  0000_003B   WHvX64RegisterTscVirtualOffset
 
     switch (msr) {
     case 0x00000010: reg = WHvX64RegisterTsc; break;
@@ -445,6 +446,7 @@ bool TranslateMSR(uint64_t msr, WHV_REGISTER_NAME& reg) noexcept {
     case 0xC0000103: reg = WHvX64RegisterTscAux; break;
     case 0x00000048: if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) { reg = WHvX64RegisterSpecCtrl; break; } return false;
     case 0x00000049: if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) { reg = WHvX64RegisterPredCmd; break; } return false;
+    case 0x0000003B: if (g_whpxVersion >= VersionInfo(10, 0, 19028, 0)) { reg = WHvX64RegisterTscVirtualOffset; break; } return false;
     default: return false;
     }
 

@@ -80,7 +80,7 @@ WhpxPlatform::WhpxPlatform() noexcept
         m_initStatus = PlatformInitStatus::Failed;
     }
 
-    const WhpxDefs::WHV_CAPABILITY_FEATURES features = cap.Features;
+    const WHV_CAPABILITY_FEATURES features = cap.Features;
     m_features.floatingPointExtensions = HostInfo.floatingPointExtensions;
     m_features.extendedControlRegisters = ExtendedControlRegister::CR8 | ExtendedControlRegister::MXCSRMask;
     if (g_whpxVersion >= VersionInfo(10, 0, 17763, 0)) {
@@ -121,6 +121,15 @@ WhpxPlatform::WhpxPlatform() noexcept
             m_initStatus = PlatformInitStatus::Failed;
         }
         m_features.exceptionExits = static_cast<ExceptionCode>(cap.ExceptionExitBitmap);
+    }
+    if (cap.ExtendedVmExits.X64RdtscExit) {
+        m_features.extendedVMExits |= ExtendedVMExit::TSCAccess;
+    }
+    if (cap.ExtendedVmExits.X64ApicSmiExit) {
+        m_features.extendedVMExits |= ExtendedVMExit::APICSMI;
+    }
+    if (cap.ExtendedVmExits.HypercallExit) {
+        m_features.extendedVMExits |= ExtendedVMExit::Hypercall;
     }
 }
 

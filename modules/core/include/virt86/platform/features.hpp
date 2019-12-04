@@ -246,6 +246,8 @@ enum class ExtendedVMExit {
     MSRAccess = (1 << 1),     // Supports VM exit on MSR access
     Exception = (1 << 2),     // Supports VM exit on CPU exception
     TSCAccess = (1 << 3),     // Supports VM exit on TSC access (RDTSC, RDTSCP, RDMSR, WRMSR)
+    APICSMI = (1 << 4),       // Supports VM exit on APIC SMI
+    Hypercall = (1 << 5),     // Supports VM exit on hypercalls
 };
 
 /**

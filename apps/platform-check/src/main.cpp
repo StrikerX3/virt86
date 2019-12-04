@@ -173,6 +173,8 @@ int main() {
             if (extVMExits.AnyOf(ExtendedVMExit::MSRAccess)) printf(" MSRAccess");
             if (extVMExits.AnyOf(ExtendedVMExit::Exception)) printf(" Exception");
             if (extVMExits.AnyOf(ExtendedVMExit::TSCAccess)) printf(" TSCAccess");
+            if (extVMExits.AnyOf(ExtendedVMExit::APICSMI)) printf(" APICSMI");
+            if (extVMExits.AnyOf(ExtendedVMExit::Hypercall)) printf(" Hypercall");
         }
         printf("\n");
         printf("    Exception exits:");

@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <Windows.h>
-#include <WinHvPlatform.h>
-#include <WinHvEmulation.h>
 
 #include <string>
 #include <sstream>

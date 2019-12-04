@@ -75,6 +75,15 @@ bool WhpxVirtualMachine::Initialize() {
         if (enabledVMExits.AnyOf(ExtendedVMExit::Exception)) {
             vmExits.ExtendedVmExits.ExceptionExit = TRUE;
         }
+        if (enabledVMExits.AnyOf(ExtendedVMExit::TSCAccess)) {
+            vmExits.ExtendedVmExits.X64RdtscExit = TRUE;
+        }
+        if (enabledVMExits.AnyOf(ExtendedVMExit::APICSMI)) {
+            vmExits.ExtendedVmExits.X64ApicSmiExit = TRUE;
+        }
+        if (enabledVMExits.AnyOf(ExtendedVMExit::Hypercall)) {
+            vmExits.ExtendedVmExits.HypercallExit = TRUE;
+        }
 
         if (S_OK != m_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeExtendedVmExits, &vmExits, sizeof(WHV_PARTITION_PROPERTY))) {
             CloseHandle(m_handle);
@@ -130,9 +139,28 @@ bool WhpxVirtualMachine::Initialize() {
 
         if (S_OK != m_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeCpuidResultList, cpuidResultList, count * sizeof(WHV_X64_CPUID_RESULT))) {
             delete[] cpuidResultList;
+            CloseHandle(m_handle);
+            m_handle = INVALID_HANDLE_VALUE;
             return false;
         }
         delete[] cpuidResultList;
+    }
+
+    // Setup TSC scaling if requested and available
+    if (m_platform.GetFeatures().guestTSCScaling && m_specifications.guestTSCFrequency != 0) {
+        WHV_PARTITION_PROPERTY freq = { 0 };
+        freq.ProcessorClockFrequency = m_specifications.guestTSCFrequency;
+        if (S_OK != m_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeProcessorClockFrequency, &freq, sizeof(WHV_PARTITION_PROPERTY))) {
+            CloseHandle(m_handle);
+            m_handle = INVALID_HANDLE_VALUE;
+            return false;
+        }
+        freq.InterruptClockFrequency = m_specifications.guestTSCFrequency;
+        if (S_OK != m_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeInterruptClockFrequency, &freq, sizeof(WHV_PARTITION_PROPERTY))) {
+            CloseHandle(m_handle);
+            m_handle = INVALID_HANDLE_VALUE;
+            return false;
+        }
     }
 
     // Setup the partition

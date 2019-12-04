@@ -30,9 +30,6 @@ SOFTWARE.
 #include "virt86/whpx/whpx_platform.hpp"
 #include "whpx_dispatch.hpp"
 
-#include <Windows.h>
-#include <WinHvPlatform.h>
-
 namespace virt86::whpx {
 
 class WhpxVirtualMachine : public VirtualMachine {

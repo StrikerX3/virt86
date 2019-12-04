@@ -47,26 +47,31 @@ enum class VPOperationStatus {
 };
 
 enum class VMExitReason {
-    Normal,              // Time slice expiration
+    Normal = 0,              // Time slice expiration
 
-    Cancelled,           // Execution was cancelled (possibly due to interrupt injection)
-    Interrupt,           // An interrupt window has opened
+    Cancelled = 1,           // Execution was cancelled (possibly due to interrupt injection)
+    Interrupt = 2,           // An interrupt window has opened
 
-    PIO,                 // IN or OUT instruction
-    MMIO,                // MMIO instruction
+    PIO = 3,                 // IN or OUT instruction
+    MMIO = 4,                // MMIO instruction
 
-    Step,                // Single stepping completed successfully
-    SoftwareBreakpoint,  // Software breakpoint
-    HardwareBreakpoint,  // Hardware breakpoint
+    Step = 5,                // Single stepping completed successfully
+    SoftwareBreakpoint = 6,  // Software breakpoint
+    HardwareBreakpoint = 7,  // Hardware breakpoint
 
-    HLT,                 // HLT instruction
-    CPUID,               // CPUID instruction
-    MSRAccess,           // MSR access
-    Exception,           // CPU exception
+    HLT = 8,                 // HLT instruction
+    CPUID = 9,               // CPUID instruction
+    MSRAccess = 10,          // MSR access
+    TSCAccess = 15,          // TSC access (RDTSC, RDTSCP, RDMSR, WRMSR)
+    Exception = 11,          // CPU exception
 
-    Shutdown,            // System shutdown
-    Error,               // Non-specific error
-    Unhandled,           // VM exit reason returned by hypervisor is unhandled
+    Shutdown = 12,           // System shutdown
+    Error = 13,              // Non-specific error
+    Unhandled = 14,          // VM exit reason returned by hypervisor is unhandled
+};
+
+enum class TSCAccessType {
+    RDTSC, RDTSCP, RDMSR, WRMSR
 };
 
 struct VMExitInfo {
@@ -78,7 +83,7 @@ struct VMExitInfo {
         // The exception code, when reason == VMExitReason::Exception
         uint32_t exceptionCode;
 
-        // MSR access information, whem VMExitReason::MSRAccess
+        // MSR access information, when VMExitReason::MSRAccess
         struct {
             bool isWrite;
             uint32_t msrNumber;
@@ -86,7 +91,14 @@ struct VMExitInfo {
             uint64_t rdx;
         } msr;
 
-        // CPUID access information, whem VMExitReason::CPUID.
+        // TSC access information, when VMExitReason::TScAccess
+        struct {
+            TSCAccessType type;
+            uint64_t tscAux;
+            uint64_t virtualOffset;
+        } tsc;
+
+        // CPUID access information, when VMExitReason::CPUID.
         // The register fields contain the values when CPUID was executed and
         // the default* fields indicate the values the hypervisor would return
         // based on its properties and the host's capabilities.

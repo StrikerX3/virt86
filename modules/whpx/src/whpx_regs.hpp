@@ -28,11 +28,9 @@ SOFTWARE.
 
 #include "virt86/vp/regs.hpp"
 #include "virt86/vp/status.hpp"
+#include "whpx_defs.hpp"
 
 #include <cstdint>
-
-#include <Windows.h>
-#include <WinHvPlatform.h>
 
 namespace virt86::whpx {
 

@@ -4,6 +4,10 @@ Declares dynamic dispatching functions for the Windows Hypervisor Platform API.
 This avoids directly linking against the platform's dynamic libraries, which
 would cause the application to require said libraries that are not available
 in older versions of Windows.
+
+The function definitions come from the following Windows 10 SDK header files:
+- WinHvPlatform.h
+- WinHvEmulation.h
 -------------------------------------------------------------------------------
 MIT License
 
@@ -30,13 +34,12 @@ SOFTWARE.
 #pragma once
 
 #include <Windows.h>
-#include <WinHvPlatform.h>
-#include <WinHvEmulation.h>
 
 #include "whpx_defs.hpp"
 #include "virt86/sys/windows/version_info.hpp"
 
 using namespace virt86::sys::windows;
+using namespace virt86::whpx::defs;
 
 #define WHPX_PLATFORM_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvGetCapability, (WHV_CAPABILITY_CODE CapabilityCode, VOID* CapabilityBuffer, UINT32 CapabilityBufferSizeInBytes, UINT32* WrittenSizeInBytes)) \
@@ -56,9 +59,20 @@ using namespace virt86::sys::windows;
     FUNC(HRESULT, WHvSetVirtualProcessorRegisters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const WHV_REGISTER_NAME* RegisterNames, UINT32 RegisterCount, const WHV_REGISTER_VALUE* RegisterValues))
 
 #define WHPX_OPTIONAL_PLATFORM_FUNCTIONS(FUNC) \
-    FUNC(HRESULT, WHvQueryGpaRangeDirtyBitmap, (WHV_PARTITION_HANDLE Partition, WHV_GUEST_PHYSICAL_ADDRESS GuestAddress, UINT64 RangeSizeInBytes, UINT64* Bitmap, UINT32 BitmapSizeInBytes)) \
     FUNC(HRESULT, WHvSuspendPartitionTime, (WHV_PARTITION_HANDLE Partition)) \
-    FUNC(HRESULT, WHvResumePartitionTime, (WHV_PARTITION_HANDLE Partition))
+    FUNC(HRESULT, WHvResumePartitionTime, (WHV_PARTITION_HANDLE Partition)) \
+    FUNC(HRESULT, WHvGetVirtualProcessorInterruptControllerState, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, VOID* State, UINT32 StateSize, UINT32* WrittenSize)) \
+    FUNC(HRESULT, WHvSetVirtualProcessorInterruptControllerState, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const VOID* State, UINT32 StateSize)) \
+    FUNC(HRESULT, WHvRequestInterrupt, (WHV_PARTITION_HANDLE Partition, const WHV_INTERRUPT_CONTROL* Interrupt, UINT32 InterruptControlSize)) \
+    FUNC(HRESULT, WHvGetVirtualProcessorXsaveState, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, VOID* Buffer, UINT32 BufferSizeInBytes, UINT32* BytesWritten)) \
+    FUNC(HRESULT, WHvSetVirtualProcessorXsaveState, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const VOID* Buffer, UINT32 BufferSizeInBytes)) \
+    FUNC(HRESULT, WHvQueryGpaRangeDirtyBitmap, (WHV_PARTITION_HANDLE Partition, WHV_GUEST_PHYSICAL_ADDRESS GuestAddress, UINT64 RangeSizeInBytes, UINT64* Bitmap, UINT32 BitmapSizeInBytes)) \
+    FUNC(HRESULT, WHvGetPartitionCounters, (WHV_PARTITION_HANDLE Partition, WHV_PARTITION_COUNTER_SET CounterSet, VOID* Buffer, UINT32 BufferSizeInBytes, UINT32* BytesWritten)) \
+    FUNC(HRESULT, WHvGetVirtualProcessorCounters, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, WHV_PROCESSOR_COUNTER_SET CounterSet, VOID* Buffer, UINT32 BufferSizeInBytes, UINT32* BytesWritten)) \
+    FUNC(HRESULT, WHvGetVirtualProcessorInterruptControllerState2, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, VOID* State, UINT32 StateSize, UINT32* WrittenSize)) \
+    FUNC(HRESULT, WHvSetVirtualProcessorInterruptControllerState2, (WHV_PARTITION_HANDLE Partition, UINT32 VpIndex, const VOID* State, UINT32 StateSize)) \
+    FUNC(HRESULT, WHvRegisterPartitionDoorbellEvent, (WHV_PARTITION_HANDLE Partition, const WHV_DOORBELL_MATCH_DATA* MatchData, HANDLE EventHandle)) \
+    FUNC(HRESULT, WHvUnregisterPartitionDoorbellEvent, (WHV_PARTITION_HANDLE Partition, const WHV_DOORBELL_MATCH_DATA* MatchData))
 
 #define WHPX_EMULATION_FUNCTIONS(FUNC) \
     FUNC(HRESULT, WHvEmulatorCreateEmulator, (const WHV_EMULATOR_CALLBACKS* Callbacks, WHV_EMULATOR_HANDLE* Emulator)) \
