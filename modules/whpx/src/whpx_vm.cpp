@@ -76,7 +76,6 @@ bool WhpxVirtualMachine::Initialize() {
             vmExits.ExtendedVmExits.ExceptionExit = TRUE;
         }
 
-        vmExits.ExtendedVmExits.X64CpuidExit = TRUE;
         if (S_OK != m_dispatch.WHvSetPartitionProperty(m_handle, WHvPartitionPropertyCodeExtendedVmExits, &vmExits, sizeof(WHV_PARTITION_PROPERTY))) {
             CloseHandle(m_handle);
             m_handle = INVALID_HANDLE_VALUE;
